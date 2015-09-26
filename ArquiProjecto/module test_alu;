@@ -1,0 +1,15 @@
+module test_mux_2x1;
+reg [2: 0] I; //Las entradas del módulo deben ser tipo reg
+wire Y; //Las salidas deben ser tipo wire
+parameter sim_time = 100;
+mux_2x1 mux1 (Y, I[2], I[0], I[1]); // Instanciación del módulo
+initial #sim_time $finish; // Especifica cuando termina simulación
+initial begin
+I = 3’b000; //Genera las combinaciones de las entradas
+repeat (7) #10 I = I + 3’b001; //cada 10 unidades de tiempo
+end
+initial begin
+$display (“ S I1 I0 Y”); //imprime header
+$monitor (“ %b %b %b %b”, I[2], I[1], I[0], Y); //imprime las señales
+end
+endmodule

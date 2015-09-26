@@ -1,0 +1,53 @@
+#! /usr/local/Cellar/icarus-verilog/0.9.7/bin/vvp
+:ivl_version "0.9.7 " "(v0_9_7)";
+:vpi_time_precision + 0;
+:vpi_module "system";
+:vpi_module "v2005_math";
+:vpi_module "va_math";
+S_0x7f819ad03bc0 .scope module, "ALU" "ALU" 2 1;
+ .timescale 0 0;
+v0x7f819ad00610_0 .var "ALU_OUTPUT", 31 0;
+v0x7f819ad13b60_0 .net "CIN", 0 0, C4<z>; 0 drivers
+v0x7f819ad13bf0_0 .var "COUT", 0 0;
+v0x7f819ad13c90_0 .net "FN", 3 0, C4<zzzz>; 0 drivers
+v0x7f819ad13d20_0 .net "LEFT_OP", 31 0, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; 0 drivers
+v0x7f819ad13de0_0 .net "RIGHT_OP", 31 0, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; 0 drivers
+v0x7f819ad13e70_0 .var "V", 0 0;
+E_0x7f819ad010a0 .event edge, v0x7f819ad13b60_0, v0x7f819ad13c90_0, v0x7f819ad13de0_0, v0x7f819ad13d20_0;
+    .scope S_0x7f819ad03bc0;
+T_0 ;
+    %wait E_0x7f819ad010a0;
+    %load/v 8, v0x7f819ad13c90_0, 4;
+    %cmpi/u 8, 0, 4;
+    %jmp/1 T_0.0, 6;
+    %cmpi/u 8, 2, 4;
+    %jmp/1 T_0.1, 6;
+    %jmp T_0.2;
+T_0.0 ;
+    %load/v 40, v0x7f819ad13d20_0, 32;
+    %cmpi/u 40, 0, 32;
+    %inv 4, 1;
+    %mov 40, 4, 1;
+    %load/v 41, v0x7f819ad13de0_0, 32;
+    %cmpi/u 41, 0, 32;
+    %inv 4, 1;
+    %mov 41, 4, 1;
+    %and 40, 41, 1;
+    %mov 8, 40, 1;
+    %mov 9, 0, 31;
+    %set/v v0x7f819ad00610_0, 8, 32;
+    %jmp T_0.2;
+T_0.1 ;
+    %load/v 8, v0x7f819ad13d20_0, 32;
+    %load/v 40, v0x7f819ad13de0_0, 32;
+    %sub 8, 40, 32;
+    %set/v v0x7f819ad00610_0, 8, 32;
+    %jmp T_0.2;
+T_0.2 ;
+    %jmp T_0;
+    .thread T_0, $push;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "/Users/pedro/Desktop/ArquiProjecto/alu.v";
