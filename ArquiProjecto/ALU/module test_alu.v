@@ -13,16 +13,16 @@ initial #sim_time $finish; // Especifica cuando termina simulación
 
 initial begin
 IF = 4'b0000; //Genera las combinaciones de las entradas
-IL = 32'hf0000000;
-IR = 32'hf0000000;
-CIN = 0;
+IL = 25;
+IR = 20;
+CIN = 1'b1;
 
 repeat (15) #10 IF = IF + 4'b0001;
 end
 
 initial begin
 $display (" IF 	  C N V Z 		   IL 	  IL 	  ALUOUT"); //imprime header
-$monitor (" %b%b%b%b     %b %b %b %b         %h %h %h", IF[3], IF[2], IF[1], IF[0], COUT, N, V, ZERO, IL ,IR, ALUOUT); //imprime las señales
+$monitor ("   %b%b%b%b  %b %b %b %b         %d %d %d", IF[3], IF[2], IF[1], IF[0], COUT, N, V, ZERO, IL ,IR, ALUOUT); //imprime las señales
 end
 
 endmodule
