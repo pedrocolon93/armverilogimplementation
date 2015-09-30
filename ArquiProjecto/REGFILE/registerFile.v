@@ -142,18 +142,18 @@ module registerFileTestBench;
 			/*
 				Registers Start Cleared
 			*/
-			CLK = 1; //Start Clock Assertion Level Low
+			CLK = 0; //Start Clock Assertion Level Low
 			PC = 0; // Initialize PC with Value 0
 			RFE = 0; // turn on enable decoder
 			TEST = 0;
 		end
 
 	initial fork
-		repeat (24) 
+		repeat (16) 
 			//Loop to Change Clock & Increment PC & TEST. Clock Goes High, PC & TEST Increment Every Even Number of Time Units
 			begin
-				#1 CLK = ~CLK; // Change Clock Every Time Unit
-				if (CLK) 
+				#2 CLK = ~CLK; // Change Clock Every Time Unit
+				if (!CLK)
 					begin
 						PC <= PC + 1;
 						TEST <= TEST + 1;
@@ -163,56 +163,38 @@ module registerFileTestBench;
 					end
 			end
 
-// FIX Delay in output to A & B. Output occurs next clock cycle. NOTE: DOESNT CHANGE WHEN RC ISNT CHANGED. EVIDENCE IN TEST 5
-
 	// Test 0: Pass PC = 0 to R0, Then Watch R0 = PC Value Pass to Mux A
 	#1 RC = 0; // R0 Enable Selected
 	#1 RA = 0; // Select MUX A R0
 
-	// Test 1: Let A Output Display
-	#3 ;
-
-	// Test 2: Let A Output Increment
+	// Test 1: Let R0 Increment
 	#5 ;
 
-// FIX Delay in Output to A & B. Output Occurs Next Clock Cycle. NOTE: DOESNT CHANGE WHEN RC ISNT CHANGED. EVIDENCE IN TEST 5
+	// Test 2: Change Enable from R0 to R1 to Stop A at Last stored PC Value (R0 value)
+	#9 RC = 1;
+	#9 RA = 1;
 
-	// Test 3: Change Enable from R0 to R1 to Stop A at Last stored PC Value (R0 value)
-	#7 RC = 1;
-	#7 RA = 1;
+	// Test 3: Change Mux B output to PC through R1. Stop Mux A Output at Last Stored Value
+	#13 RA = 4'bx;
+	#13 RB = 1;
 
-	// Test 4: Let A Output Display
-	#9 ;
+	// Test 4: Pass PC to R4 then Output Mux A. Stop Mux B Output at Last Stored Value
+	#17 RC = 3;
+	#17 RA = 3;
+	#17 RB = 4'bx;
 
-	// Test 5: Change Mux B output to PC through R1
-	#11 RA = 4'bx;
-	#11 RB = 1;
+	// Test 5: Let Both A and B Output Latest R4 Value
+	#21 RA = 3;
+	#21 RB = 3;
 
-	// Test 6: Let B Output Increment
-	#13 ;
+	// Test 6: Clear B Output
+	#25 RC = 4'bx;
+	#25 RB = 0;
+	#25 RD = 0;
 
-// FIX Delay in Output to A & B. Output Occurs Next Clock Cycle. NOTE: DOESNT CHANGE WHEN RC ISNT CHANGED. EVIDENCE IN TEST 5
-
-	// Test 7: Pass PC to R4 then Output Mux A.
-	#15 RC = 3;
-	#15 RA = 3;
-	#15 RB = 4'bx;
-
-	// Test 8: Let A Output Display
-	#17 ;
-
-	// Test 9: Let Both A and B Output R4 Value
-	#19 RA = 3;
-	#19 RB = 3;
-
-	// Test 10: Clear B Output
-	#21 RC = 4'bx;
-	#21 RB = 0;
-	#21 RD = 0;
-
-	// Test 11: Clear A Output
-	#23 RA = 0;
-	#23 RD = 0;
+	// Test 7: Clear A Output
+	#29 RA = 0;
+	#29 RD = 0;
 
 	join
 
