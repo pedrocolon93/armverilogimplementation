@@ -158,7 +158,7 @@ module registerFileTestBench;
 						PC <= PC + 1;
 						TEST <= TEST + 1;
 						$display ("TEST  A         							B         							PC         							CLK 	RFE  	RA		RB		RC 		RD  	TIME");
-						$display ("%d    %b   	%b   	%b   	%b   	%b   	%b   	%b   	%b   	%b   	%0d", TEST, A, B, PC, CLK, RFE, RA, RB, RC, RD, $time);
+						$display ("%d    %h   	%b   	%b   	%b   	%b   	%b   	%b   	%b   	%b   	%0d", TEST, A, B, PC, CLK, RFE, RA, RB, RC, RD, $time);
 						$display ("",);
 					end
 			end
