@@ -8,7 +8,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0]LEFT_O
 			4'b0000: 
 			begin
 				//Set the output and C flag
-				{C,ALU_OUTPUT[31:0]} = LEFT_OP[31:0] && RIGHT_OP[31:0];
+				{C,ALU_OUTPUT[31:0]} = LEFT_OP[31:0] & RIGHT_OP[31:0];
 				
 				//Set the N flag
 				N = ALU_OUTPUT[31];
@@ -32,7 +32,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0]LEFT_O
 			// //EOR
 			4'b0001: 
 			begin
-				{C,ALU_OUTPUT[31:0]} = (LEFT_OP[31:0] || RIGHT_OP[31:0])&&!(LEFT_OP[31:0] && RIGHT_OP[31:0]);
+				{C,ALU_OUTPUT[31:0]} = LEFT_OP[31:0] ^ RIGHT_OP[31:0];
 				//Set the N flag
 				N = ALU_OUTPUT[31];
 				//Set the Z flag
@@ -192,7 +192,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0]LEFT_O
 			// //TEQ
 			4'b1001:
 			begin 
-				{C,TEMP[31:0]} =  (LEFT_OP[31:0] || RIGHT_OP[31:0])&&!(LEFT_OP[31:0] && RIGHT_OP[31:0]);
+				{C,TEMP[31:0]} =  LEFT_OP[31:0] ^ RIGHT_OP[31:0];
 
 				N =  TEMP[31];
 
@@ -254,7 +254,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0]LEFT_O
 			// //ORR
 			4'b1100: 
 			begin
-				ALU_OUTPUT[31:0] = LEFT_OP[31:0] || RIGHT_OP[31:0];
+				ALU_OUTPUT[31:0] = LEFT_OP[31:0] | RIGHT_OP[31:0];
 				//Set the N flag
 				N = ALU_OUTPUT[31];
 				//Set the Z flag
