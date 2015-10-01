@@ -1,0 +1,314 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"b",
+				"b0000000000000000000001110000000"
+			],
+			[
+				"R",
+				"RFE"
+			],
+			[
+				"decor",
+				"decoder2RegisterEnable"
+			],
+			[
+				"E",
+				"endmodule"
+			],
+			[
+				"Q",
+				"Q_n"
+			],
+			[
+				"file",
+				"file_name"
+			],
+			[
+				"fi",
+				"file_name"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "registerFile2CycleEnableChange.v",
+			"settings":
+			{
+				"buffer_size": 8113,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 365.0,
+		"last_filter": "Package Control: Ins	",
+		"selected_items":
+		[
+			[
+				"Package Control: Ins	",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: i",
+				"Package Control: Install Package"
+			],
+			[
+				"package control: In",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 1040.0
+	},
+	"console":
+	{
+		"height": 308.0,
+		"history":
+		[
+			"Package Control Install Package",
+			"Package Control",
+			"install Package",
+			"install Package->SystemVerilog",
+			"import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/hecto/Documents/Github Files/armverilogimplementation/ArquiProjecto/arquiproject.sublime-project.sublime-workspace",
+		"/C/Users/hecto/OneDrive/verilogWorkspace/registerFile.v",
+		"/C/iverilog/samples/Project3/register_test.v",
+		"/C/iverilog/samples/Project2/Mux4to1_test.v",
+		"/C/iverilog/samples/Project2/Mux4to1.v",
+		"/C/iverilog/samples/Project3/register.v",
+		"/C/iverilog/samples/Project3/register1bit_test.v",
+		"/C/iverilog/samples/Project2/Mux4to1",
+		"/C/iverilog/samples/Project1/mux2to1.v",
+		"/C/iverilog/samples/Project1/counter.v",
+		"/C/iverilog/samples/Project1/counter_test.v",
+		"/C/Users/hecto/AppData/Roaming/Sublime Text 3/Packages/User/verilog_project.sublime-build",
+		"/C/iverilog/samples/hello.v",
+		"/C/Users/hecto/AppData/Roaming/Sublime Text 3/Packages/User/iverilog.sublime-build",
+		"/C/Users/hecto/AppData/Roaming/Sublime Text 3/Packages/User/verilog.sublime-build",
+		"/C/iverilog/samples/hello.vl",
+		"/C/iverilog/samples/sqrt.vl",
+		"/C/Users/hecto/AppData/Roaming/Sublime Text 3/Packages/User/Projects/helloverilog.sublime-project",
+		"/C/Users/hecto/AppData/Local/Temp/verilogmult.sublime-build.txt",
+		"/C/Users/hecto/AppData/Roaming/Sublime Text 3/Packages/User/Verilog.sublime-package",
+		"/C/iverilog/hi.v"
+	],
+	"find":
+	{
+		"height": 46.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"CLR",
+			"REGCLR",
+			"REGCLK",
+			"M1SEL",
+			"RB",
+			"RB02",
+			"RC03",
+			"M0SEL",
+			"REGEN",
+			"decoder4x16_32b",
+			"register32x32_32b",
+			"z",
+			"register2Muxes",
+			"REGCLRSEL",
+			"REGENSEL",
+			"decoder2RegisterClear",
+			"decoder2RegisterEnable",
+			"decoder2Registers",
+			";\n",
+			"active"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"RD",
+			"CLR",
+			"CLK",
+			"RB",
+			"RA",
+			"RB",
+			"RC",
+			"RB02",
+			"RC03",
+			"dec4x16_32b",
+			"reg_32b",
+			"reg2Muxes",
+			"REGCLR",
+			"REGEN",
+			"decoder2RegClear",
+			"decoder2RegEnable",
+			"decoder2Enable",
+			"decoder2RegisterEnable"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "registerFile2CycleEnableChange.v",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8113,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SystemVerilog/SystemVerilog.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 44.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 466.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/User/verilog_project.sublime-build",
+	"project": "arquiproject.sublime-project.sublime-project",
+	"replace":
+	{
+		"height": 88.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 375.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

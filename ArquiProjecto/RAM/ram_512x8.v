@@ -3,7 +3,7 @@
 changed mem value for test purposes */
 
 module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [8:0]address, input [31:0]dataIn, input [1:0]MAS, A);
-	reg [8:0]mem[0:20];
+	reg [8:0]mem[0:512];
 	always @ (enable, readWrite, MAS, dataIn, A, address)
 	begin
 		if (enable)
@@ -43,6 +43,7 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 										 mem[address + 8'b0000011][7:0]};
 						// #30;
 					end
+					default: dataOut = dataOut;
 				endcase
 			end
 			else begin
@@ -77,6 +78,7 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 						mem[address][7:0] = dataIn[31:24];
 						//#60;
 					end
+					default: dataOut = dataOut;
 				endcase
 			end
 			done = 1;
