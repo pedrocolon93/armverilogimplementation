@@ -51,7 +51,7 @@ module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 endmodule
 
 module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL);
-	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7) // if I change the input and enable is high then 
+	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15) // if I change the input and enable is high then 
 		case(SEL)
 			4'b0000: O = I0;
 			4'b0001: O = I1;
