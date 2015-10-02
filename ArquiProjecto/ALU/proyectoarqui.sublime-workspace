@@ -27,6 +27,14 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "/C/Users/hecto/Desktop/REGFILE/registerFile.v",
+			"settings":
+			{
+				"buffer_size": 5383,
+				"line_ending": "Windows"
+			}
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -85,6 +93,10 @@
 	},
 	"file_history":
 	[
+		"/C/Users/hecto/Desktop/REGFILE/registerFile_tester.v",
+		"/C/Users/hecto/Desktop/REGFILE/registerFile.v",
+		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/ALU/alu.v",
+		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/ALU/module test_alu.v",
 		"/Users/pedro/Documents/Sistemas operativos/Codes/semaphorePthread.c",
 		"/Users/pedro/Documents/Sistemas operativos/Codes/pthread_print.c",
 		"/Users/pedro/Documents/Sistemas operativos/Codes/pthread_hello.cpp",
@@ -149,8 +161,37 @@
 	"groups":
 	[
 		{
+			"selected": 0,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "/C/Users/hecto/Desktop/REGFILE/registerFile.v",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5383,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								524,
+								524
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SystemVerilog/SystemVerilog.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -187,13 +228,13 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 100.0
+		"height": 856.0
 	},
 	"output.find_results":
 	{
 		"height": 0.0
 	},
-	"pinned_build_system": "Packages/User/verilog.sublime-build",
+	"pinned_build_system": "Packages/User/verilog_project.sublime-build",
 	"project": "proyectoarqui.sublime-project",
 	"replace":
 	{

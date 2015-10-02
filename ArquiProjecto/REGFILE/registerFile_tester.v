@@ -26,7 +26,7 @@ module registerFileTestBench;
 		end
 
 	initial fork
-		repeat (16) 
+		repeat (18) 
 			//Loop to Change Clock & Increment PC & TEST. Clock Goes High, PC & TEST Increment Every Even Number of Time Units
 			begin
 				#2 CLK = ~CLK; // Change Clock Every Time Unit
@@ -51,7 +51,7 @@ module registerFileTestBench;
 	#9 RC = 1;
 	#9 RA = 1;
 
-	// Test 3: Change Mux B output to PC through R1. Stop Mux A Output at Last Stored Value
+	// Test 3: Change Mux B output to PC through R1. Stop Mux A Output at Last Stored Value. Deselect MUX A so Output is the Same as Previous Test
 	#13 RA = 4'bx;
 	#13 RB = 1;
 
@@ -64,14 +64,17 @@ module registerFileTestBench;
 	#21 RA = 3;
 	#21 RB = 3;
 
-	// Test 6: Clear B Output
-	#25 RC = 4'bx;
-	#25 RB = 0;
-	#25 RD = 0;
+	// Test 6: Let Both Outputs Increment
+	#25 ;
 
-	// Test 7: Clear A Output
-	#29 RA = 0;
+	// Test 7: Clear B Output
+	#29 RC = 4'bx;
+	#29 RB = 0;
 	#29 RD = 0;
+
+	// Test 8: Clear A Output
+	#33 RA = 0;
+	#33 RD = 0;
 
 	join
 
