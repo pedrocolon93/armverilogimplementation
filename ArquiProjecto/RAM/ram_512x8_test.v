@@ -9,7 +9,7 @@ module ram_test;
 	wire [31:0]out;
 	wire finished;
 
-	ram512x8 ram(out, finished, en, rw, adr, data, dataSize, dataPlace);
+	ram512x8 ram(out, finished, en, rw, adr, data, dataSize);
 
 	parameter sim_time = 1500;
 	initial #sim_time $finish;
@@ -17,7 +17,7 @@ module ram_test;
 	initial begin
 		en = 1'b0;
 		rw = 1'b0;
-		adr = 8'b0000000;
+		adr = 8'b0000011;
 		data = 32'h00000002;
 		dataSize = 2'b00;
 		dataPlace = 2'b11;
@@ -26,10 +26,12 @@ module ram_test;
 			en = 1'b1;
 			data = data + 1;
 			dataPlace = dataPlace - 2'b01;
+			adr = dataPlace;
 		end
 		#40 repeat(4) #15 begin		//read B
 			rw = 1'b1;
 			dataPlace = dataPlace + 2'b01;
+			adr = dataPlace;
 		end
 		
 
@@ -38,10 +40,12 @@ module ram_test;
 			dataSize = 2'b01;
 			data = data + 1;
 			dataPlace = dataPlace - 2'b10;
+			adr = dataPlace;
 		end
 		#130 repeat(2) #15 begin		//read H
 			rw = 1'b1;
 			dataPlace = dataPlace + 2'b10;
+			adr = dataPlace;
 		end
 
 
@@ -57,6 +61,6 @@ module ram_test;
 
 	initial begin
 		$display("data     size dP RW EN");
-		$monitor("%h %b   %b %b  %b", out, dataSize, dataPlace, rw, en);
+		$monitor("%h %b   %b %b  %b", out, dataSize, adr, rw, en);
 	end
 endmodule
