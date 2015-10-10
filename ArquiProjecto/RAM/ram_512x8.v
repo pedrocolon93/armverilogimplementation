@@ -12,7 +12,7 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 			if (readWrite) begin
 				//Reading
 				case(MAS)
-<<<<<<< HEAD
+
 					2'b00:	begin
 						// case(address[1:0])
 						// 	2'b00:	dataOut[7:0] = mem[address + 8'b0000011][7:0];
@@ -21,19 +21,9 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 							//2'b11:	
 							dataOut[7:0] = mem[address][7:0];
 						//  endcase
-=======
-					2'b00:	begin // #15;
-						case(A)
-							2'b00:	dataOut[7:0] = mem[address + 8'b0000011][7:0];
-							2'b01:	dataOut[7:0] = mem[address + 8'b0000010][7:0];
-							2'b10:	dataOut[7:0] = mem[address + 8'b0000001][7:0];
-							2'b11:	dataOut[7:0] = mem[address][7:0];
-						endcase
->>>>>>> e5dd09604a2f15378edc301521c6fdc52121ca21
 						dataOut[31:8] = 24'b0000_0000_0000_0000_0000_0000;
 						
 					end
-<<<<<<< HEAD
 					2'b01:	begin	
 						// case(address[1])
 						// 	1'b0:	begin
@@ -41,15 +31,6 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 						// 		dataOut[7:0] = mem[address + 8'b0000011][7:0];
 						// 	end
 						// 	1'b1:	begin
-=======
-					2'b01:	begin // #20;
-						case(A[1])
-							1'b0:	begin
-								dataOut[15:8] = mem[address + 8'b0000010][7:0];
-								dataOut[7:0] = mem[address + 8'b0000011][7:0];
-							end
-							1'b1:	begin
->>>>>>> e5dd09604a2f15378edc301521c6fdc52121ca21
 								dataOut[15:8] = mem[address][7:0];
 								dataOut[7:0] = mem[address + 8'b0000001][7:0];
 						//	end
@@ -70,7 +51,6 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 			else begin
 				//Writing
 				case(MAS)
-<<<<<<< HEAD
 					2'b00:	begin	
 						// case(A)
 						// 	2'b00:	mem[address + 8'b0000011][7:0] = dataIn[7:0];
@@ -93,29 +73,6 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 							// end
 						// endcase
 						//#35;
-=======
-					2'b00:	begin // #25;
-						case(A)
-							2'b00:	mem[address + 8'b0000011][7:0] = dataIn[7:0];
-							2'b01:	mem[address + 8'b0000010][7:0] = dataIn[7:0];
-							2'b10:	mem[address + 8'b0000001][7:0] = dataIn[7:0];
-							2'b11:	mem[address][7:0] = dataIn[7:0];
-						endcase
-						
-					end
-					2'b01:	begin //#35;
-						case(A[1])
-							1'b0:	begin
-								mem[address + 8'b0000010][7:0] = dataIn[15:8];
-								mem[address + 8'b0000011][7:0] = dataIn[7:0];
-							end
-							1'b1:	begin
-								mem[address][7:0] = dataIn[15:8];
-								mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
-							end
-						endcase
-						
->>>>>>> e5dd09604a2f15378edc301521c6fdc52121ca21
 					end
 					2'b10:	begin //#60;
 						mem[address + 8'b00000011][7:0] = dataIn[7:0];
