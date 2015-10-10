@@ -14,14 +14,14 @@ module test_alu;
 
 	initial begin
 		IF = 4'b0000; //Genera las combinaciones de las entradas
-		IL = 25;
-		IR = 20;
-		CIN = 1'b1;
+		IL = 1;
+		IR = 2;
+		CIN = 1'b0;
 		repeat (15) #10 IF = IF + 4'b0001;
 	end
 
 	initial begin
-		$display (" IF 	  C N V Z 		   IL 	  IL 	  ALUOUT"); //imprime header
+		$display ("   IF 	 C N V Z 		    IL 	  IL 	  ALUOUT"); //imprime header
 		$monitor ("   %b%b%b%b  %b %b %b %b         %d %d %d", IF[3], IF[2], IF[1], IF[0], COUT, N, V, ZERO, IL ,IR, ALUOUT); //imprime las señales
 	end
 

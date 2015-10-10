@@ -33,6 +33,10 @@ module dec4x16_32b(output reg [15:0] D, input[3:0] A, input EN);
 							default: D = 16'b1111111111111111;				
 					endcase		
 				end
+			else 
+				begin
+					D = 16'b1111111111111111;
+				end
 		end
 endmodule
 
@@ -50,27 +54,27 @@ module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 			Q <= Q; // enable off. output what came out before
 endmodule
 
-module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL);
-	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7) // if I change the input and enable is high then 
-		case(SEL)
-			4'b0000: O = I0;
-			4'b0001: O = I1;
-			4'b0010: O = I2;
-			4'b0011: O = I3;
-			4'b0100: O = I4;
-			4'b0101: O = I5;
-			4'b0110: O = I6;
-			4'b0111: O = I7;
-			4'b1000: O = I8;
-			4'b1001: O = I9;
-			4'b1010: O = I10;
-			4'b1011: O = I11;
-			4'b1100: O = I12;
-			4'b1101: O = I13;
-			4'b1110: O = I14;
-			4'b1111: O = I15;
-			default:O = O;
-		endcase
+module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL, input EN);
+	always @ (posedge EN) // if I change the input and enable is high then 
+			case(SEL)
+				4'b0000: O = I0;
+				4'b0001: O = I1;
+				4'b0010: O = I2;
+				4'b0011: O = I3;
+				4'b0100: O = I4;
+				4'b0101: O = I5;
+				4'b0110: O = I6;
+				4'b0111: O = I7;
+				4'b1000: O = I8;
+				4'b1001: O = I9;
+				4'b1010: O = I10;
+				4'b1011: O = I11;
+				4'b1100: O = I12;
+				4'b1101: O = I13;
+				4'b1110: O = I14;
+				4'b1111: O = I15;
+				default:O = O;
+			endcase
 endmodule
 
 module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, input [3:0] REGCLR, input [3:0] M0SEL, input [3:0] M1SEL, input REGCLK, RFE);
@@ -115,8 +119,84 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 	reg_32b R15 (reg15ToMux, PC, decoder2RegEnable[15], decoder2RegClear[15],REGCLK);
 
 	mux8x1_32b M0 (A, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
-		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M0SEL);
+		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M0SEL, RFE);
 
 	mux8x1_32b M1 (B, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
-		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M1SEL);
+		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M1SEL, RFE);
+endmodule
+module registerFileTestBench;
+
+	reg [31:0] PC;	// Input from ALU. 32 bits
+	reg [3:0] RA; // Selector of A Mux is 3 bits
+	reg [3:0] RB; // Selector of B Mux is 3 bits
+	reg [3:0] RC; // Register Enable Selectors (Input to Decoders 0 and 1)
+	reg [3:0] RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
+	reg CLK; // Register Clock Enable (All Clocks of Registers are Shared)
+	reg RFE; // Decoder and Mux Enabler (All Enables of Decoders are Shared)
+
+	wire [31:0] A, B; // Outputs of the Register File. Can be Wire Since I do not Assign Values to A, B (Outputs)
+
+	registerFile registerFile (A, B, PC, RC, RD, RA, RB, CLK, RFE); // Instance of Entire Register File
+
+	initial fork
+		repeat (21) 
+			//Loop to Change Clock & Increment PC & TEST. Clock Goes High, PC & TEST Increment Every Even Number of Time Units
+			begin
+				#2 CLK = ~CLK; // Change Clock Every Time Unit
+				PC = PC + 1;
+			end
+
+	// Test 1: Write to R0
+	#0 PC = 0;
+	#0 CLK = 0;
+	#0 RFE = 0; // write first
+	#0 RC = 0; // R0 Enable Selected
+
+	// Test 1: Read R0 content ( R0 = 1 ) to A
+	#4 RFE = 1;
+	#4 RA = 0;
+
+	// Test 2: Write to R1
+	#8 RC = 1;
+	#8 RFE = 0;
+	#8 RA = 4'bx;
+
+	// Test 3: Change Output to Mux B to read R1
+	#12 RFE = 1;
+	#12 RB = 1;
+
+	// Test 4: Write to R3. Stop Mux B Output at Last Stored Value
+	#16 RC = 3;
+	#16 RFE = 0;
+	#16 RB = 4'bx;
+
+	// Test 5: Read R3 Through Mux A. 
+	#20 RA = 3;
+	#20 RFE = 1;
+
+	// Read R4 Through Both A and B
+	#24 RB = 3;
+
+	// Test 6: Write Latest PC Value to R3
+	#28 RFE = 0;
+
+	// Test 7: Read R3
+	#32 RFE = 1;
+
+	// Test 8: Write a Clear Signal to R3
+	#36 RD = 0;
+	#36 RFE = 0;
+
+	// Test 8: Read R3 Through Both Outputs A and B
+	#40 RA = 0;
+	#40 RB = 0;
+	#40 RFE = 1;
+
+	join
+
+	initial
+		begin
+			$display ("A           B           PC    		CLK 	RFE  	RA		RB		RC 		RD  	TIME");
+			$monitor ("%h   	%h   	%h   	%b   	%b   	%b   	%b   	%b   	%b   	%0d", A, B, PC, CLK, RFE, RA, RB, RC, RD, $time);
+		end
 endmodule
