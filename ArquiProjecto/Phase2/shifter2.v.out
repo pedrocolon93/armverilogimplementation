@@ -1,0 +1,133 @@
+#! /usr/local/Cellar/icarus-verilog/0.9.7/bin/vvp
+:ivl_version "0.9.7 " "(v0_9_7)";
+:vpi_time_precision + 0;
+:vpi_module "system";
+:vpi_module "v2005_math";
+:vpi_module "va_math";
+S_0x7fe123404ce0 .scope module, "internal_shifter_tester" "internal_shifter_tester" 2 68;
+ .timescale 0 0;
+P_0x7fe123405298 .param/l "simtime" 2 78, +C4<010111011100>;
+v0x7fe123415ad0_0 .var "input_register", 31 0;
+v0x7fe123415b50_0 .net "out", 31 0, v0x7fe123414580_0; 1 drivers
+v0x7fe123415bd0_0 .var "selector", 0 0;
+v0x7fe123415c50_0 .var "shifter_operand", 11 0;
+S_0x7fe1234041e0 .scope module, "sh" "shifter" 2 77, 2 55, S_0x7fe123404ce0;
+ .timescale 0 0;
+v0x7fe123415120_0 .net *"_s0", 26 0, C4<000000000000000000000000000>; 1 drivers
+v0x7fe1234151a0_0 .net *"_s11", 4 0, L_0x7fe1234160c0; 1 drivers
+v0x7fe123415230_0 .net *"_s14", 23 0, C4<000000000000000000000000>; 1 drivers
+v0x7fe1234152d0_0 .net *"_s17", 7 0, L_0x7fe123416390; 1 drivers
+v0x7fe123415360_0 .net *"_s3", 3 0, L_0x7fe123415dc0; 1 drivers
+v0x7fe123415420_0 .net *"_s4", 0 0, C4<0>; 1 drivers
+v0x7fe1234154b0_0 .net *"_s8", 26 0, C4<000000000000000000000000000>; 1 drivers
+v0x7fe123415570_0 .net "amounttointernal", 31 0, L_0x7fe123415cd0; 1 drivers
+v0x7fe123415630_0 .net "input_register", 31 0, v0x7fe123415ad0_0; 1 drivers
+v0x7fe123415700_0 .alias "out", 31 0, v0x7fe123415b50_0;
+v0x7fe123415780_0 .net "selector", 0 0, v0x7fe123415bd0_0; 1 drivers
+v0x7fe1234158e0_0 .net "shifter_operand", 11 0, v0x7fe123415c50_0; 1 drivers
+v0x7fe123415960_0 .net "shifttypetointernal", 1 0, L_0x7fe123416600; 1 drivers
+v0x7fe123415a50_0 .net "valuetointernal", 31 0, L_0x7fe1234162c0; 1 drivers
+L_0x7fe123415dc0 .part v0x7fe123415c50_0, 8, 4;
+L_0x7fe123415ef0 .concat [ 1 4 27 0], C4<0>, L_0x7fe123415dc0, C4<000000000000000000000000000>;
+L_0x7fe1234160c0 .part v0x7fe123415c50_0, 7, 5;
+L_0x7fe123416150 .concat [ 5 27 0 0], L_0x7fe1234160c0, C4<000000000000000000000000000>;
+L_0x7fe123416390 .part v0x7fe123415c50_0, 0, 8;
+L_0x7fe1234164f0 .concat [ 8 24 0 0], L_0x7fe123416390, C4<000000000000000000000000>;
+L_0x7fe123416800 .part v0x7fe123415c50_0, 5, 2;
+S_0x7fe123414df0 .scope module, "amount_mux" "mux_2x1" 2 59, 2 10, S_0x7fe1234041e0;
+ .timescale 0 0;
+v0x7fe123414ed0_0 .net "I0", 31 0, L_0x7fe123415ef0; 1 drivers
+v0x7fe123414f50_0 .net "I1", 31 0, L_0x7fe123416150; 1 drivers
+v0x7fe123414fe0_0 .alias "S", 0 0, v0x7fe123415780_0;
+v0x7fe123415080_0 .alias "Y", 31 0, v0x7fe123415570_0;
+L_0x7fe123415cd0 .functor MUXZ 32, L_0x7fe123416150, L_0x7fe123415ef0, v0x7fe123415bd0_0, C4<>;
+S_0x7fe123414a90 .scope module, "value_mux" "mux_2x1" 2 60, 2 10, S_0x7fe1234041e0;
+ .timescale 0 0;
+v0x7fe123414b70_0 .net "I0", 31 0, L_0x7fe1234164f0; 1 drivers
+v0x7fe123414c00_0 .alias "I1", 31 0, v0x7fe123415630_0;
+v0x7fe123414c90_0 .alias "S", 0 0, v0x7fe123415780_0;
+v0x7fe123414d70_0 .alias "Y", 31 0, v0x7fe123415a50_0;
+L_0x7fe1234162c0 .functor MUXZ 32, v0x7fe123415ad0_0, L_0x7fe1234164f0, v0x7fe123415bd0_0, C4<>;
+S_0x7fe123414740 .scope module, "shift_type_mux" "mux_2x1_2b" 2 62, 2 14, S_0x7fe1234041e0;
+ .timescale 0 0;
+v0x7fe123414820_0 .net "I0", 1 0, C4<01>; 1 drivers
+v0x7fe1234148c0_0 .net "I1", 1 0, L_0x7fe123416800; 1 drivers
+v0x7fe123414950_0 .alias "S", 0 0, v0x7fe123415780_0;
+v0x7fe123414a10_0 .alias "Y", 1 0, v0x7fe123415960_0;
+L_0x7fe123416600 .functor MUXZ 2, L_0x7fe123416800, C4<01>, v0x7fe123415bd0_0, C4<>;
+S_0x7fe123406a60 .scope module, "intsh" "internal_shifter" 2 64, 2 25, S_0x7fe1234041e0;
+ .timescale 0 0;
+v0x7fe123404f40_0 .alias "amount", 31 0, v0x7fe123415570_0;
+v0x7fe123414580_0 .var "shift_out", 31 0;
+v0x7fe123414610_0 .alias "shift_type", 0 0, v0x7fe123415780_0;
+v0x7fe1234146b0_0 .alias "value", 31 0, v0x7fe123415a50_0;
+E_0x7fe123403d10 .event edge, v0x7fe123414610_0, v0x7fe1234146b0_0, v0x7fe123404f40_0;
+    .scope S_0x7fe123406a60;
+T_0 ;
+    %wait E_0x7fe123403d10;
+    %load/v 8, v0x7fe123414610_0, 1;
+    %cmpi/u 8, 0, 1;
+    %jmp/1 T_0.0, 6;
+    %cmpi/u 8, 1, 1;
+    %jmp/1 T_0.1, 6;
+    %cmpi/u 8, 2, 1;
+    %jmp/1 T_0.2, 6;
+    %cmpi/u 8, 3, 1;
+    %jmp/1 T_0.3, 6;
+    %jmp T_0.4;
+T_0.0 ;
+    %load/v 8, v0x7fe1234146b0_0, 32;
+    %load/v 40, v0x7fe123404f40_0, 32;
+    %ix/get 0, 40, 32;
+    %shiftl/i0  8, 32;
+    %set/v v0x7fe123414580_0, 8, 32;
+    %jmp T_0.4;
+T_0.1 ;
+    %load/v 8, v0x7fe1234146b0_0, 32;
+    %load/v 40, v0x7fe123404f40_0, 32;
+    %ix/get 0, 40, 32;
+    %shiftr/i0  8, 32;
+    %set/v v0x7fe123414580_0, 8, 32;
+    %jmp T_0.4;
+T_0.2 ;
+    %load/v 8, v0x7fe1234146b0_0, 32;
+    %load/v 40, v0x7fe123404f40_0, 32;
+    %ix/get 0, 40, 32;
+    %shiftl/i0  8, 32;
+    %set/v v0x7fe123414580_0, 8, 32;
+    %jmp T_0.4;
+T_0.3 ;
+    %load/v 8, v0x7fe1234146b0_0, 32;
+    %load/v 40, v0x7fe123404f40_0, 32;
+    %ix/get 0, 40, 32;
+    %shiftr/i0  8, 32;
+    %set/v v0x7fe123414580_0, 8, 32;
+    %jmp T_0.4;
+T_0.4 ;
+    %jmp T_0;
+    .thread T_0, $push;
+    .scope S_0x7fe123404ce0;
+T_1 ;
+    %delay 1500, 0;
+    %vpi_call 2 79 "$finish";
+    %end;
+    .thread T_1;
+    .scope S_0x7fe123404ce0;
+T_2 ;
+    %movi 8, 2, 32;
+    %set/v v0x7fe123415ad0_0, 8, 32;
+    %movi 8, 257, 12;
+    %set/v v0x7fe123415c50_0, 8, 12;
+    %set/v v0x7fe123415bd0_0, 0, 1;
+    %end;
+    .thread T_2;
+    .scope S_0x7fe123404ce0;
+T_3 ;
+    %vpi_call 2 86 "$monitor", "%d %d", v0x7fe123415c50_0, v0x7fe123415b50_0;
+    %end;
+    .thread T_3;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "/Users/pedro/Documents/git/armverilogimplementation/ArquiProjecto/Phase2/shifter2.v";
