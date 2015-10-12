@@ -13,19 +13,37 @@ module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1, I2, I3);
 endmodule
 
 module inverter(output reg out, input in, inv);
-
+	always @ (in, inv)
+	if(inv)	
+		out = ~in;
+	else
+		out = in;
 endmodule
 
 module NSASel(output reg [1:0]M, input [2:0]ns, input sts);
-
+	always @ (ns, sts)
+	case(ns)
+		3'b000: 
+		3'b001:
+		3'b010:
+		3'b011:
+		3'b100:
+		3'b101:
+		3'b110:
+		3'b111:
 endmodule
 
 module encoder(output reg [3:0]out, input [32:0]IR);
 
 endmodule
 
-module adder(output reg [3:0]out, input [3:0]currentState, input[3:0] add);
+module condEval(output reg [3:0]out, input [31:0]IR, input [31:0] statusReg);
 
+endmodule
+
+module adder(output reg [3:0]out, input [3:0]currentState, input[3:0] add);
+	always @ (currentState)
+	out = currentState + add;
 endmodule
 
 module IncReg(output reg [3:0] Q, input [3:0] D, input EN, CLR, CLK);
