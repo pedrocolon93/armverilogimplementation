@@ -1,7 +1,3 @@
-module ControlUnit (output [31:0]out, input clk, clk_en, rst_n, input mfc, input [31:0]IR, input statusReg);
-
-endmodule
-
 module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
@@ -23,14 +19,26 @@ endmodule
 module NSASel(output reg [1:0]M, input [2:0]ns, input sts);
 	always @ (ns, sts)
 	case(ns)
-		3'b000: 
-		3'b001:
-		3'b010:
-		3'b011:
-		3'b100:
+		3'b000: M = 2'b11; 
+		3'b001: M = 2'b10;
+		3'b010: M = 2'b01;
+		3'b011: M = 2'b00;
+		3'b100: 
+			case(sts)
+				0: M = 2'b11;
+				1: M = 2'b01;
+			endcase
 		3'b101:
+			case(sts)
+				0: M = 2'b00;
+				1: M = 2'b01;
+			endcase
 		3'b110:
-		3'b111:
+			case(sts)
+				0: M = 2'b00;
+				1: M = 2'b11;
+			endcase
+		3'b111: ;  // lo que necesitemos
 endmodule
 
 module encoder(output reg [3:0]out, input [32:0]IR);
@@ -68,5 +76,9 @@ module mux_4x1_4b(output reg[3:0] Y, input [1:0] S, input [3:0] I0, I1, I2, I3);
 endmodule
 
 module ROM (output reg [31:0]out, input [3:0]state, input clk);
+
+endmodule
+
+module ControlUnit (output [31:0]out, input clk, clk_en, rst_n, input mfc, input [31:0]IR, input statusReg);
 
 endmodule
