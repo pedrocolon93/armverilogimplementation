@@ -41,41 +41,83 @@ module NSASel(output reg [1:0]M, input [2:0]ns, input sts);
 		3'b111: ;  // lo que necesitemos
 endmodule
 
-module encoder(output reg [3:0]out, input [32:0]IR);
-
+module encoder(output reg [5:0]out, input [32:0]IR);
+	always @()
+	case(IR[24:21])
+		4'b0000:
+		4'b0001:
+		4'b0010:
+		4'b0011:
+		4'b0100:
+		4'b0101:
+		4'b0110:
+		4'b0111:
+		4'b1000:
+		4'b1001:
+		4'b1010:
+		4'b1011:
+		4'b1100:
+		4'b1101:
+		4'b1110:
+		4'b1111:
+	endcase
 endmodule
 
-module condEval(output reg [3:0]out, input [31:0]IR, input [31:0] statusReg);
-
+module condEval(output reg [5:0]out, input [31:0]IR, input [31:0] statusReg);
+	always @ (IR, statusReg)
+	case(IR[31:28])
+		4'b0000:
+		4'b0001:
+		4'b0010:
+		4'b0011:
+		4'b0100:
+		4'b0101:
+		4'b0110:
+		4'b0111:
+		4'b1000:
+		4'b1001:
+		4'b1010:
+		4'b1011:
+		4'b1100:
+		4'b1101:
+		4'b1110:
+		4'b1111:
+	endcase
 endmodule
 
-module adder(output reg [3:0]out, input [3:0]currentState, input[3:0] add);
+module adder(output reg [5:0]out, input [5:0]currentState, input[3:0] add);
 	always @ (currentState)
 	out = currentState + add;
 endmodule
 
-module IncReg(output reg [3:0] Q, input [3:0] D, input EN, CLR, CLK);
-	initial Q = 4'b0000; // Start registers with 0
+module IncReg(output reg [5:0] Q, input [5:0] D, input EN, CLR, CLK);
+	initial Q = 5'b00000; // Start registers with 0
 	always @ (negedge CLK, negedge CLR)
 		if(!EN)
 			Q = D; // Enable Sync. Only occurs when Clk is high
 		else if(!CLR) // clear
-			Q = 4'b0000; // Clear Async
+			Q = 5'b00000; // Clear Async
 		else
 			Q <= Q; // enable off. output what came out before
 endmodule
 
-module mux_4x1_4b(output reg[3:0] Y, input [1:0] S, input [3:0] I0, I1, I2, I3);
+module mux_4x1_4b(output reg[5:0] Y, input [1:0] S, input [5:0] I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
-		2'b00: assign Y=I0[3:0];
-		2'b01: assign Y=I1[3:0];
-		2'b10: assign Y=I2[3:0];
-		2'b11: assign Y=I3[3:0];
+		2'b00: assign Y=I0[5:0];
+		2'b01: assign Y=I1[5:0];
+		2'b10: assign Y=I2[5:0];
+		2'b11: assign Y=I3[5:0];
 	endcase
 endmodule
 
-module ROM (output reg [31:0]out, input [3:0]state, input clk);
+module ROM (output reg [31:0]out, input [5:0]state, input clk);
+	reg [31:0]mem[0:63];
+	initial begin 
+		//put rom memory here (in theory)
+	end
+	always @ (posedge clk)
+		out = mem[state][31:0];
 
 endmodule
 
