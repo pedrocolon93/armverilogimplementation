@@ -39,49 +39,82 @@ module NSASel(output reg [1:0]M, input [2:0]ns, input sts);
 				1: M = 2'b11;
 			endcase
 		3'b111: ;  // lo que necesitemos
-endmodule
-
-module encoder(output reg [5:0]out, input [32:0]IR);
-	always @()
-	case(IR[24:21])
-		4'b0000:
-		4'b0001:
-		4'b0010:
-		4'b0011:
-		4'b0100:
-		4'b0101:
-		4'b0110:
-		4'b0111:
-		4'b1000:
-		4'b1001:
-		4'b1010:
-		4'b1011:
-		4'b1100:
-		4'b1101:
-		4'b1110:
-		4'b1111:
 	endcase
 endmodule
 
-module condEval(output reg [5:0]out, input [31:0]IR, input [31:0] statusReg);
+module encoder(output reg [5:0]out, input [32:0]IR);
+	always @(IR)
+	case(IR[37:35])
+		3'b000: begin
+			if (IR[4])
+				if (IR[7]) ;
+				else
+					if (IR[20]) ;
+					else
+						if (IR[24:23] == 2'b10) ;
+						else ;
+			else
+				if (IR[20]) ;
+				else
+					if (IR[24:23] == 2'b10) ;
+					else ;
+		  end
+		3'b001: begin
+			if (IR[20]) ;
+			else
+				if (IR[24:23] == 2'b10)
+					if (IR[21]) ;
+					else ;
+				else ;
+		  end
+		3'b010: ;
+		3'b011: begin
+			if(IR[4])
+				if(IR[8:5]) 
+					if(IR[24:20]) ;
+					else ;
+				else ;
+			else ;
+		  end
+		3'b100: ;
+		3'b101: ;
+		3'b110: ;//not given
+		3'b111: ;//not given
+	endcase
+endmodule
+
+module condEval(output reg out, input [31:0]IR, input [31:0] statusReg);
 	always @ (IR, statusReg)
 	case(IR[31:28])
-		4'b0000:
-		4'b0001:
-		4'b0010:
-		4'b0011:
-		4'b0100:
-		4'b0101:
-		4'b0110:
-		4'b0111:
-		4'b1000:
-		4'b1001:
-		4'b1010:
-		4'b1011:
-		4'b1100:
-		4'b1101:
-		4'b1110:
-		4'b1111:
+		4'b0000: if (statusReg[30]) out = 1;				// Z=1
+				 else out = 0;
+		4'b0001: if (~statusReg[30]) out = 1;				// Z=0
+				 else out = 0;
+		4'b0010: if (statusReg[29]) out = 1;				// C=1
+				 else out = 0;
+		4'b0011: if (~statusReg[29]) out = 1;				// C=0
+				 else out = 0;
+		4'b0100: if (statusReg[31]) out = 1;				// N=1
+				 else out = 0;
+		4'b0101: if (~statusReg[31]) out = 1;				// N=0
+				 else out = 0;
+		4'b0110: if (statusReg[28]) out = 1;				// V=1
+				 else out = 0;
+		4'b0111: if (~statusReg[28]) out = 1;				// V=0
+				 else out = 0;
+		4'b1000: if (statusReg[29] == 1 && statusReg[30] == 0) out = 1; 	// C=1 & Z=0
+				 else out = 0;
+		4'b1001: if (statusReg[29] == 0 || statusReg[30] == 1) out = 1;	// C=0 or Z=1
+				 else out = 0;
+		4'b1010: if (statusReg[31] == statusReg[28]) out = 1;		// N=Z
+				 else out = 0;
+		4'b1011: if (statusReg[31] != statusReg[28]) out = 1;		// N!=V
+				 else out = 0;
+		4'b1100: if (statusReg[30] == 0 && statusReg[31] == statusReg[28]) out = 1;	// Z=0 & N=V
+				 else out = 0;
+		4'b1101: if (statusReg[30] == 1 || statusReg[31] != statusReg[28]) out = 1;	//Z=1 or N=!Z
+				 else out = 0;
+		default: out = 1;
 	endcase
 endmodule
 
