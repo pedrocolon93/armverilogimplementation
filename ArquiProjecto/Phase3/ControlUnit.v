@@ -153,15 +153,16 @@ module mux_4x1_6b(output reg[5:0] Y, input [1:0] S, input [5:0] I0, I1, I2, I3);
 endmodule
 //-------------------------------------------------------------------------------
 //ROM (output may increce, depending on signals requiered, 1bit per signal)
-module ROM (output reg [31:0]out, input [5:0]state, input clk);
-	reg [31:0]mem[0:45];
+module ROM (output reg [44:0]out, input [5:0]state, input clk);
+	reg [31:0]mem[0:44];
 	initial begin 
 		//fetch
+		//			   44   42   39 38    33 32 31 30 29   25   21   17   14   10  7  6  5  4  3    1   0
 		// 			 | s0s1 NS  Inv pl   |s0 E1 E0 C1 RA   RB   RC   S3S1 S7S4 ShT E2 E3 E4 E5 MAS R/W MFA
-		mem[0][45:0] = 00___011_0___00000_0__1__0__1__1111_0000_0000_000__1101_000_0__0__0__1__01__0___0; 
-		mem[1][45:0] = 00___011_0___00000_0__0__1__1__1111_0000_1111_000__1101_000_0__0__0__0__01__0___1; 
-		mem[2][45:0] = 00___101_1___00011_0__1__0__1__1111_0000_0000_000__1101_000_1__1__1__0__01__0___1; 
-		mem[3][45:0] = 00___000_0___00000_0__1__0__1__1111_0000_0000_000__1101_000_0__0__0__0__01__0___0; 
+		mem[0][44:0] = 00___011__0__00000_0__1__0__1__1111_0000_0000_000__1101_000_0__0__0__1__01___0___0; 
+		mem[1][44:0] = 00___011__0__00000_0__0__1__1__1111_0000_1111_000__1101_000_0__0__0__0__01___0___1; 
+		mem[2][44:0] = 00___101__1__00011_0__1__0__1__1111_0000_0000_000__1101_000_1__1__1__0__01___0___1; 
+		mem[3][44:0] = 00___000__0__00000_0__1__0__1__1111_0000_0000_000__1101_000_0__0__0__0__01___0___0; 
 		//decode
 
 		//execute
@@ -169,26 +170,46 @@ module ROM (output reg [31:0]out, input [5:0]state, input clk);
 		//put rom memory here (in theory)
 	end
 	always @ (posedge clk)
-		out = mem[state][31:0];
+		out = mem[state][44:0];
 
 endmodule
 //-------------------------------------------------------------------------------
 //control unit box (output depends on ROM output)
-module ControlUnit (output [31:0]out, input clk, clk_en, rst_n, mfc, input [31:0]IR, statusReg);
-	wire [5,0]state, stateSel, stateSel1, stateSel2, stateSel3, stateToAdd, addToR;
+module ControlUnit (output [44:0]out, input clk, clk_en, clr, mfc, input [31:0]IR, statusReg);
+	wire [5,0]state, stateSel stateSel1, stateSel2, stateSel3, addToR;
+	wire [1:0]mux6bsel;
 	wire invIn, invOut, ms0, ms1;
-	//ROM rom (out, ,clk);
-	//mux_4x1_6b mux6b ();
-	//IncReg incR();
-	//adder adderAlu();
-	//condEval condeval();
-	//encoder iREnc();
-	//NSASel stateSel();
-	//inverter inv();
-	//mux_4x1_1b mux1b();
+	wire [44:0]innerOut;
+
+	ROM 		rom 	 (innerOut,   state, 			clk);
+	mux_4x1_6b 	mux6b 	 (state, 	  mux6bsel, 		stateSel, 	stateSel1,  stateSel2, 	stateSSel3);
+	IncReg 		incR 	 (stateSel,   addToR, 			1, 			clr, 		clk);
+	adder 		adderAlu (addToR, 	  state, 			1);
+	condEval 	condEval (invIn, 	  IR, 				statusReg);
+	encoder 	iREnc 	 (stateSSel3, IR);
+	NSASel 		stateSel (mux6bsel,   innerOut[42:38], 	invOut);
+	inverter 	inv 	 (invOut, 	  invIn, 			innerOut[39]);
+	mux_4x1_1b 	mux1b 	 (invIn, 	  innerOut[44:43],	mfc, 		0, 			0, 			0);
+	
+	always @(posedge clk)
+		out = innerOut;
 endmodule
+//-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 //tester
 module CU_tester;
+
+endmodule
+//------------------------------------------
+module condEval_tester;
+
+endmodule
+//------------------------------------------
+module encoder_tester;
+
+endmodule
+//------------------------------------------
+module ROM_tester;
 
 endmodule
