@@ -1,3 +1,4 @@
+// mux to inverter with inputs if 1 bit
 module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
@@ -7,7 +8,8 @@ module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1, I2, I3);
 		2'b11: assign Y=I3;
 	endcase
 endmodule
-
+//-------------------------------------------------------------------------------
+//inverter
 module inverter(output reg out, input in, inv);
 	always @ (in, inv)
 	if(inv)	
@@ -15,7 +17,8 @@ module inverter(output reg out, input in, inv);
 	else
 		out = in;
 endmodule
-
+//-------------------------------------------------------------------------------
+// 4bit mux selector upon conditions
 module NSASel(output reg [1:0]M, input [2:0]ns, input sts);
 	always @ (ns, sts)
 	case(ns)
@@ -41,7 +44,8 @@ module NSASel(output reg [1:0]M, input [2:0]ns, input sts);
 		3'b111: ;  // lo que necesitemos
 	endcase
 endmodule
-
+//-------------------------------------------------------------------------------
+// IR encoder for next state
 module encoder(output reg [5:0]out, input [32:0]IR);
 	always @(IR)
 	case(IR[37:35])
@@ -78,11 +82,12 @@ module encoder(output reg [5:0]out, input [32:0]IR);
 		  end
 		3'b100: ;
 		3'b101: ;
-		3'b110: ;//not given
-		3'b111: ;//not given
+		3'b110: ;//does not apply
+		3'b111: ;//does not apply
 	endcase
 endmodule
-
+//-------------------------------------------------------------------------------
+// IR condition evaluator
 module condEval(output reg out, input [31:0]IR, input [31:0] statusReg);
 	always @ (IR, statusReg)
 	case(IR[31:28])
@@ -117,12 +122,14 @@ module condEval(output reg out, input [31:0]IR, input [31:0] statusReg);
 		default: out = 1;
 	endcase
 endmodule
-
+//-------------------------------------------------------------------------------
+//state adder 
 module adder(output reg [5:0]out, input [5:0]currentState, input[3:0] add);
 	always @ (currentState)
 	out = currentState + add;
 endmodule
-
+//-------------------------------------------------------------------------------
+//state adder register
 module IncReg(output reg [5:0] Q, input [5:0] D, input EN, CLR, CLK);
 	initial Q = 5'b00000; // Start registers with 0
 	always @ (negedge CLK, negedge CLR)
@@ -133,8 +140,9 @@ module IncReg(output reg [5:0] Q, input [5:0] D, input EN, CLR, CLK);
 		else
 			Q <= Q; // enable off. output what came out before
 endmodule
-
-module mux_4x1_4b(output reg[5:0] Y, input [1:0] S, input [5:0] I0, I1, I2, I3);
+//-------------------------------------------------------------------------------
+//6bit mux selector for state choosing (may increase depending on final states quantity)
+module mux_4x1_6b(output reg[5:0] Y, input [1:0] S, input [5:0] I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
 		2'b00: assign Y=I0[5:0];
@@ -143,17 +151,44 @@ module mux_4x1_4b(output reg[5:0] Y, input [1:0] S, input [5:0] I0, I1, I2, I3);
 		2'b11: assign Y=I3[5:0];
 	endcase
 endmodule
-
+//-------------------------------------------------------------------------------
+//ROM (output may increce, depending on signals requiered, 1bit per signal)
 module ROM (output reg [31:0]out, input [5:0]state, input clk);
-	reg [31:0]mem[0:63];
+	reg [31:0]mem[0:45];
 	initial begin 
+		//fetch
+		// 			 | s0s1 NS  Inv pl   |s0 E1 E0 C1 RA   RB   RC   S3S1 S7S4 ShT E2 E3 E4 E5 MAS R/W MFA
+		mem[0][45:0] = 00___011_0___00000_0__1__0__1__1111_0000_0000_000__1101_000_0__0__0__1__01__0___0; 
+		mem[1][45:0] = 00___011_0___00000_0__0__1__1__1111_0000_1111_000__1101_000_0__0__0__0__01__0___1; 
+		mem[2][45:0] = 00___101_1___00011_0__1__0__1__1111_0000_0000_000__1101_000_1__1__1__0__01__0___1; 
+		mem[3][45:0] = 00___000_0___00000_0__1__0__1__1111_0000_0000_000__1101_000_0__0__0__0__01__0___0; 
+		//decode
+
+		//execute
+
 		//put rom memory here (in theory)
 	end
 	always @ (posedge clk)
 		out = mem[state][31:0];
 
 endmodule
-
-module ControlUnit (output [31:0]out, input clk, clk_en, rst_n, input mfc, input [31:0]IR, input statusReg);
+//-------------------------------------------------------------------------------
+//control unit box (output depends on ROM output)
+module ControlUnit (output [31:0]out, input clk, clk_en, rst_n, mfc, input [31:0]IR, statusReg);
+	wire [5,0]state, stateSel, stateSel1, stateSel2, stateSel3, stateToAdd, addToR;
+	wire invIn, invOut, ms0, ms1;
+	//ROM rom (out, ,clk);
+	//mux_4x1_6b mux6b ();
+	//IncReg incR();
+	//adder adderAlu();
+	//condEval condeval();
+	//encoder iREnc();
+	//NSASel stateSel();
+	//inverter inv();
+	//mux_4x1_1b mux1b();
+endmodule
+//-------------------------------------------------------------------------------
+//tester
+module CU_tester;
 
 endmodule
