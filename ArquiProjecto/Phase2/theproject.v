@@ -29,10 +29,8 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] RIGHT
 			// #5 
 			begin
 				//Set the output and C flag
-
 				{ALU_OUTPUT[31:0]} = LEFT_OP[31:0] & RIGHT_OP[31:0];
 				C = CIN;
-
 				//Set the N flag
 				N = ALU_OUTPUT[31];
 				//Set the Z flag
@@ -41,7 +39,6 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] RIGHT
 				else
 					Z = 0;
 				//Set the overflow flag
-				
 			end
 			// //EOR
 			4'b0001: 
@@ -311,8 +308,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] RIGHT
 		end
 endmodule
 
-//
-
+//---------------------------------------------------------------------------------------------------------------------------------------
 module mux_4x1(output reg[31:0] Y, input [1:0] S, input [31:0] I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
@@ -323,7 +319,7 @@ module mux_4x1(output reg[31:0] Y, input [1:0] S, input [31:0] I0, I1, I2, I3);
 	endcase
 endmodule
 
-//
+//---------------------------------------------------------------------------------------------------------------------------------------
 module mux_8x1(output reg[31:0] Y, input [2:0] S, input [31:0] I0, I1, I2, I3, I4,I5,I6,I7);
 	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
 	case (S)
@@ -338,48 +334,42 @@ module mux_8x1(output reg[31:0] Y, input [2:0] S, input [31:0] I0, I1, I2, I3, I
 	endcase
 endmodule
 
-//
+//---------------------------------------------------------------------------------------------------------------------------------------
 module mux_2x1(output [31:0] Y, input S, input [31:0] I0, I1);
 	assign Y=S? I0:I1;
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module mux_2x1_2b(output [1:0] Y, input S, input [1:0] I0, I1);
 	assign Y=S? I0:I1;
 endmodule
 
-//
+//---------------------------------------------------------------------------------------------------------------------------------------
 /*MAS: 00 B  //  01 H  //  10 w  // 11 undefined
-1 = read  //  0 = write
-changed mem value for test purposes */
-
-module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [8:0]address, input [31:0]dataIn, input [1:0]MAS);
-	reg [8:0]mem[0:512];
+1 = read  //  0 = write*/
+module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [7:0]address, input [31:0]dataIn, input [1:0]MAS);
+	reg [7:0]mem[0:511];
 	always @ (enable, readWrite, MAS, dataIn, address)
 	begin
-		if (enable)
-		begin
+		if (enable) begin
 			done = 0;
 			if (readWrite) begin
 				//Reading
 				case(MAS)
-
 					2'b00:	begin
 						dataOut[7:0] = mem[address][7:0];
 						dataOut[31:8] = 24'b0000_0000_0000_0000_0000_0000;
-						
 					end
 					2'b01:	begin	
 						dataOut[15:8] = mem[address][7:0];
 						dataOut[7:0] = mem[address + 8'b0000001][7:0];
 						dataOut[31:16] = 16'b0000_0000_0000_0000;
-						
 					end
 					2'b10:	begin // #30;
 						dataOut[31:0] = {mem[address][7:0], 
 										 mem[address + 8'b0000001][7:0], 
 										 mem[address + 8'b0000010][7:0], 
 										 mem[address + 8'b0000011][7:0]};
-						
 					end
 					default: dataOut = dataOut;
 				endcase
@@ -387,23 +377,16 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 			else begin
 				//Writing
 				case(MAS)
-					2'b00:	begin	
-						
-						mem[address][7:0] = dataIn[7:0];
-						
-					end
+					2'b00:	mem[address][7:0] = dataIn[7:0];
 					2'b01:	begin
-						
 						mem[address][7:0] = dataIn[15:8];
 						mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
-				
 					end
 					2'b10:	begin //#60;
 						mem[address + 8'b00000011][7:0] = dataIn[7:0];
 						mem[address + 8'b00000010][7:0] = dataIn[15:8];
 						mem[address + 8'b00000001][7:0] = dataIn[23:16];
 						mem[address][7:0] = dataIn[31:24];
-						
 					end
 					default: dataOut = dataOut;
 				endcase
@@ -415,11 +398,9 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 	end
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module reg_12b(output reg [11:0] Q, input [11:0] D, input EN, CLR, CLK);
-	initial
-		begin
-			Q <= 12'b000000000000; // Start registers with 0
-		end
+	initial	Q <= 12'b000000000000; // Start registers with 0
 	always @ (posedge CLK, negedge CLR)
 		if(!EN)
 			Q <= D; // Enable Sync. Only occurs when Clk is high
@@ -429,11 +410,9 @@ module reg_12b(output reg [11:0] Q, input [11:0] D, input EN, CLR, CLK);
 			Q <= Q; // enable off. output what came out before
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module reg_12to32_SE(output reg [32:0] Q, input [12:0] D, input EN, CLR, CLK);
-	initial
-		begin
-			Q <= 12'b000000000000; // Start registers with 0
-		end
+	initial	Q <= 12'b000000000000; // Start registers with 0
 	always @ (posedge CLK, negedge CLR)
 		if(!EN)
 			Q <= {D[11], D[11], D[11], D[11], D[11], D[11], D[11], D[11], D[11], 
@@ -445,11 +424,9 @@ module reg_12to32_SE(output reg [32:0] Q, input [12:0] D, input EN, CLR, CLK);
 			Q <= Q; // enable off. output what came out before
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module reg_32(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
-	initial
-		begin
-			Q = 32'b0000000000000000000000000000000; // Start registers with 0
-		end
+	initial	Q = 32'b0000000000000000000000000000000; // Start registers with 0
 	always @ (posedge CLK, negedge CLR)
 		if(!EN)
 			Q <= D; // Enable Sync. Only occurs when Clk is high
@@ -459,39 +436,36 @@ module reg_32(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 			Q <= Q; // enable off. output what came out before
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module dec4x16_32b(output reg [15:0] D, input[3:0] A, input EN);
 	always @(EN, A)
-		begin
-			if (!EN) 
-				begin
-					case(A)
-							4'b0000: D = 16'b1111111111111110;
-							4'b0001: D = 16'b1111111111111101;
-							4'b0010: D = 16'b1111111111111011;
-							4'b0011: D = 16'b1111111111110111;
-							4'b0100: D = 16'b1111111111101111;
-							4'b0101: D = 16'b1111111111011111;
-							4'b0110: D = 16'b1111111110111111;
-							4'b0111: D = 16'b1111111101111111;
-							4'b1000: D = 16'b1111111011111111;
-							4'b1001: D = 16'b1111110111111111;
-							4'b1010: D = 16'b1111101111111111;
-							4'b1011: D = 16'b1111011111111111;
-							4'b1100: D = 16'b1110111111111111;
-							4'b1101: D = 16'b1101111111111111;
-							4'b1110: D = 16'b1011111111111111;
-							4'b1111: D = 16'b0111111111111111;
-							default: D = 16'b1111111111111111;				
-					endcase		
-				end
-		end
+	begin
+		if (!EN)
+			case(A)
+				4'b0000: D = 16'b1111111111111110;
+				4'b0001: D = 16'b1111111111111101;
+				4'b0010: D = 16'b1111111111111011;
+				4'b0011: D = 16'b1111111111110111;
+				4'b0100: D = 16'b1111111111101111;
+				4'b0101: D = 16'b1111111111011111;
+				4'b0110: D = 16'b1111111110111111;
+				4'b0111: D = 16'b1111111101111111;
+				4'b1000: D = 16'b1111111011111111;
+				4'b1001: D = 16'b1111110111111111;
+				4'b1010: D = 16'b1111101111111111;
+				4'b1011: D = 16'b1111011111111111;
+				4'b1100: D = 16'b1110111111111111;
+				4'b1101: D = 16'b1101111111111111;
+				4'b1110: D = 16'b1011111111111111;
+				4'b1111: D = 16'b0111111111111111;
+				default: D = 16'b1111111111111111;				
+			endcase	
+	end
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
-	initial
-		begin
-			Q = 32'b0000000000000000000000000000000; // Start registers with 0
-		end
+	initial	Q = 32'b0000000000000000000000000000000; // Start registers with 0
 	always @ (negedge CLK, negedge CLR)
 		if(!EN)
 			Q = D; // Enable Sync. Only occurs when Clk is high
@@ -501,6 +475,7 @@ module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 			Q <= Q; // enable off. output what came out before
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL);
 	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7) // if I change the input and enable is high then 
 		case(SEL)
@@ -524,6 +499,7 @@ module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, 
 		endcase
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, input [3:0] REGCLR, input [3:0] M0SEL, input [3:0] M1SEL, input REGCLK, RFE);
 	wire [15:0] decoder2RegEnable; // 16 lines of one bit for Register Enables
 	wire [15:0]	decoder2RegClear; // 16 lines of one bit for Register Clears
@@ -571,36 +547,26 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 	mux8x1_32b M1 (B, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
 		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M1SEL);
 endmodule
-module internal_shifter (
-	input [31:0]amount, value,
-	input shift_type,
-	output reg [31:0] shift_out
-);
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+module internal_shifter (input [31:0]amount, value, input shift_type, output reg [31:0] shift_out);
 	reg I;
 	always @(amount, value, shift_type) 
 	begin
 		case(shift_type)
-			0:begin
-				//left logic
+			0:	//left logic
 				shift_out[31:0] = value[31:0]<<amount;
-			end
-			1:begin
-				//right logic
+			1:	//right logic
 				shift_out[31:0] = value[31:0]>>amount;
-			end
-
-			2:begin
-				//left arithmetic
+			2:	//left arithmetic
 				shift_out[31:0] = value[31:0]<<<amount;
-			end
-			3:begin
-				//right arithmetic
+			3:	//right arithmetic
 				shift_out[31:0] = value[31:0]>>>amount;
-			end
 		endcase // shift_type
 	end
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module shifter(input[31:0] input_register, input[11:0] shifter_operand, input selector, output [31:0] out);
 	wire[31:0] amounttointernal,valuetointernal;
 	wire[1:0] shifttypetointernal;
@@ -613,19 +579,17 @@ module shifter(input[31:0] input_register, input[11:0] shifter_operand, input se
 	internal_shifter intsh(amounttointernal,valuetointernal,selector,out);
 endmodule
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module adder(input [31:0] pc, right, output reg [31:0] out);
 	always @(pc, right)
-	begin
 		out = pc+right;
-	end
 endmodule	
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 module datapath;
 	//CU Signals
-
 	reg E0,E1,E2,E3,E4,E5;//Enables the register that holds pc+4
 	reg S0;//Selects whether its pc or pc+4
-
 
 	reg [3:0] RA; // Selector of A Mux is 3 bits
 	reg [3:0] RB; // Selector of B Mux is 3 bits
@@ -644,39 +608,29 @@ module datapath;
 	reg shift_type;//shifter
 
 	//Flags
-
 	wire N, COUT, V, ZERO;//ALU Flags
+	
 	//Clock
-
 	reg CLK; // Register Clock Enable (All Clocks of Registers are Shared)
-
 
 	//General wires
 	reg CIN;		
 	
 	wire [31:0] PC, LEFT_OP, B;
-
 	wire [31:0] alu_in_sel_mux_to_alu,pc_plus_4_mux_to_rf, register_to_mux, adder_to_register;
-	
 	wire [31:0] mar_to_ram;
 
-
 	reg [31:0]data;
-
+	
 	wire [31:0]mem_data;
-
 	wire [31:0] ir_out;
-
 	wire [11:0] twelve_bit_shift_reg_out;
 	reg[31:0]input_register;
-
-	
 
 	wire[31:0] shifter_output;
 		wire [31:0] ser_out;
 
 	//Components 
-
 	adder pc_plus_4(PC, 4, adder_to_register);
 
 	reg_32 sum_holder_register (register_to_mux, adder_to_register, E0, 1'b1,CLK);
@@ -685,24 +639,22 @@ module datapath;
 
 	registerFile registerFile (LEFT_OP, B, pc_plus_4_mux_to_rf, RC, RD, RA, RB, CLK, RFE); // Instance of Entire Register File
 
-	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S3,S2,S1}, B, shifter_output,twelve_bit_shift_reg_out, ir_out, ser_out,0,0,0);
+	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S3,S2,S1}, B, shifter_output,{{20{1'b0}},twelve_bit_shift_reg_out}, ir_out, ser_out,0,0,0);
 
 	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, {S7,S6,S5,S4}, CIN);
 
 	//Right side
 	reg_32b mar(mar_to_ram,PC,E5,1'b1,CLK);
 
-	ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[8:0], data, dataSize);
+	ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
 
 	reg_32b ir(ir_out, mem_data,E3,1'b1,CLK);
 
-
 	reg_12b r_12(twelve_bit_shift_reg_out, ir_out[11:0],E4,1'b1,CLK);
-
 
 	shifter sh(B,twelve_bit_shift_reg_out,shift_type,shifter_output);
 
-	reg_32b ser(ser_out,{{8{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
+	reg_32b ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
 
 	//Vamos a probar 
 	parameter sim_time = 160;
@@ -741,9 +693,8 @@ module datapath;
 	initial #sim_time $finish;
 
 	initial begin
-		$display ("CLK  RA RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B"); //imprime header
+		$display ("CLK  RA RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A         B"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("%d    %d %d %0d %0d %d %d %d %d %d %d %d %d %d %d %d", CLK,RA,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B); //imprime las señales
+		$monitor ("%d    %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d", CLK,RA,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B); //imprime las señales
 	end
 endmodule	
-

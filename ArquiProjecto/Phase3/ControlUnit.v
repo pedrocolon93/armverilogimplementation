@@ -88,36 +88,36 @@ module encoder(output reg [5:0]out, input [32:0]IR);
 endmodule
 //-------------------------------------------------------------------------------
 // IR condition evaluator
-module condEval(output reg out, input [31:0]IR, input [31:0] statusReg);
-	always @ (IR, statusReg)
+module condEval(output reg out, input [31:0]IR, input [31:0] tsr);
+	always @ (IR, tsr)
 	case(IR[31:28])
-		4'b0000: if (statusReg[30]) out = 1;				// Z=1
+		4'b0000: if (str[30]) out = 1;				// Z=1
 				 else out = 0;
-		4'b0001: if (~statusReg[30]) out = 1;				// Z=0
+		4'b0001: if (~str[30]) out = 1;				// Z=0
 				 else out = 0;
-		4'b0010: if (statusReg[29]) out = 1;				// C=1
+		4'b0010: if (str[29]) out = 1;				// C=1
 				 else out = 0;
-		4'b0011: if (~statusReg[29]) out = 1;				// C=0
+		4'b0011: if (~str[29]) out = 1;				// C=0
 				 else out = 0;
-		4'b0100: if (statusReg[31]) out = 1;				// N=1
+		4'b0100: if (str[31]) out = 1;				// N=1
 				 else out = 0;
-		4'b0101: if (~statusReg[31]) out = 1;				// N=0
+		4'b0101: if (~str[31]) out = 1;				// N=0
 				 else out = 0;
-		4'b0110: if (statusReg[28]) out = 1;				// V=1
+		4'b0110: if (str[28]) out = 1;				// V=1
 				 else out = 0;
-		4'b0111: if (~statusReg[28]) out = 1;				// V=0
+		4'b0111: if (~str[28]) out = 1;				// V=0
 				 else out = 0;
-		4'b1000: if (statusReg[29] == 1 && statusReg[30] == 0) out = 1; 	// C=1 & Z=0
+		4'b1000: if (str[29] == 1 && str[30] == 0) out = 1; 	// C=1 & Z=0
 				 else out = 0;
-		4'b1001: if (statusReg[29] == 0 || statusReg[30] == 1) out = 1;	// C=0 or Z=1
+		4'b1001: if (str[29] == 0 || str[30] == 1) out = 1;	// C=0 or Z=1
 				 else out = 0;
-		4'b1010: if (statusReg[31] == statusReg[28]) out = 1;		// N=Z
+		4'b1010: if (str[31] == str[28]) out = 1;		// N=Z
 				 else out = 0;
-		4'b1011: if (statusReg[31] != statusReg[28]) out = 1;		// N!=V
+		4'b1011: if (str[31] != str[28]) out = 1;		// N!=V
 				 else out = 0;
-		4'b1100: if (statusReg[30] == 0 && statusReg[31] == statusReg[28]) out = 1;	// Z=0 & N=V
+		4'b1100: if (str[30] == 0 && str[31] == str[28]) out = 1;	// Z=0 & N=V
 				 else out = 0;
-		4'b1101: if (statusReg[30] == 1 || statusReg[31] != statusReg[28]) out = 1;	//Z=1 or N=!Z
+		4'b1101: if (str[30] == 1 || str[31] != str[28]) out = 1;	//Z=1 or N=!Z
 				 else out = 0;
 		default: out = 1;
 	endcase
