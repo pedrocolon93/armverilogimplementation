@@ -702,35 +702,7 @@ module datapath;
 
 	shifter sh(B,twelve_bit_shift_reg_out,shift_type,shifter_output);
 
-	reg_32b ser(ser_out,
-		{
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-
-		twelve_bit_shift_reg_out[11],
-		twelve_bit_shift_reg_out[11],
-
-		twelve_bit_shift_reg_out[11:0],
-		2'b00}
-		,E2,1'b1,CLK
-		);
+	reg_32b ser(ser_out,{{8{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
 
 	//Vamos a probar 
 	parameter sim_time = 160;
