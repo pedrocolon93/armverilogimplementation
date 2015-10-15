@@ -324,6 +324,21 @@ module mux_4x1(output reg[31:0] Y, input [1:0] S, input [31:0] I0, I1, I2, I3);
 endmodule
 
 //
+module mux_8x1(output reg[31:0] Y, input [2:0] S, input [31:0] I0, I1, I2, I3, I4,I5,I6,I7);
+	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
+	case (S)
+		0: assign Y=I0[31:0];
+		1: assign Y=I1[31:0];
+		2: assign Y=I2[31:0];
+		3: assign Y=I3[31:0];
+		4: assign Y=I4;
+		5: assign Y=I5;
+		6: assign Y=I6;
+		7: assign Y=I7;
+	endcase
+endmodule
+
+//
 module mux_2x1(output [31:0] Y, input S, input [31:0] I0, I1);
 	assign Y=S? I0:I1;
 endmodule
@@ -400,7 +415,7 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 	end
 endmodule
 
-module reg_32b(output reg [12:0] Q, input [12:0] D, input EN, CLR, CLK);
+module reg_12b(output reg [12:0] Q, input [12:0] D, input EN, CLR, CLK);
 	initial
 		begin
 			Q <= 12'b000000000000; // Start registers with 0
@@ -599,5 +614,54 @@ module shifter(input[31:0] input_register, input[11:0] shifter_operand, input se
 	internal_shifter intsh(amounttointernal,valuetointernal,selector,out);
 endmodule
 
+module adder(input [31:0] pc, right, output reg [31:0] out);
+	always @(pc, right)
+	begin
+		out = pc+right;
+	end
+endmodule	
 
+module datapath;
+	//CU Signals
+
+	wire E0;//Enables the register that holds pc+4
+	wire S0;//Selects whether its pc or pc+4
+
+
+	reg [3:0] RA; // Selector of A Mux is 3 bits
+	reg [3:0] RB; // Selector of B Mux is 3 bits
+	reg [3:0] RC; // Register Enable Selectors (Input to Decoders 0 and 1)
+	reg [3:0] RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
+	reg RFE; // Decoder and Mux Enabler (All Enables of Decoders are Shared)
+
+	wire S4,S5,S6,S7;//Function select for alu
+	wire S1,S2,S3;
+	//Flags
+
+	wire N, COUT, V, ZERO;//ALU Flags
+	//Clock
+
+	reg CLK; // Register Clock Enable (All Clocks of Registers are Shared)
+
+
+	//General wires
+	wire CIN;		
+	
+	wire [31:0] PC, LEFT_OP, B;
+
+	wire [31:0] alu_in_sel_mux_to_alu,pc_plus_4_mux_to_rf, register_to_mux, adder_to_register;
+	
+	adder pc_plus_4(PC, 4, adder_to_register);
+
+	reg_32 sum_holder_register (register_to_mux, adder_to_register, E0, 1'b0,CLK);
+
+	mux_2x1 rf_entry_mux(pc_plus_4_mux_to_rf, S0, PC, register_to_mux);
+
+	registerFile registerFile (LEFT_OP, B, pc_plus_4_mux_to_rf, RC, RD, RA, RB, CLK, RFE); // Instance of Entire Register File
+
+	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S3,S2,S1}, B, 0, 0, 0, 0,0,0,0);
+
+	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, {S7,S6,S5,S4}, CIN);
+
+endmodule	
 
