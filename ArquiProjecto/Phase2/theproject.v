@@ -17,7 +17,7 @@ Shifter operand === RIGHT_OP
 1110 BIC Bit Clear Rd := Rn AND NOT(shifter_operand)
 1111 MVN Move Not Rd := NOT shifter_operand (no first operand)
 */
-module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0]LEFT_OP, RIGHT_OP, input  [3:0]FN, input  CIN);
+module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] RIGHT_OP,LEFT_OP, input  [3:0]FN, input  CIN);
 	reg [31:0] TEMP;
 	reg CTEMP;
 
@@ -415,7 +415,7 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 	end
 endmodule
 
-module reg_12b(output reg [12:0] Q, input [12:0] D, input EN, CLR, CLK);
+module reg_12b(output reg [11:0] Q, input [11:0] D, input EN, CLR, CLK);
 	initial
 		begin
 			Q <= 12'b000000000000; // Start registers with 0
@@ -448,7 +448,7 @@ endmodule
 module reg_32(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 	initial
 		begin
-			Q <= 32'b0000000000000000000000000000000; // Start registers with 0
+			Q = 32'b0000000000000000000000000000000; // Start registers with 0
 		end
 	always @ (posedge CLK, negedge CLR)
 		if(!EN)
@@ -571,7 +571,6 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 	mux8x1_32b M1 (B, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
 		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M1SEL);
 endmodule
-
 module internal_shifter (
 	input [31:0]amount, value,
 	input shift_type,
@@ -624,8 +623,8 @@ endmodule
 module datapath;
 	//CU Signals
 
-	wire E0;//Enables the register that holds pc+4
-	wire S0;//Selects whether its pc or pc+4
+	reg E0,E1,E2,E3,E4,E5;//Enables the register that holds pc+4
+	reg S0;//Selects whether its pc or pc+4
 
 
 	reg [3:0] RA; // Selector of A Mux is 3 bits
@@ -634,8 +633,16 @@ module datapath;
 	reg [3:0] RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
 	reg RFE; // Decoder and Mux Enabler (All Enables of Decoders are Shared)
 
-	wire S4,S5,S6,S7;//Function select for alu
-	wire S1,S2,S3;
+	reg S4,S5,S6,S7;//Function select for alu
+	reg S1,S2,S3;
+
+	reg en;//Signals for memory
+	reg rw;
+	reg [1:0]dataSize;
+	wire finished;
+
+	reg shift_type;//shifter
+
 	//Flags
 
 	wire N, COUT, V, ZERO;//ALU Flags
@@ -645,23 +652,126 @@ module datapath;
 
 
 	//General wires
-	wire CIN;		
+	reg CIN;		
 	
 	wire [31:0] PC, LEFT_OP, B;
 
 	wire [31:0] alu_in_sel_mux_to_alu,pc_plus_4_mux_to_rf, register_to_mux, adder_to_register;
 	
+	wire [31:0] mar_to_ram;
+
+
+	reg [31:0]data;
+
+	wire [31:0]mem_data;
+
+	wire [31:0] ir_out;
+
+	wire [11:0] twelve_bit_shift_reg_out;
+	reg[31:0]input_register;
+
+	
+
+	wire[31:0] shifter_output;
+		wire [31:0] ser_out;
+
+	//Components 
+
 	adder pc_plus_4(PC, 4, adder_to_register);
 
-	reg_32 sum_holder_register (register_to_mux, adder_to_register, E0, 1'b0,CLK);
+	reg_32 sum_holder_register (register_to_mux, adder_to_register, E0, 1'b1,CLK);
 
 	mux_2x1 rf_entry_mux(pc_plus_4_mux_to_rf, S0, PC, register_to_mux);
 
 	registerFile registerFile (LEFT_OP, B, pc_plus_4_mux_to_rf, RC, RD, RA, RB, CLK, RFE); // Instance of Entire Register File
 
-	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S3,S2,S1}, B, 0, 0, 0, 0,0,0,0);
+	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S3,S2,S1}, B, shifter_output,twelve_bit_shift_reg_out, ir_out, ser_out,0,0,0);
 
 	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, {S7,S6,S5,S4}, CIN);
 
+	//Right side
+	reg_32b mar(mar_to_ram,PC,E5,1'b1,CLK);
+
+	ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[8:0], data, dataSize);
+
+	reg_32b ir(ir_out, mem_data,E3,1'b1,CLK);
+
+
+	reg_12b r_12(twelve_bit_shift_reg_out, ir_out[11:0],E4,1'b1,CLK);
+
+
+	shifter sh(B,twelve_bit_shift_reg_out,shift_type,shifter_output);
+
+	reg_32b ser(ser_out,
+		{
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+
+		twelve_bit_shift_reg_out[11],
+		twelve_bit_shift_reg_out[11],
+
+		twelve_bit_shift_reg_out[11:0],
+		2'b00}
+		,E2,1'b1,CLK
+		);
+
+	//Vamos a probar 
+	parameter sim_time = 160;
+
+	initial 
+		begin
+			/*
+				Registers Start Cleared
+			*/
+			CLK = 0; //Start Clock Assertion Level Low
+			RFE = 0; // turn on enable decoder
+			RA = 15; //Output R15
+			RC = 15; //Input to r15
+			E0 = 0; //Enable the adder register
+			S0 = 0;
+
+			CIN = 0;
+
+			S1 = 0;
+			S2 = 0;
+			S3 = 0;
+			//Select mov operation on mux
+			S4 = 1;
+			S5 = 0;
+			S6 = 1;
+			S7 = 1;
+
+			//
+			rw = 1'b1;
+			en = 1'b1;
+		end
+
+	initial 
+		forever #2 CLK = ~CLK; // Change Clock Every Time Unit
+			
+	initial #sim_time $finish;
+
+	initial begin
+		$display ("CLK  RA RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B"); //imprime header
+		// $monitor ("%d",PC);
+		$monitor ("%d    %d %d %0d %0d %d %d %d %d %d %d %d %d %d %d %d", CLK,RA,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B); //imprime las señales
+	end
 endmodule	
 
