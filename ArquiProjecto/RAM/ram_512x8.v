@@ -2,8 +2,8 @@
 1 = read  //  0 = write
 changed mem value for test purposes */
 
-module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [8:0]address, input [31:0]dataIn, input [1:0]MAS);
-	reg [8:0]mem[0:512];
+module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [7:0]address, input [31:0]dataIn, input [1:0]MAS);
+	reg [7:0]mem[0:511];
 	always @ (enable, readWrite, MAS, dataIn, address)
 	begin
 		if (enable)
