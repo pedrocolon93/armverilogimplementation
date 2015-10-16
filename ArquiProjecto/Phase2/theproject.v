@@ -707,7 +707,7 @@ module datapath;
 
 	reg_32 sum_holder_register (register_to_mux, adder_to_register, E0, 1'b1,CLK);
 
-	mux_4x1 rf_entry_mux(pc_plus_4_mux_to_rf, {S00, S0}, PC, register_to_mux,1'b1,1'b1);
+	mux_4x1 rf_entry_mux(pc_plus_4_mux_to_rf, {S00, S0}, PC, register_to_mux,3,3);
 
 	registerFile registerFile (LEFT_OP, B, pc_plus_4_mux_to_rf, RC, RD, RA, RB, CLK, RFE); // Instance of Entire Register File
 
@@ -731,7 +731,7 @@ module datapath;
 	reg_32b ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
 
 	//Vamos a probar 
-	parameter sim_time =30;
+	parameter sim_time =40;
 
 	initial 
 		begin
@@ -758,8 +758,8 @@ module datapath;
 				CLK = 0; //Start Clock Assertion Level Low
 				RFE = 0;
 
-				RC = 11;
-				RB = 11;
+				RC = 12;
+				RB = 12;
 
 				S0 = 0;
 				S00 = 1;
@@ -776,7 +776,7 @@ module datapath;
 				E5 = 0; //Enable mar
 
 				S00 = 0;
-				S0 = 0; //Seleccion de el adder mux
+				S0 = 1; //Seleccion de el adder mux
 				//Carry de entrada
 				CIN = 0;
 				//Mux de 8
@@ -794,6 +794,7 @@ module datapath;
 				en = 1'b1;//MFA
 				dataSize = 2'b10;//MAS
 			end 
+			
 			//State 2
 
 			#16 begin				
@@ -837,7 +838,7 @@ module datapath;
 	initial begin
 		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	                 12BIT        SHIFTEROUT"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d                 %d %b %b %d %d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, shift_type); //imprime las señales
+		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d                 %d %b %b %d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output); //imprime las señales
 
 		
 	end
