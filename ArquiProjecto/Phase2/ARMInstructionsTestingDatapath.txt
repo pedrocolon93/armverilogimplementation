@@ -1,0 +1,20 @@
+00010001101011101011011111001100 
+// MOVNE R11, R12, ASR #15, shift by immediate shifter operand
+
+11100010101101100111111110000001
+// ADCS R7, R6, #516, 32bit immediate shifter operand
+
+11100001010011011100000010110110
+// STRH R12, [R13, #-7], Immediate offset/index
+
+11100001000000010010000011111010
+// STRD R2, [R1, -R10], load store register offset
+
+11100101101000000001000000000100
+// LDR R1, [R0, #4]!, immediate pre indexed
+
+11100100110100111000000000011001
+// LDRB R8, [R3], #25, Immediate offset post indexed
+
+11100110100110000000000000000010
+// LDR R0, [R8], R2, LSL #0, register post indexed
