@@ -477,7 +477,7 @@ endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL);
-	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7) // if I change the input and enable is high then 
+	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15) // if I change the input and enable is high then 
 		case(SEL)
 			4'b0000: O = I0;
 			4'b0001: O = I1;
@@ -660,7 +660,6 @@ module datapath;
 	//Vamos a probar 
 	parameter sim_time = 160;
 
-<<<<<<< HEAD
 	initial 
 		begin
 			/*
@@ -674,6 +673,7 @@ module datapath;
 			S0 = 0;
 			E3 = 0;
 			E4 = 0;
+			E5 = 0;
 
 			CIN = 0;
 
@@ -692,32 +692,7 @@ module datapath;
 			data = 2;
 			dataSize = 2'b10;
 		end
-=======
-	initial begin
-		/* Registers Start Cleared  */
-		CLK = 0; //Start Clock Assertion Level Low
-		RFE = 0; // turn on enable decoder
-		RA = 15; //Output R15
-		RC = 15; //Input to r15
-		E0 = 0; //Enable the adder register
-		S0 = 0;
 
-		CIN = 0;
-
-		S1 = 0;
-		S2 = 0;
-		S3 = 0;
-		//Select mov operation on mux
-		S4 = 1;
-		S5 = 0;
-		S6 = 1;
-		S7 = 1;
-
-		//
-		rw = 1'b1;
-		en = 1'b1;
-	end
->>>>>>> 4e96432a68605e510c7e99244e1c5815aa9471b7
 
 	initial 
 		forever #2 CLK = ~CLK; // Change Clock Every Time Unit
@@ -732,12 +707,10 @@ module datapath;
 	end
 
 	initial begin
-		$display ("CLK  RA RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A         B"); //imprime header
+		$display ("CLK  RA RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished   data   ir"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("%d    %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d", CLK,RA,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B); //imprime las señales
-		// $display ("CLK  mar_to_ram mem_data finished data ir"); //imprime header
-		// $monitor ("%d",PC);
-		// $monitor ("%d   %0d     %0d     %0d     %0d  %d %d", CLK,PC,mar_to_ram, mem_data, finished, data,ir_out,); //imprime las señales
+		$monitor ("%d    %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d     %0d      %0d      	%0d  %0d", CLK,RA,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished, data,ir_out); //imprime las señales
+
 		
 	end
 endmodule	
