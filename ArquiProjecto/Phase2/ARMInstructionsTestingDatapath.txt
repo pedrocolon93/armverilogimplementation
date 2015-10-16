@@ -1,8 +1,11 @@
 0001000110101110101101111100 1100 
 // MOVNE R11, R12, ASR #15, shift by immediate shifter operand
 
-11100010101101100111111110000001
-// ADCS R7, R6, #516, 32bit immediate shifter operand
+11100010
+10111011
+10111111
+10000001
+// ADCS R11, R11, #516, 32bit immediate shifter operand
 
 11100001010011011100000010110110
 // STRH R12, [R13, #-7], Immediate offset/index
