@@ -17,7 +17,7 @@ Shifter operand === RIGHT_OP
 1110 BIC Bit Clear Rd := Rn AND NOT(shifter_operand)
 1111 MVN Move Not Rd := NOT shifter_operand (no first operand)
 */
-module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] RIGHT_OP,LEFT_OP, input  [3:0]FN, input  CIN);
+module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_OP,RIGHT_OP, input  [3:0]FN, input  CIN);
 	reg [31:0] TEMP;
 	reg CTEMP;
 
@@ -397,6 +397,61 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 			dataOut = 32'bz;
 	end
 endmodule
+//---------------------------------------------------------------------------------------------------------------------------------------
+module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [7:0]address, input [31:0]dataIn, input [1:0]MAS);
+	reg [7:0]mem[0:511];
+	initial begin
+	  $readmemb("data.bin", mem) ;
+	end
+	always @ (enable, readWrite, MAS, dataIn, address)
+	begin
+		if (enable) begin
+			done = 0;
+			if (readWrite) begin
+				//Reading
+				case(MAS)
+					2'b00:	begin
+						dataOut[7:0] = mem[address][7:0];
+						dataOut[31:8] = 24'b0000_0000_0000_0000_0000_0000;
+					end
+					2'b01:	begin	
+						dataOut[15:8] = mem[address][7:0];
+						dataOut[7:0] = mem[address + 8'b0000001][7:0];
+						dataOut[31:16] = 16'b0000_0000_0000_0000;
+					end
+					2'b10:	begin // #30;
+						dataOut[31:0] = {mem[address][7:0], 
+										 mem[address + 8'b0000001][7:0], 
+										 mem[address + 8'b0000010][7:0], 
+										 mem[address + 8'b0000011][7:0]};
+					end
+					default: dataOut = dataOut;
+				endcase
+			end
+			else begin
+				//Writing
+				case(MAS)
+					2'b00:	mem[address][7:0] = dataIn[7:0];
+					2'b01:	begin
+						mem[address][7:0] = dataIn[15:8];
+						mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
+					end
+					2'b10:	begin //#60;
+						mem[address + 8'b00000011][7:0] = dataIn[7:0];
+						mem[address + 8'b00000010][7:0] = dataIn[15:8];
+						mem[address + 8'b00000001][7:0] = dataIn[23:16];
+						mem[address][7:0] = dataIn[31:24];
+					end
+					default: dataOut = dataOut;
+				endcase
+			end
+			#2 done = 1;
+		end
+		else
+			dataOut = 32'bz;
+	end
+endmodule
+
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 module reg_12b(output reg [11:0] Q, input [11:0] D, input EN, CLR, CLK);
@@ -588,7 +643,7 @@ endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 module datapath;
 	//CU Signals
-	reg E0,E1,E2,E3,E4,E5;//Enables the register that holds pc+4
+	reg E0,E2,E3,E4,E5;//Enables the register that holds pc+4
 	reg S0;//Selects whether its pc or pc+4
 
 	reg [3:0] RA; // Selector of A Mux is 3 bits
@@ -647,7 +702,8 @@ module datapath;
 	reg_32b mar(mar_to_ram,PC,E5,1'b1,CLK);
 
 
-	ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
+	//ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
+	ramdummyreadfile ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
 
 	reg_32b ir(ir_out, mem_data,E3,1'b1,CLK);
 
@@ -658,39 +714,74 @@ module datapath;
 	reg_32b ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
 
 	//Vamos a probar 
-	parameter sim_time = 160;
+	parameter sim_time = 6;
 
 	initial 
 		begin
-			/*
-				Registers Start Cleared
-			*/
+			//State 1 microprogram
 			CLK = 0; //Start Clock Assertion Level Low
+
+
 			RFE = 0; // turn on enable decoder
-			RA = 15; //Output R15
+			RB = 15; //Output R15
 			RC = 15; //Input to r15
 			E0 = 0; //Enable the adder register
-			S0 = 0;
-			E3 = 0;
-			E4 = 0;
-			E5 = 0;
+			//E1 es el RFE
+			E2 = 0; //SER enabler
+			E3 = 0; //Enable instruction register
+			E4 = 0; //Enable 12bit register
+			E5 = 0; //Enable mar
 
+
+			S0 = 0; //Seleccion de el adder mux
+			//Carry de entrada
 			CIN = 0;
-
+			//Mux de 8
 			S1 = 0;
 			S2 = 0;
 			S3 = 0;
-			//Select mov operation on mux
+			//Select mov operation on adder
 			S4 = 1;
 			S5 = 0;
 			S6 = 1;
 			S7 = 1;
 
 			//
-			rw = 1'b0;
-			en = 1'b1;
-			data = 2;
-			dataSize = 2'b10;
+			rw = 1'b1;//Read
+			en = 1'b1;//MFA
+			dataSize = 2'b10;//MAS
+
+			//State 2
+			if(finished)
+			begin
+				$display("Variables for when finished");
+				RFE = 1; // turn on enable decoder
+				RC = 15; //Input to r15
+				E0 = 1; //Enable the adder register
+				//E1 es el RFE
+				E2 = 0; //SER enabler
+				E3 = 0; //Enable instruction register
+				E4 = 0; //Enable 12bit register
+				E5 = 0; //Enable mar
+
+
+				S0 = 0; //Seleccion de el adder mux
+				//Mux de 8
+				S1 = 0;
+				S2 = 0;
+				S3 = 0;
+				//Select mov operation on adder
+				S4 = 1;
+				S5 = 0;
+				S6 = 1;
+				S7 = 1;
+
+				//
+				rw = 1'b1;//Read
+				en = 1'b1;//MFA
+				dataSize = 2'b10;//MAS
+
+			end
 		end
 
 
@@ -699,17 +790,10 @@ module datapath;
 			
 	initial #sim_time $finish;
 
-	initial 
-	begin 
-		#0 rw = 1'b0;
-		
-		#1 rw = 1'b1;
-	end
-
 	initial begin
-		$display ("CLK  RA RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished   data   ir"); //imprime header
+		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("%d    %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d     %0d      %0d      	%0d  %0d", CLK,RA,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished, data,ir_out); //imprime las señales
+		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d     %0d      %d     %b", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out); //imprime las señales
 
 		
 	end
