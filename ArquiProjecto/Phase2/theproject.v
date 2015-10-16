@@ -714,7 +714,7 @@ module datapath;
 	reg_32b ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
 
 	//Vamos a probar 
-	parameter sim_time = 6;
+	parameter sim_time = 10;
 
 	initial 
 		begin
@@ -754,27 +754,24 @@ module datapath;
 			//State 2
 			if(finished)
 			begin
-				$display("Variables for when finished");
-				RFE = 1; // turn on enable decoder
-				RC = 15; //Input to r15
+				$display("Variables for when finished\n");
+				RFE = 0;// turn on enable decoder
+				RC = ir_out[15:12];//Input to r15
 				E0 = 1; //Enable the adder register
-				//E1 es el RFE
+						//E1 es el RFE
 				E2 = 0; //SER enabler
 				E3 = 0; //Enable instruction register
 				E4 = 0; //Enable 12bit register
-				E5 = 0; //Enable mar
+				E5 = 1; //Enable mar
 
 
-				S0 = 0; //Seleccion de el adder mux
+				S0 = 1; //Seleccion de el adder mux
 				//Mux de 8
-				S1 = 0;
+				S1 = 1;
 				S2 = 0;
 				S3 = 0;
 				//Select mov operation on adder
-				S4 = 1;
-				S5 = 0;
-				S6 = 1;
-				S7 = 1;
+				{S7,S6,S5,S4} = ir_out[24:21];
 
 				//
 				rw = 1'b1;//Read
@@ -793,7 +790,7 @@ module datapath;
 	initial begin
 		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d     %0d      %d     %b", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out); //imprime las señales
+		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d      %0d           %d %b", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out); //imprime las señales
 
 		
 	end
