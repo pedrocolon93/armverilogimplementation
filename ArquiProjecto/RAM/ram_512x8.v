@@ -12,74 +12,35 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 			if (readWrite) begin
 				//Reading
 				case(MAS)
-
 					2'b00:	begin
-						// case(address[1:0])
-						// 	2'b00:	dataOut[7:0] = mem[address + 8'b0000011][7:0];
-						// 	2'b01:	dataOut[7:0] = mem[address + 8'b0000010][7:0];
-						// 	2'b10:	dataOut[7:0] = mem[address + 8'b0000001][7:0];
-							//2'b11:	
-							dataOut[7:0] = mem[address][7:0];
-						//  endcase
+						dataOut[7:0] = mem[address][7:0];
 						dataOut[31:8] = 24'b0000_0000_0000_0000_0000_0000;
-						
 					end
 					2'b01:	begin	
-						// case(address[1])
-						// 	1'b0:	begin
-						// 		dataOut[15:8] = mem[address + 8'b0000010][7:0];
-						// 		dataOut[7:0] = mem[address + 8'b0000011][7:0];
-						// 	end
-						// 	1'b1:	begin
-								dataOut[15:8] = mem[address][7:0];
-								dataOut[7:0] = mem[address + 8'b0000001][7:0];
-						//	end
-						//endcase
+						dataOut[15:8] = mem[address][7:0];
+						dataOut[7:0] = mem[address + 8'b0000001][7:0];
 						dataOut[31:16] = 16'b0000_0000_0000_0000;
-						
 					end
-					2'b10:	begin // #30;
-						dataOut[31:0] = {mem[address][7:0], 
+					2'b10:	dataOut[31:0] = {mem[address][7:0], 
 										 mem[address + 8'b0000001][7:0], 
 										 mem[address + 8'b0000010][7:0], 
 										 mem[address + 8'b0000011][7:0]};
-						
-					end
 					default: dataOut = dataOut;
 				endcase
 			end
 			else begin
 				//Writing
 				case(MAS)
-					2'b00:	begin	
-						// case(A)
-						// 	2'b00:	mem[address + 8'b0000011][7:0] = dataIn[7:0];
-						// 	2'b01:	mem[address + 8'b0000010][7:0] = dataIn[7:0];
-						// 	2'b10:	mem[address + 8'b0000001][7:0] = dataIn[7:0];
-							// 2'b11:	
-							mem[address][7:0] = dataIn[7:0];
-						// endcase
-						// #25;
-					end
+					2'b00:	mem[address][7:0] = dataIn[7:0];
 					2'b01:	begin
-						// case(A[1])
-						// 	1'b0:	begin
-						// 		mem[address + 8'b0000010][7:0] = dataIn[15:8];
-						// 		mem[address + 8'b0000011][7:0] = dataIn[7:0];
-						// 	end
-							// 1'b1:	begin
-								mem[address][7:0] = dataIn[15:8];
-								mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
-							// end
-						// endcase
-						//#35;
+						mem[address][7:0] = dataIn[15:8];
+						mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
 					end
 					2'b10:	begin //#60;
 						mem[address + 8'b00000011][7:0] = dataIn[7:0];
 						mem[address + 8'b00000010][7:0] = dataIn[15:8];
 						mem[address + 8'b00000001][7:0] = dataIn[23:16];
-						mem[address][7:0] = dataIn[31:24];
-						
+						mem[address][7:0] = dataIn[31:24];	
 					end
 					default: dataOut = dataOut;
 				endcase
