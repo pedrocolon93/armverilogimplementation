@@ -797,7 +797,8 @@ module datapath;
 			//State 2
 
 			#16 begin				
-				shift_type = 0;
+				shift_type = 1;
+				RB = 12;
 
 				// $display("Variables for when finished\n %d\n",shift_type);
 				RFE = 0;// turn on enable decoder
