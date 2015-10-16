@@ -685,6 +685,7 @@ module datapath;
 	wire [31:0] shifter_output;
 	wire [31:0] ser_out;
 
+	reg something;
 	//Components 
 	adder pc_plus_4(PC, 4, adder_to_register);
 
@@ -714,14 +715,12 @@ module datapath;
 	reg_32b ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
 
 	//Vamos a probar 
-	parameter sim_time = 10;
+	parameter sim_time =10;
 
 	initial 
 		begin
 			//State 1 microprogram
 			CLK = 0; //Start Clock Assertion Level Low
-
-
 			RFE = 0; // turn on enable decoder
 			RB = 15; //Output R15
 			RC = 15; //Input to r15
@@ -752,13 +751,12 @@ module datapath;
 			dataSize = 2'b10;//MAS
 
 			//State 2
-			if(finished)
-			begin
+
+			#8 begin
 				$display("Variables for when finished\n");
 				RFE = 0;// turn on enable decoder
 				RC = ir_out[15:12];//Input to r15
 				E0 = 1; //Enable the adder register
-						//E1 es el RFE
 				E2 = 0; //SER enabler
 				E3 = 0; //Enable instruction register
 				E4 = 0; //Enable 12bit register
@@ -772,13 +770,15 @@ module datapath;
 				S3 = 0;
 				//Select mov operation on adder
 				{S7,S6,S5,S4} = ir_out[24:21];
-
+				shift_type = 1;
 				//
 				rw = 1'b1;//Read
 				en = 1'b1;//MFA
 				dataSize = 2'b10;//MAS
-
+				#1 something = 0;
 			end
+			
+			
 		end
 
 
@@ -790,7 +790,7 @@ module datapath;
 	initial begin
 		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d      %0d           %d %b", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out); //imprime las señales
+		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d      %0d           %d %b %b %b", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output); //imprime las señales
 
 		
 	end
