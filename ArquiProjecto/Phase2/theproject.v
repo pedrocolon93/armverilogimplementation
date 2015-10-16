@@ -625,10 +625,10 @@ module datapath;
 	wire [31:0]mem_data;
 	wire [31:0] ir_out;
 	wire [11:0] twelve_bit_shift_reg_out;
-	reg[31:0]input_register;
+	reg [31:0]input_register;
 
-	wire[31:0] shifter_output;
-		wire [31:0] ser_out;
+	wire [31:0] shifter_output;
+	wire [31:0] ser_out;
 
 	//Components 
 	adder pc_plus_4(PC, 4, adder_to_register);
@@ -659,33 +659,30 @@ module datapath;
 	//Vamos a probar 
 	parameter sim_time = 160;
 
-	initial 
-		begin
-			/*
-				Registers Start Cleared
-			*/
-			CLK = 0; //Start Clock Assertion Level Low
-			RFE = 0; // turn on enable decoder
-			RA = 15; //Output R15
-			RC = 15; //Input to r15
-			E0 = 0; //Enable the adder register
-			S0 = 0;
+	initial begin
+		/* Registers Start Cleared  */
+		CLK = 0; //Start Clock Assertion Level Low
+		RFE = 0; // turn on enable decoder
+		RA = 15; //Output R15
+		RC = 15; //Input to r15
+		E0 = 0; //Enable the adder register
+		S0 = 0;
 
-			CIN = 0;
+		CIN = 0;
 
-			S1 = 0;
-			S2 = 0;
-			S3 = 0;
-			//Select mov operation on mux
-			S4 = 1;
-			S5 = 0;
-			S6 = 1;
-			S7 = 1;
+		S1 = 0;
+		S2 = 0;
+		S3 = 0;
+		//Select mov operation on mux
+		S4 = 1;
+		S5 = 0;
+		S6 = 1;
+		S7 = 1;
 
-			//
-			rw = 1'b1;
-			en = 1'b1;
-		end
+		//
+		rw = 1'b1;
+		en = 1'b1;
+	end
 
 	initial 
 		forever #2 CLK = ~CLK; // Change Clock Every Time Unit

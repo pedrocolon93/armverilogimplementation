@@ -124,9 +124,9 @@ module condEval(output reg out, input [31:0]IR, input [31:0] tsr);
 endmodule
 //-------------------------------------------------------------------------------
 //state adder 
-module adder(output reg [5:0]out, input [5:0]currentState, input[3:0] add);
-	always @ (currentState)
-	out = currentState + add;
+module adder(output reg [5:0]out, input [5:0]cs, input[3:0] add);
+	always @ (cs)
+	out = cs + add;
 endmodule
 //-------------------------------------------------------------------------------
 //state adder register
@@ -175,7 +175,7 @@ module ROM (output reg [44:0]out, input [5:0]state, input clk);
 endmodule
 //-------------------------------------------------------------------------------
 //control unit box (output depends on ROM output)
-module ControlUnit (output [44:0]out, input clk, clk_en, clr, mfc, input [31:0]IR, statusReg);
+module ControlUnit (output [44:0]out, input clk, clr, mfc, input [31:0]IR, statusReg);
 	wire [5,0]state, stateSel stateSel1, stateSel2, stateSel3, addToR;
 	wire [1:0]mux6bsel;
 	wire invIn, invOut, ms0, ms1;
