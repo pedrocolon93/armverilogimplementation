@@ -646,6 +646,7 @@ module datapath;
 	//Right side
 	reg_32b mar(mar_to_ram,PC,E5,1'b1,CLK);
 
+
 	ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
 
 	reg_32b ir(ir_out, mem_data,E3,1'b1,CLK);
@@ -670,6 +671,8 @@ module datapath;
 			RC = 15; //Input to r15
 			E0 = 0; //Enable the adder register
 			S0 = 0;
+			E3 = 0;
+			E4 = 0;
 
 			CIN = 0;
 
@@ -683,8 +686,10 @@ module datapath;
 			S7 = 1;
 
 			//
-			rw = 1'b1;
+			rw = 1'b0;
 			en = 1'b1;
+			data = 2;
+			dataSize = 2'b10;
 		end
 
 	initial 
@@ -692,9 +697,20 @@ module datapath;
 			
 	initial #sim_time $finish;
 
+	initial 
+	begin 
+		#0 rw = 1'b0;
+		
+		#1 rw = 1'b1;
+	end
+
 	initial begin
 		$display ("CLK  RA RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A         B"); //imprime header
 		// $monitor ("%d",PC);
 		$monitor ("%d    %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d", CLK,RA,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B); //imprime las señales
+		// $display ("CLK  mar_to_ram mem_data finished data ir"); //imprime header
+		// $monitor ("%d",PC);
+		// $monitor ("%d   %0d     %0d     %0d     %0d  %d %d", CLK,PC,mar_to_ram, mem_data, finished, data,ir_out,); //imprime las señales
+		
 	end
 endmodule	
