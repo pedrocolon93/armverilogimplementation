@@ -1,5 +1,14 @@
 00010001101011101011011111001100 
 // MOVNE R11, R12, ASR #15, shift by immediate shifter operand
+// Condition Code –> 0001 = NE
+// Opcode -> 1101 = MOV
+// Rn -> 1110 = R14
+// Rd -> 1011= R11
+// shifter_imm -> 01111 = 1510
+// shift_type -> 10 = ASR
+// Rm -> 1100 = R12
+// shift R14 right arithmetic by 15, write to R11 (i.e. R14 = 3)
+// Result is R11 = 0x00030000 = 196608
 
 11100010101101100111111110000001
 // ADCS R7, R6, #516, 32bit immediate shifter operand
