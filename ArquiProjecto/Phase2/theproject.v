@@ -336,12 +336,12 @@ endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 module mux_2x1(output [31:0] Y, input S, input [31:0] I0, I1);
-	assign Y=S? I0:I1;
+	assign Y=S? I1:I0;
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 module mux_2x1_2b(output [1:0] Y, input S, input [1:0] I0, I1);
-	assign Y=S? I0:I1;
+	assign Y=S? I1:I0;
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
@@ -409,7 +409,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 			done = 0;
 			if (readWrite) begin
 				//Reading
-				case(MAS)
+				#4 case(MAS)
 					2'b00:	begin
 						dataOut[7:0] = mem[address][7:0];
 						dataOut[31:8] = 24'b0000_0000_0000_0000_0000_0000;
@@ -430,7 +430,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 			end
 			else begin
 				//Writing
-				case(MAS)
+				#4 case(MAS)
 					2'b00:	mem[address][7:0] = dataIn[7:0];
 					2'b01:	begin
 						mem[address][7:0] = dataIn[15:8];
@@ -445,7 +445,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 					default: dataOut = dataOut;
 				endcase
 			end
-			#2 done = 1;
+			#4 done = 1;
 		end
 		else
 			dataOut = 32'bz;
@@ -529,7 +529,16 @@ module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 		else
 			Q <= Q; // enable off. output what came out before
 endmodule
-
+module reg_32b_MAGIC(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
+	initial	Q = 32'b0000000000000000000000000001001; // Start registers with 0
+	always @ (negedge CLK, negedge CLR)
+		if(!EN)
+			Q = D; // Enable Sync. Only occurs when Clk is high
+		else if(!CLR) // clear
+			Q = 32'b0000000000000000000000000000000; // Clear Async
+		else
+			Q <= Q; // enable off. output what came out before
+endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL);
 	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15) // if I change the input and enable is high then 
@@ -591,7 +600,7 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 	reg_32b R9  (reg9ToMux,  PC, decoder2RegEnable[9],  decoder2RegClear[9], REGCLK);
 	reg_32b R10 (reg10ToMux, PC, decoder2RegEnable[10], decoder2RegClear[10],REGCLK);
 	reg_32b R11 (reg11ToMux, PC, decoder2RegEnable[11], decoder2RegClear[11],REGCLK);
-	reg_32b R12 (reg12ToMux, PC, decoder2RegEnable[12], decoder2RegClear[12],REGCLK);
+	reg_32b_MAGIC R12 (reg12ToMux, PC, decoder2RegEnable[12], decoder2RegClear[12],REGCLK);
 	reg_32b R13 (reg13ToMux, PC, decoder2RegEnable[13], decoder2RegClear[13],REGCLK);
 	reg_32b R14 (reg14ToMux, PC, decoder2RegEnable[14], decoder2RegClear[14],REGCLK);
 	reg_32b R15 (reg15ToMux, PC, decoder2RegEnable[15], decoder2RegClear[15],REGCLK);
@@ -605,10 +614,11 @@ endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 module internal_shifter (input [31:0]amount, value, input [1:0]shift_type, output reg [31:0] shift_out);
-	reg I;
-
+	reg [31:0] temp;
+	reg [31:0]index;
 	always @(amount, value, shift_type) 
 	begin
+		// $display("Change AMOUNT %d VALUE %d SHIFT TyPE %d",amount, value, shift_type);
 		case(shift_type)
 			2'b00:	//left logic
 			begin
@@ -621,13 +631,14 @@ module internal_shifter (input [31:0]amount, value, input [1:0]shift_type, outpu
 
 				shift_out[31:0] = value[31:0]>>amount;
 			end
-			2'b10:	//left arithmetic
+			2'b10:	//right arithmetic
 			begin
-								// $display("Amm%d",amount);
 
-				shift_out[31:0] = value[31:0]<<<amount;
+
+
+				shift_out[31:0] = value[31:0]>>>amount;
 			end
-			2'b11:	//right arithmetic
+			2'b11:	//rotate right
 			begin
 								// $display("Amm%d",amount);
 
@@ -645,7 +656,7 @@ module shifter(input[31:0] input_register, input[11:0] shifter_operand, input se
 	mux_2x1 amount_mux(amounttointernal,selector,{27'b0000_0000_0000_0000_0000_0000_000,shifter_operand[11:8],1'b0}, {27'b0000_0000_0000_0000_0000_0000_000,shifter_operand[11:7]});
 	mux_2x1 value_mux(valuetointernal,selector,{24'b0000_0000_0000_0000_0000_0000,shifter_operand[7:0]},input_register[31:0]);
 	
-	mux_2x1_2b shift_type_mux(shifttypetointernal,selector,2'b01,shifter_operand[6:5]);
+	mux_2x1_2b shift_type_mux(shifttypetointernal,selector,1,shifter_operand[6:5]);
 
 	internal_shifter intsh(amounttointernal,valuetointernal,shifttypetointernal,out);
 endmodule
@@ -716,115 +727,71 @@ module datapath;
 	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, {S7,S6,S5,S4}, CIN);
 
 	//Right side
-	reg_32b mar(mar_to_ram,PC,E5,1'b1,CLK);
+	reg_32 mar(mar_to_ram,PC,E5,1'b1,CLK);
 
 
 	//ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
 	ramdummyreadfile ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
 
-	reg_32b ir(ir_out, mem_data,E3,1'b1,CLK);
+	reg_32 ir(ir_out, mem_data,E3,1'b1,CLK);
 
 	reg_12b r_12(twelve_bit_shift_reg_out, ir_out[11:0],E4,1'b1,CLK);
 
 	shifter sh(B,twelve_bit_shift_reg_out,shift_type,shifter_output);
 
-	reg_32b ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
+	reg_32 ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
 
 	//Vamos a probar 
 	parameter sim_time =40;
 
 	initial 
 		begin
-			//State 1 microprogram
-			#0 begin
-				//
-				//Mux de 8
-				S1 = 0;
-				S2 = 0;
-				S3 = 0;
-
-				E0 = 0; 				//Enable the adder register
-
-				E2 = 1; //SER enabler
-				E3 = 1; //Enable instruction register
-				E4 = 1; //Enable 12bit register
-				E5 = 1; //Enable mar
-				//Select mov operation on adder
-				S4 = 1;
-				S5 = 0;
-				S6 = 1;
-				S7 = 1;
-
-				CLK = 0; //Start Clock Assertion Level Low
-				RFE = 0;
-
-				RC = 12;
-				RB = 12;
-
-				S0 = 0;
-				S00 = 1;
+			//State 0 microprogram
+			#4 begin
+				$display("start");
+				CLK  = 1;
+				//Do nothing
 			end
-
-			#8 begin
-				 // turn on enable decoder
-				RB = 15; //Output R15
-				RC = 15; //Input to r15
-				//E1 es el RFE
-				E2 = 0; //SER enabler
-				E3 = 0; //Enable instruction register
-				E4 = 0; //Enable 12bit register
-				E5 = 0; //Enable mar
+			#4 begin
+				$display("Stating 4");
+				E0 = 0;
 
 				S00 = 0;
-				S0 = 1; //Seleccion de el adder mux
-				//Carry de entrada
-				CIN = 0;
-				//Mux de 8
-				S1 = 0;
-				S2 = 0;
-				S3 = 0;
-				//Select mov operation on adder
-				S4 = 1;
-				S5 = 0;
-				S6 = 1;
-				S7 = 1;
+				S0 =1;
 				
-				//
-				rw = 1'b1;//Read
-				en = 1'b1;//MFA
-				dataSize = 2'b10;//MAS
-			end 
-			
-			//State 2
+				RFE = 0;
+				RC  = 15;
+				RB  = 15;
+				S3  = 0;
+				S2  = 0;
+				S1  = 0;
 
-			#16 begin				
-				shift_type = 1;
-				RB = 12;
+				S7 = 1;
+				S6 = 1;
+				S5 = 0;
+				S4 = 1;
 
-				// $display("Variables for when finished\n %d\n",shift_type);
-				RFE = 0;// turn on enable decoder
-				RC = ir_out[15:12];//Input to r15
-				E0 = 1; //Enable the adder register
-				E2 = 0; //SER enabler
-				E3 = 0; //Enable instruction register
-				E4 = 0; //Enable 12bit register
-				E5 = 1; //Enable mar
+				E5 = 0;
 
+				en = 1;
+				rw = 1;
+				dataSize = 2'b10;
 
-				S0 = 1; //Seleccion de el adder mux
-				//Mux de 8
-				S1 = 1;
-				S2 = 0;
-				S3 = 0;
-				//Select mov operation on adder
-				{S7,S6,S5,S4} = ir_out[24:21];
-				//
-				rw = 1'b1;//Read
-				en = 1'b1;//MFA
-				dataSize = 2'b10;//MAS
+				E3 = 0;
+				E4 = 0;
+
 			end
+			#8 begin
+				$display("Starting 8");
+				shift_type = 1;
+				E0 = 1;
+				E5 = 1;
+				RC = 1'bx;
+
+				RB = ir_out[3:0];
 
 
+			end
 			
 			
 		end
@@ -836,9 +803,9 @@ module datapath;
 	initial #sim_time $finish;
 
 	initial begin
-		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	                 12BIT        SHIFTEROUT"); //imprime header
+		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	                 12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d                 %d %b %b %d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output); //imprime las señales
+		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d      %d %b %b %d %d %d %d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, sh.amounttointernal, sh.valuetointernal, sh.shifttypetointernal); //imprime las señales
 
 		
 	end

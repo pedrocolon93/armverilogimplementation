@@ -61,7 +61,7 @@ module shifter(input[31:0] input_register, input[11:0] shifter_operand, input se
 	
 	mux_2x1_2b shift_type_mux(shifttypetointernal,selector,2'b01,shifter_operand[6:5]);
 
-	internal_shifter intsh(amounttointernal,valuetointernal,selector,out);
+	internal_shifter intsh(amounttointernal,valuetointernal,shifttypetointernal,out);
 endmodule
 
 
