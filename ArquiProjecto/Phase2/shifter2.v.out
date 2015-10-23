@@ -1,72 +1,75 @@
-#! /usr/local/Cellar/icarus-verilog/0.9.7/bin/vvp
+#! /c/iverilog/bin/vvp
 :ivl_version "0.9.7 " "(v0_9_7)";
 :vpi_time_precision + 0;
 :vpi_module "system";
 :vpi_module "v2005_math";
 :vpi_module "va_math";
-S_0x7fd89960b4c0 .scope module, "internal_shifter_tester" "internal_shifter_tester" 2 68;
+S_00E03950 .scope module, "internal_shifter_tester" "internal_shifter_tester" 2 72;
  .timescale 0 0;
-P_0x7fd89960d1f8 .param/l "simtime" 2 78, +C4<010111011100>;
-v0x7fd8997105d0_0 .var "input_register", 31 0;
-v0x7fd899710650_0 .net "out", 31 0, v0x7fd89970f0e0_0; 1 drivers
-v0x7fd899710710_0 .var "selector", 0 0;
-v0x7fd899710810_0 .var "shifter_operand", 11 0;
-S_0x7fd89960bf70 .scope module, "sh" "shifter" 2 77, 2 55, S_0x7fd89960b4c0;
+P_00FC9DD4 .param/l "simtime" 2 82, +C4<010111011100>;
+v00E3B9B0_0 .var "input_register", 31 0;
+v00E3B538_0 .net "out", 31 0, v00E12DF0_0; 1 drivers
+v00E3B4E0_0 .var "selector", 0 0;
+v00E3B3D8_0 .var "shifter_operand", 11 0;
+S_00E039D8 .scope module, "sh" "shifter" 2 81, 2 59, S_00E03950;
  .timescale 0 0;
-v0x7fd89970fca0_0 .net *"_s0", 26 0, C4<000000000000000000000000000>; 1 drivers
-v0x7fd89970fd20_0 .net *"_s11", 4 0, L_0x7fd899710c40; 1 drivers
-v0x7fd89970fdb0_0 .net *"_s14", 23 0, C4<000000000000000000000000>; 1 drivers
-v0x7fd89970fe50_0 .net *"_s17", 7 0, L_0x7fd899710f10; 1 drivers
-v0x7fd89970fee0_0 .net *"_s3", 3 0, L_0x7fd899710940; 1 drivers
-v0x7fd89970ffa0_0 .net *"_s4", 0 0, C4<0>; 1 drivers
-v0x7fd899710030_0 .net *"_s8", 26 0, C4<000000000000000000000000000>; 1 drivers
-v0x7fd8997100f0_0 .net "amounttointernal", 31 0, L_0x7fd899710890; 1 drivers
-v0x7fd8997101b0_0 .net "input_register", 31 0, v0x7fd8997105d0_0; 1 drivers
-v0x7fd899710280_0 .alias "out", 31 0, v0x7fd899710650_0;
-v0x7fd899710300_0 .net "selector", 0 0, v0x7fd899710710_0; 1 drivers
-v0x7fd8997103e0_0 .net "shifter_operand", 11 0, v0x7fd899710810_0; 1 drivers
-v0x7fd899710460_0 .net "shifttypetointernal", 1 0, L_0x7fd899711160; 1 drivers
-v0x7fd899710550_0 .net "valuetointernal", 31 0, L_0x7fd899710e40; 1 drivers
-L_0x7fd899710940 .part v0x7fd899710810_0, 8, 4;
-L_0x7fd899710a70 .concat [ 1 4 27 0], C4<0>, L_0x7fd899710940, C4<000000000000000000000000000>;
-L_0x7fd899710c40 .part v0x7fd899710810_0, 7, 5;
-L_0x7fd899710cd0 .concat [ 5 27 0 0], L_0x7fd899710c40, C4<000000000000000000000000000>;
-L_0x7fd899710f10 .part v0x7fd899710810_0, 0, 8;
-L_0x7fd899711050 .concat [ 8 24 0 0], L_0x7fd899710f10, C4<000000000000000000000000>;
-L_0x7fd8997112e0 .part v0x7fd899710810_0, 5, 2;
-L_0x7fd8997113f0 .part L_0x7fd899711160, 0, 1;
-S_0x7fd89970f960 .scope module, "amount_mux" "mux_2x1" 2 59, 2 10, S_0x7fd89960bf70;
+v00E106E8_0 .net *"_s0", 26 0, C4<000000000000000000000000000>; 1 drivers
+v00E10740_0 .net *"_s11", 4 0, L_00E3B7F8; 1 drivers
+v00E10A00_0 .net *"_s14", 23 0, C4<000000000000000000000000>; 1 drivers
+v00E10848_0 .net *"_s17", 7 0, L_00E3B900; 1 drivers
+v00E10AB0_0 .net *"_s23", 1 0, L_00E3BA60; 1 drivers
+v00E10798_0 .net *"_s27", 0 0, C4<0>; 1 drivers
+v00E10B60_0 .net *"_s3", 3 0, L_00E3B430; 1 drivers
+v00E108A0_0 .net *"_s4", 0 0, C4<0>; 1 drivers
+v00E10588_0 .net *"_s8", 26 0, C4<000000000000000000000000000>; 1 drivers
+v00E109A8_0 .net "amounttointernal", 31 0, L_00E3B850; 1 drivers
+v00E108F8_0 .net "input_register", 31 0, v00E3B9B0_0; 1 drivers
+v00E104D8_0 .alias "out", 31 0, v00E3B538_0;
+v00E10530_0 .net "selector", 0 0, v00E3B4E0_0; 1 drivers
+v00E3B6F0_0 .net "shifter_operand", 11 0, v00E3B3D8_0; 1 drivers
+v00E3B488_0 .net "shifttypetointernal", 2 0, L_00E3B010; 1 drivers
+v00E3B7A0_0 .net "valuetointernal", 31 0, L_00E3B118; 1 drivers
+L_00E3B430 .part v00E3B3D8_0, 8, 4;
+L_00E3BA08 .concat [ 1 4 27 0], C4<0>, L_00E3B430, C4<000000000000000000000000000>;
+L_00E3B7F8 .part v00E3B3D8_0, 7, 5;
+L_00E3B5E8 .concat [ 5 27 0 0], L_00E3B7F8, C4<000000000000000000000000000>;
+L_00E3B900 .part v00E3B3D8_0, 0, 8;
+L_00E3B698 .concat [ 8 24 0 0], L_00E3B900, C4<000000000000000000000000>;
+L_00E3BA60 .part v00E3B3D8_0, 5, 2;
+L_00E3B2D0 .concat [ 2 1 0 0], L_00E3BA60, C4<0>;
+L_00E3BAB8 .part L_00E3B010, 0, 1;
+S_00E03378 .scope module, "amount_mux" "mux_2x1" 2 63, 2 10, S_00E039D8;
  .timescale 0 0;
-v0x7fd89970fa40_0 .net "I0", 31 0, L_0x7fd899710a70; 1 drivers
-v0x7fd89970fac0_0 .net "I1", 31 0, L_0x7fd899710cd0; 1 drivers
-v0x7fd89970fb40_0 .alias "S", 0 0, v0x7fd899710300_0;
-v0x7fd89970fc20_0 .alias "Y", 31 0, v0x7fd8997100f0_0;
-L_0x7fd899710890 .functor MUXZ 32, L_0x7fd899710cd0, L_0x7fd899710a70, v0x7fd899710710_0, C4<>;
-S_0x7fd89970f5f0 .scope module, "value_mux" "mux_2x1" 2 60, 2 10, S_0x7fd89960bf70;
+v00E10950_0 .net "I0", 31 0, L_00E3BA08; 1 drivers
+v00E10B08_0 .net "I1", 31 0, L_00E3B5E8; 1 drivers
+v00E10690_0 .alias "S", 0 0, v00E10530_0;
+v00E10638_0 .alias "Y", 31 0, v00E109A8_0;
+L_00E3B850 .functor MUXZ 32, L_00E3B5E8, L_00E3BA08, v00E3B4E0_0, C4<>;
+S_00E02DA0 .scope module, "value_mux" "mux_2x1" 2 64, 2 10, S_00E039D8;
  .timescale 0 0;
-v0x7fd89970f6d0_0 .net "I0", 31 0, L_0x7fd899711050; 1 drivers
-v0x7fd89970f770_0 .alias "I1", 31 0, v0x7fd8997101b0_0;
-v0x7fd89970f800_0 .alias "S", 0 0, v0x7fd899710300_0;
-v0x7fd89970f8c0_0 .alias "Y", 31 0, v0x7fd899710550_0;
-L_0x7fd899710e40 .functor MUXZ 32, v0x7fd8997105d0_0, L_0x7fd899711050, v0x7fd899710710_0, C4<>;
-S_0x7fd89970f2b0 .scope module, "shift_type_mux" "mux_2x1_2b" 2 62, 2 14, S_0x7fd89960bf70;
+v00E107F0_0 .net "I0", 31 0, L_00E3B698; 1 drivers
+v00E10C10_0 .alias "I1", 31 0, v00E108F8_0;
+v00E10A58_0 .alias "S", 0 0, v00E10530_0;
+v00E105E0_0 .alias "Y", 31 0, v00E3B7A0_0;
+L_00E3B118 .functor MUXZ 32, v00E3B9B0_0, L_00E3B698, v00E3B4E0_0, C4<>;
+S_00E037B8 .scope module, "shift_type_mux" "mux_2x1_2b" 2 66, 2 14, S_00E039D8;
  .timescale 0 0;
-v0x7fd89970f390_0 .net "I0", 1 0, C4<01>; 1 drivers
-v0x7fd89970f430_0 .net "I1", 1 0, L_0x7fd8997112e0; 1 drivers
-v0x7fd89970f4c0_0 .alias "S", 0 0, v0x7fd899710300_0;
-v0x7fd89970f560_0 .alias "Y", 1 0, v0x7fd899710460_0;
-L_0x7fd899711160 .functor MUXZ 2, L_0x7fd8997112e0, C4<01>, v0x7fd899710710_0, C4<>;
-S_0x7fd89960ab90 .scope module, "intsh" "internal_shifter" 2 64, 2 25, S_0x7fd89960bf70;
+v00FC34B8_0 .net "I0", 2 0, C4<001>; 1 drivers
+v00FC3510_0 .net "I1", 2 0, L_00E3B2D0; 1 drivers
+v00FC3568_0 .alias "S", 0 0, v00E10530_0;
+v00E10BB8_0 .alias "Y", 2 0, v00E3B488_0;
+L_00E3B010 .functor MUXZ 3, L_00E3B2D0, C4<001>, v00E3B4E0_0, C4<>;
+S_00E03268 .scope module, "intsh" "internal_shifter" 2 68, 2 25, S_00E039D8;
  .timescale 0 0;
-v0x7fd89960d940_0 .alias "amount", 31 0, v0x7fd8997100f0_0;
-v0x7fd89970f0e0_0 .var "shift_out", 31 0;
-v0x7fd89970f170_0 .net "shift_type", 0 0, L_0x7fd8997113f0; 1 drivers
-v0x7fd89970f220_0 .alias "value", 31 0, v0x7fd899710550_0;
-E_0x7fd8996042e0 .event edge, v0x7fd89970f170_0, v0x7fd89970f220_0, v0x7fd89960d940_0;
-    .scope S_0x7fd89960ab90;
+v00FCA6C8_0 .alias "amount", 31 0, v00E109A8_0;
+v00E12DF0_0 .var "shift_out", 31 0;
+v00E12E48_0 .net "shift_type", 0 0, L_00E3BAB8; 1 drivers
+v00E12EA0_0 .alias "value", 31 0, v00E3B7A0_0;
+E_00FC9DF0 .event edge, v00E12E48_0, v00E12EA0_0, v00FCA6C8_0;
+    .scope S_00E03268;
 T_0 ;
-    %wait E_0x7fd8996042e0;
-    %load/v 8, v0x7fd89970f170_0, 1;
+    %wait E_00FC9DF0;
+    %load/v 8, v00E12E48_0, 1;
     %cmpi/u 8, 0, 1;
     %jmp/1 T_0.0, 6;
     %cmpi/u 8, 1, 1;
@@ -77,58 +80,58 @@ T_0 ;
     %jmp/1 T_0.3, 6;
     %jmp T_0.4;
 T_0.0 ;
-    %load/v 8, v0x7fd89970f220_0, 32;
-    %load/v 40, v0x7fd89960d940_0, 32;
+    %load/v 8, v00E12EA0_0, 32;
+    %load/v 40, v00FCA6C8_0, 32;
     %ix/get 0, 40, 32;
     %shiftl/i0  8, 32;
-    %set/v v0x7fd89970f0e0_0, 8, 32;
+    %set/v v00E12DF0_0, 8, 32;
     %jmp T_0.4;
 T_0.1 ;
-    %load/v 8, v0x7fd89970f220_0, 32;
-    %load/v 40, v0x7fd89960d940_0, 32;
+    %load/v 8, v00E12EA0_0, 32;
+    %load/v 40, v00FCA6C8_0, 32;
     %ix/get 0, 40, 32;
     %shiftr/i0  8, 32;
-    %set/v v0x7fd89970f0e0_0, 8, 32;
+    %set/v v00E12DF0_0, 8, 32;
     %jmp T_0.4;
 T_0.2 ;
-    %load/v 8, v0x7fd89970f220_0, 32;
-    %load/v 40, v0x7fd89960d940_0, 32;
+    %load/v 8, v00E12EA0_0, 32;
+    %load/v 40, v00FCA6C8_0, 32;
     %ix/get 0, 40, 32;
     %shiftl/i0  8, 32;
-    %set/v v0x7fd89970f0e0_0, 8, 32;
+    %set/v v00E12DF0_0, 8, 32;
     %jmp T_0.4;
 T_0.3 ;
-    %load/v 8, v0x7fd89970f220_0, 32;
-    %load/v 40, v0x7fd89960d940_0, 32;
+    %load/v 8, v00E12EA0_0, 32;
+    %load/v 40, v00FCA6C8_0, 32;
     %ix/get 0, 40, 32;
     %shiftr/i0  8, 32;
-    %set/v v0x7fd89970f0e0_0, 8, 32;
+    %set/v v00E12DF0_0, 8, 32;
     %jmp T_0.4;
 T_0.4 ;
     %jmp T_0;
     .thread T_0, $push;
-    .scope S_0x7fd89960b4c0;
+    .scope S_00E03950;
 T_1 ;
     %delay 1500, 0;
-    %vpi_call 2 79 "$finish";
+    %vpi_call 2 83 "$finish";
     %end;
     .thread T_1;
-    .scope S_0x7fd89960b4c0;
+    .scope S_00E03950;
 T_2 ;
     %movi 8, 2, 32;
-    %set/v v0x7fd8997105d0_0, 8, 32;
+    %set/v v00E3B9B0_0, 8, 32;
     %movi 8, 257, 12;
-    %set/v v0x7fd899710810_0, 8, 12;
-    %set/v v0x7fd899710710_0, 0, 1;
+    %set/v v00E3B3D8_0, 8, 12;
+    %set/v v00E3B4E0_0, 0, 1;
     %end;
     .thread T_2;
-    .scope S_0x7fd89960b4c0;
+    .scope S_00E03950;
 T_3 ;
-    %vpi_call 2 86 "$monitor", "%d %d", v0x7fd899710810_0, v0x7fd899710650_0;
+    %vpi_call 2 90 "$monitor", "%d %d", v00E3B3D8_0, v00E3B538_0;
     %end;
     .thread T_3;
 # The file index is used to find the file name in the following table.
 :file_names 3;
     "N/A";
     "<interactive>";
-    "/Users/pedro/Documents/git/armverilogimplementation/ArquiProjecto/Phase2/shifter2.v";
+    "C:\Users\hecto\Documents\armverilogimplementation\ArquiProjecto\Phase2\shifter2.v";
