@@ -365,7 +365,7 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 						dataOut[7:0] = mem[address + 8'b0000001][7:0];
 						dataOut[31:16] = 16'b0000_0000_0000_0000;
 					end
-					2'b10:	begin // #30;
+					2'b10:	begin
 						dataOut[31:0] = {mem[address][7:0], 
 										 mem[address + 8'b0000001][7:0], 
 										 mem[address + 8'b0000010][7:0], 
@@ -382,7 +382,7 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 						mem[address][7:0] = dataIn[15:8];
 						mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
 					end
-					2'b10:	begin //#60;
+					2'b10:	begin
 						mem[address + 8'b00000011][7:0] = dataIn[7:0];
 						mem[address + 8'b00000010][7:0] = dataIn[15:8];
 						mem[address + 8'b00000001][7:0] = dataIn[23:16];
@@ -393,8 +393,10 @@ module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWr
 			end
 			done = 1;
 		end
-		else
+		else begin
 			dataOut = 32'bz;
+			done = 0;
+		end
 	end
 endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
@@ -627,21 +629,16 @@ module internal_shifter (input [31:0]amount, value, input [1:0]shift_type, outpu
 			end
 			2'b01:	//right logic
 			begin
-								// $display("Amm%d",amount);
-
+				// $display("Amm%d",amount);
 				shift_out[31:0] = value[31:0]>>amount;
 			end
 			2'b10:	//right arithmetic
 			begin
-
-
-
 				shift_out[31:0] = value[31:0]>>>amount;
 			end
 			2'b11:	//rotate right
 			begin
-								// $display("Amm%d",amount);
-
+				// $display("Amm%d",amount);
 				shift_out[31:0] = value[31:0]>>>amount;
 			end
 		endcase // shift_type
@@ -744,61 +741,53 @@ module datapath;
 	//Vamos a probar 
 	parameter sim_time =40;
 
-	initial 
-		begin
-			//State 0 microprogram
-			#4 begin
-				$display("start");
-				CLK  = 1;
-				//Do nothing
-			end
-			#4 begin
-				$display("Stating 4");
-				E0 = 0;
-
-				S00 = 0;
-				S0 =1;
-				
-				RFE = 0;
-				RC  = 15;
-				RB  = 15;
-				S3  = 0;
-				S2  = 0;
-				S1  = 0;
-
-				S7 = 1;
-				S6 = 1;
-				S5 = 0;
-				S4 = 1;
-
-				E5 = 0;
-
-				en = 1;
-				rw = 1;
-				dataSize = 2'b10;
-
-				E3 = 0;
-				E4 = 0;
-
-			end
-			#8 begin
-				$display("Starting 8");
-				shift_type = 1;
-				E0 = 1;
-				E5 = 1;
-				RC = 1'bx;
-
-				RB = ir_out[3:0];
-
-
-			end
-			
-			
+	initial begin
+		//State 0 microprogram
+		#4 begin
+			$display("start");
+			CLK  = 1;
+			//Do nothing
 		end
+		#4 begin
+			$display("Stating 4");
+			E0 = 0;
 
+			S00 = 0;
+			S0 =1;
+				
+			RFE = 0;
+			RC  = 15;
+			RB  = 15;
+			S3  = 0;
+			S2  = 0;
+			S1  = 0;
 
-	initial 
-		forever #2 CLK = ~CLK; // Change Clock Every Time Unit
+			S7 = 1;
+			S6 = 1;
+			S5 = 0;
+			S4 = 1;
+
+			E5 = 0;
+
+			en = 1;
+			rw = 1;
+			dataSize = 2'b10;
+
+			E3 = 0;
+			E4 = 0;
+		end
+		#8 begin
+			$display("Starting 8");
+			shift_type = 1;
+			E0 = 1;
+			E5 = 1;
+			RC = 1'bx;
+
+			RB = ir_out[3:0];
+		end
+	end
+
+	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
 			
 	initial #sim_time $finish;
 
@@ -806,7 +795,5 @@ module datapath;
 		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	                 12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
 		// $monitor ("%d",PC);
 		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d      %d %b %b %d %d %d %d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, sh.amounttointernal, sh.valuetointernal, sh.shifttypetointernal); //imprime las señales
-
-		
 	end
 endmodule	

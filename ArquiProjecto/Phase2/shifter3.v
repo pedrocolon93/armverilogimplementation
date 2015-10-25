@@ -23,8 +23,8 @@ endmodule
 /////////////////////////////////
 /////////////////////////////////
 module internal_shifter (
-	input [31:0]amount, value,
-	input shift_type,
+	input [31:0] amount, value,
+	input [1:0] shift_type,
 	output reg [31:0] shift_out
 );
 	reg I;	
@@ -64,10 +64,6 @@ module internal_shifter (
     					temp2[31:0] = temp[31:0];
 					end
 				shift_out[31:0] = temp[31:0];
-			end
-			4:begin
-				//Arithmetic Shift Right
-				shift_out[31:0] = value[31:0]>>>amount;
 			end
 		endcase // shift_type
 	end
