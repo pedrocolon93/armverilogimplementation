@@ -615,33 +615,34 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module internal_shifter (input [31:0]amount, value, input [1:0]shift_type, output reg [31:0] shift_out);
-	reg [31:0] temp;
-	reg [31:0]index;
+module internal_shifter (
+	input [31:0] amount, value,
+	input [1:0] shift_type,
+	output reg [31:0] shift_out
+);
+	reg [63:0] temp;
 	always @(amount, value, shift_type) 
 	begin
-		// $display("Change AMOUNT %d VALUE %d SHIFT TyPE %d",amount, value, shift_type);
 		case(shift_type)
-			2'b00:	//left logic
-			begin
-				// $display("Amm%d",amount);
+			0:begin
+				//Logical Shift Left
 				shift_out[31:0] = value[31:0]<<amount;
 			end
-			2'b01:	//right logic
-			begin
-				// $display("Amm%d",amount);
+			1:begin
+				//Logical Shift Right
 				shift_out[31:0] = value[31:0]>>amount;
 			end
-			2'b10:	//right arithmetic
-			begin
-				shift_out[31:0] = value[31:0]>>>amount;
+
+			2:begin
+				//right arithmetic
+				shift_out[31:0] = $signed(value[31:0])>>>amount;
 			end
-			2'b11:	//rotate right
-			begin
-				// $display("Amm%d",amount);
-				shift_out[31:0] = value[31:0]>>>amount;
+			3:begin
+				//rotate right
+				temp = {value, value} >> amount;
+				shift_out[31:0] = temp[31:0];
 			end
-		endcase // shift_type
+		endcase //shift_type
 	end
 endmodule
 
