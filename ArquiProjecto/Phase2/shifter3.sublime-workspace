@@ -32,18 +32,10 @@
 	"buffers":
 	[
 		{
-			"file": "/C/Users/hecto/Desktop/shifter3.v",
+			"file": "shifter3.v",
 			"settings":
 			{
-				"buffer_size": 2683,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/Phase3/ControlUnit.v",
-			"settings":
-			{
-				"buffer_size": 6543,
+				"buffer_size": 2378,
 				"line_ending": "Windows"
 			}
 		}
@@ -105,6 +97,8 @@
 	},
 	"file_history":
 	[
+		"/C/Users/hecto/Desktop/shifter3.v",
+		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/Phase3/ControlUnit.v",
 		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/Phase2/shifter3.v",
 		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/REGFILE/registerFile.v",
 		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/ALU/alu.v",
@@ -191,19 +185,19 @@
 			[
 				{
 					"buffer": 0,
-					"file": "/C/Users/hecto/Desktop/shifter3.v",
+					"file": "shifter3.v",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2683,
+						"buffer_size": 2378,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1196,
-								1196
+								827,
+								827
 							]
 						],
 						"settings":
@@ -211,39 +205,10 @@
 							"syntax": "Packages/SystemVerilog/SystemVerilog.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1050.0,
+						"translation.y": 300.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/Phase3/ControlUnit.v",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6543,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2022,
-								2022
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SystemVerilog/SystemVerilog.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 4050.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
 					"type": "text"
 				}
 			]
