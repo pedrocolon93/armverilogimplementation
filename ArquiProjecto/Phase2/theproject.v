@@ -669,8 +669,9 @@ endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 module datapath;
 	//CU Signals
-	reg E0,E2,E3,E4,E5;//Enables the register that holds pc+4
+	reg E0,E2,E3,E4,E5,E6;//Enables the register that holds pc+4
 	reg S0,S00;//Selects whether its pc or pc+4
+
 
 	reg [3:0] RA; // Selector of A Mux is 3 bits
 	reg [3:0] RB; // Selector of B Mux is 3 bits
@@ -678,6 +679,7 @@ module datapath;
 	reg [3:0] RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
 	reg RFE; // Decoder and Mux Enabler (All Enables of Decoders are Shared)
 
+	reg S8, S9,S10, S11;
 	reg S4,S5,S6,S7;//Function select for alu
 	reg S1,S2,S3;
 
@@ -700,6 +702,7 @@ module datapath;
 	wire [31:0] PC, LEFT_OP, B;
 	wire [31:0] alu_in_sel_mux_to_alu,pc_plus_4_mux_to_rf, register_to_mux, adder_to_register;
 	wire [31:0] mar_to_ram;
+	wire [1:0] mux_reg_output, mux_mas_out, mux_misc_out;
 
 	reg [31:0]data;
 	
@@ -710,6 +713,8 @@ module datapath;
 
 	wire [31:0] shifter_output;
 	wire [31:0] ser_out;
+
+	wire [31:0] status_register_out;
 
 	reg something;
 	//Components 
@@ -739,6 +744,13 @@ module datapath;
 	shifter sh(B,twelve_bit_shift_reg_out,shift_type,shifter_output);
 
 	reg_32 ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
+
+	reg_32 status_register(status_register_out, {N,Z,C,V,28'b0000_0000_0000_0000_0000_0000_0000},E6,1'b1,CLK);
+
+	mux_2x1 mux_reg(mux_reg_output, S8, 2'b00,2'b11);
+	mux_8x1 mux_misc(mux_misc_out, {S11,S10,S9}, 2'b00,2'b00,2'b00,2'b00,2'b00,2'b00,2'b00,2'b00);
+	mux_4x1 mux_mas(mux_mas_out,{S13,S12},2'b00,mux_misc_out,mux_reg,0);
+
 
 	//Vamos a probar 
 	parameter sim_time =40;
