@@ -532,7 +532,7 @@ module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 			Q <= Q; // enable off. output what came out before
 endmodule
 module reg_32b_MAGIC(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
-	initial	Q = 32'b0000000000000000000000000001001; // Start registers with 0
+	initial	Q = 32'b0000000000000011000001001001001; // Start registers with 0
 	always @ (negedge CLK, negedge CLR)
 		if(!EN)
 			Q = D; // Enable Sync. Only occurs when Clk is high
@@ -623,6 +623,7 @@ module internal_shifter (
 	reg [63:0] temp;
 	always @(amount, value, shift_type) 
 	begin
+		// $display("Changing shifter output");
 		case(shift_type)
 			0:begin
 				//Logical Shift Left
@@ -782,9 +783,18 @@ module datapath;
 			shift_type = 1;
 			E0 = 1;
 			E5 = 1;
-			RC = 1'bx;
-
+			RC = ir_out[15:12];
+			RA = ir_out[15:12];
 			RB = ir_out[3:0];
+			S3  = 0;
+			S2  = 0;
+			S1  = 1;
+			S00 = 0;
+			S0 =0;
+
+		end
+		#4 begin 
+			$display("Final");
 		end
 	end
 
@@ -793,8 +803,8 @@ module datapath;
 	initial #sim_time $finish;
 
 	initial begin
-		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	                 12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
+		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	               12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d      %d %b %b %d %d %d %d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, sh.amounttointernal, sh.valuetointernal, sh.shifttypetointernal); //imprime las señales
+		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d      %d %b %0b %0d %0d %0d %0d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,alu_in_sel_mux_to_alu,     CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, sh.amounttointernal, sh.valuetointernal, sh.shifttypetointernal); //imprime las señales
 	end
 endmodule	
