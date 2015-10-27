@@ -32,10 +32,18 @@
 	"buffers":
 	[
 		{
-			"file": "shifter3.v",
+			"file": "/C/Users/hecto/Desktop/shifter3.v",
 			"settings":
 			{
-				"buffer_size": 2378,
+				"buffer_size": 2683,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/Phase3/ControlUnit.v",
+			"settings":
+			{
+				"buffer_size": 6543,
 				"line_ending": "Windows"
 			}
 		}
@@ -97,6 +105,7 @@
 	},
 	"file_history":
 	[
+		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/Phase2/shifter3.v",
 		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/REGFILE/registerFile.v",
 		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/ALU/alu.v",
 		"/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/MUX/mux2to1_32.v",
@@ -144,7 +153,7 @@
 	],
 	"find":
 	{
-		"height": 47.0
+		"height": 80.0
 	},
 	"find_in_files":
 	{
@@ -158,6 +167,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"c",
 			"w"
 		],
 		"highlight": true,
@@ -181,19 +191,19 @@
 			[
 				{
 					"buffer": 0,
-					"file": "shifter3.v",
+					"file": "/C/Users/hecto/Desktop/shifter3.v",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2378,
+						"buffer_size": 2683,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								2378
+								1196,
+								1196
 							]
 						],
 						"settings":
@@ -201,10 +211,39 @@
 							"syntax": "Packages/SystemVerilog/SystemVerilog.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 3251.0,
+						"translation.y": 1050.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/Users/hecto/Documents/Github Files/ARMVerilogImplementation/ArquiProjecto/Phase3/ControlUnit.v",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6543,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2022,
+								2022
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SystemVerilog/SystemVerilog.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 4050.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -212,7 +251,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 47.0
+		"height": 58.0
 	},
 	"input":
 	{
@@ -243,7 +282,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 597.0
+		"height": 849.0
 	},
 	"output.find_results":
 	{
@@ -253,7 +292,7 @@
 	"project": "shifter3.sublime-project",
 	"replace":
 	{
-		"height": 90.0
+		"height": 112.0
 	},
 	"save_all_on_build": true,
 	"select_file":
