@@ -22,26 +22,26 @@ endmodule
 module NSASel(output reg [1:0]M, input [2:0]ns, input sts);
 	always @ (ns, sts)
 	case(ns)
-		3'b000: M = 2'b11; 
-		3'b001: M = 2'b10;
-		3'b010: M = 2'b01;
-		3'b011: M = 2'b00;
+		3'b000: M = 2'b00; 	//encoder
+		3'b001: M = 2'b01;	//?
+		3'b010: M = 2'b10;	//pipeline
+		3'b011: M = 2'b11;	//incrementer
 		3'b100: 
 			case(sts)
-				0: M = 2'b11;
-				1: M = 2'b01;
+				0: M = 2'b00;	//encoder
+				1: M = 2'b10;	//pipeline
 			endcase
 		3'b101:
 			case(sts)
-				0: M = 2'b00;
-				1: M = 2'b01;
+				0: M = 2'b11;	//incrementer
+				1: M = 2'b10;	//pipeline
 			endcase
 		3'b110:
 			case(sts)
-				0: M = 2'b00;
-				1: M = 2'b11;
+				0: M = 2'b11;	//incrementer
+				1: M = 2'b00;	//encoder
 			endcase
-		3'b111: ;  // lo que necesitemos
+		3'b111: M = 2'b01;  // (clear)
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
@@ -51,39 +51,112 @@ module encoder(output reg [5:0]out, input [32:0]IR);
 	case(IR[37:35])
 		3'b000: begin
 			if (IR[4])
-				if (IR[7]) ;
-				else
-					if (IR[20]) ;
+				if (IR[7]) 		//multiplies & extra load/stores
+					if(IR[20])
+						case(IR[23])
+							0: 
+							1:
+						endcase
 					else
-						if (IR[24:23] == 2'b10) ;
-						else ;
-			else
-				if (IR[20]) ;
+						case(IR[23])
+							0: 
+							1:
+						endcase
 				else
-					if (IR[24:23] == 2'b10) ;
-					else ;
-		  end
-		3'b001: begin
-			if (IR[20]) ;
+					if (IR[20]) 		//data processing register shift
+						case (IR[24:21])
+							0:	//and
+							1:	//eor
+							2:	//sub
+							3:	//rsb
+							4:	//add
+							5: 	//adc
+							6: 	//sbc
+							7: 	//rsc
+							8: 	//tst
+							9:	//teq
+							10:	//cmp
+							11:	//cmn
+							12:	//orr
+							13:	//mov
+							14:	//bic
+							15:	//mvn
+						endcase
+					else
+						if (IR[24:23] == 2'b10) ;		//miscellaneous instructions
+						else //search for what's in here (up);		//data processing register shift
+				
 			else
-				if (IR[24:23] == 2'b10)
-					if (IR[21]) ;
-					else ;
-				else ;
-		  end
-		3'b010: ;
+				if (IR[20])		//data processing immediate shift
+					case (IR[24:21])
+						0:	//and
+						1:	//eor
+						2:	//sub
+						3:	//rsb
+						4:	//add
+						5: 	//adc
+						6: 	//sbc
+						7: 	//rsc
+						8: 	//tst
+						9:	//teq
+						10:	//cmp
+						11:	//cmn
+						12:	//orr
+						13:	//mov
+						14:	//bic
+						15:	//mvn
+					endcase
+				else
+					if (IR[24:23] == 2'b10) ;  		//miscellaneous instructions
+					else //search for what's in here (up); 		//data processing immediate shift			
+		end
+		3'b001: begin
+			if (IR[20]) ;		//data processing immediate
+			else
+				if (IR[24:23] == 2'b10 && IR[21]==0) out = 1;		//undefined instruction
+				else if (IR[24:23] == 2'b10 && IR[21]==1) ;		//move immediate to status register
+				else ;		//data processing immediate
+		end
+		3'b010: begin					//load/store immediate offset
+			if(IR[20])
+				case(IR[23])
+					0: 
+					1:
+				endcase
+			else
+				if(IR[23])		//check -> sub/add
+					if(IR[24])		//check -> addressing
+						case(IR[21])	//check -> indexed
+							0:			//offset addresing
+							1: 			//pre-indexed
+						endcase
+					else ;	//normal 
+				else
+					if(IR[24])		//check -> addressing
+						case(IR[21])	//check -> indexed
+							0:			//offset addresing
+							1: 			//pre-indexed
+						endcase
+					else ;	//normal 
+		end
 		3'b011: begin
-			if(IR[4])
-				if(IR[8:5]) 
-					if(IR[24:20]) ;
-					else ;
-				else ;
-			else ;
-		  end
-		3'b100: ;
-		3'b101: ;
-		3'b110: ;//does not apply
-		3'b111: ;//does not apply
+			if(IR[4]) out = 1;		// arquitecturally undefined & media instructions
+			else 
+				if(IR[20])		//load/store register offset
+					case(IR[23])		//check -> sub/add
+						0: 
+						1:
+					endcase
+				else
+					case(IR[23])		//check -> sub/add
+						0: 
+						1:
+					endcase
+		end
+		3'b100: ;		//load/store multiples
+		3'b101: ;		//branch and branch with link
+		3'b110: out = 1;		//does not apply
+		3'b111: out = 1;		//does not apply
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
@@ -119,7 +192,8 @@ module condEval(output reg out, input [31:0]IR, input [31:0] tsr);
 				 else out = 0;
 		4'b1101: if (str[30] == 1 || str[31] != str[28]) out = 1;	//Z=1 or N=!Z
 				 else out = 0;
-		default: out = 1;
+		4'b1110: out = 1;
+		4'b1111: out = 0;
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
@@ -163,9 +237,9 @@ module ROM (output reg [44:0]out, input [5:0]state, input clk);
 		mem[1][44:0] = 00___011__0__00000_0__0__1__1__1111_0000_1111_000__1101_000_0__0__0__0__01___0___1; 
 		mem[2][44:0] = 00___101__1__00011_0__1__0__1__1111_0000_0000_000__1101_000_1__1__1__0__01___0___1; 
 		mem[3][44:0] = 00___000__0__00000_0__1__0__1__1111_0000_0000_000__1101_000_0__0__0__0__01___0___0; 
-		//decode
 
 		//execute
+
 
 		//put rom memory here (in theory)
 	end
