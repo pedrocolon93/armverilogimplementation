@@ -65,50 +65,85 @@ module encoder(output reg [5:0]out, input [32:0]IR);
 				else
 					if (IR[20]) 		//data processing register shift
 						case (IR[24:21])
-							0:	//and
-							1:	//eor
-							2:	//sub
-							3:	//rsb
-							4:	//add
-							5: 	//adc
-							6: 	//sbc
-							7: 	//rsc
-							8: 	//tst
-							9:	//teq
-							10:	//cmp
-							11:	//cmn
-							12:	//orr
-							13:	//mov
-							14:	//bic
-							15:	//mvn
+							0:  out = 6;	//and
+							1:  out = 8;	//eor
+							2:  out = 10;	//sub
+							3:  out = 12;	//rsb
+							4:  out = 14;	//add
+							5:  out = 16; 	//adc
+							6:  out = 18; 	//sbc
+							7:  out = 20; 	//rsc
+							8:  out = 22; 	//tst
+							9:  out = 24;	//teq
+							10: out = 26;	//cmp
+							11: out = 28;	//cmn
+							12: out = 30;	//orr
+							13: out = 32;	//mov
+							14: out = 34;	//bic
+							15: out = 36;	//mvn
 						endcase
 					else
 						if (IR[24:23] == 2'b10) ;		//miscellaneous instructions
-						else //search for what's in here (up);		//data processing register shift
-				
+						else		//data processing register shift
+							case (IR[24:21])
+								0:  out = 6;	//and
+								1:  out = 8;	//eor
+								2:  out = 10;	//sub
+								3:  out = 12;	//rsb
+								4:  out = 14;	//add
+								5:  out = 16; 	//adc
+								6:  out = 18; 	//sbc
+								7:  out = 20; 	//rsc
+								8:  out = 22; 	//tst
+								9:  out = 24;	//teq
+								10: out = 26;	//cmp
+								11: out = 28;	//cmn
+								12: out = 30;	//orr
+								13: out = 32;	//mov
+								14: out = 34;	//bic
+								15: out = 36;	//mvn
+							endcase
 			else
 				if (IR[20])		//data processing immediate shift
 					case (IR[24:21])
-						0:	//and
-						1:	//eor
-						2:	//sub
-						3:	//rsb
-						4:	//add
-						5: 	//adc
-						6: 	//sbc
-						7: 	//rsc
-						8: 	//tst
-						9:	//teq
-						10:	//cmp
-						11:	//cmn
-						12:	//orr
-						13:	//mov
-						14:	//bic
-						15:	//mvn
+						0:  out = 5;	//and
+						1:  out = 7;	//eor
+						2:  out = 9;	//sub
+						3:  out = 11;	//rsb
+						4:  out = 13;	//add
+						5:  out = 15; 	//adc
+						6:  out = 17; 	//sbc
+						7:  out = 19; 	//rsc
+						8:  out = 21; 	//tst
+						9:  out = 23;	//teq
+						10: out = 25;	//cmp
+						11: out = 27;	//cmn
+						12: out = 29;	//orr
+						13: out = 31;	//mov
+						14: out = 33;	//bic
+						15: out = 35;	//mvn
 					endcase
 				else
 					if (IR[24:23] == 2'b10) ;  		//miscellaneous instructions
-					else //search for what's in here (up); 		//data processing immediate shift			
+					else 		//data processing immediate shift
+						case (IR[24:21])
+							0:  out = 5;	//and
+							1:  out = 7;	//eor
+							2:  out = 9;	//sub
+							3:  out = 11;	//rsb
+							4:  out = 13;	//add
+							5:  out = 15; 	//adc
+							6:  out = 17; 	//sbc
+							7:  out = 19; 	//rsc
+							8:  out = 21; 	//tst
+							9:  out = 23;	//teq
+							10: out = 25;	//cmp
+							11: out = 27;	//cmn
+							12: out = 29;	//orr
+							13: out = 31;	//mov
+							14: out = 33;	//bic
+							15: out = 35;	//mvn
+						endcase
 		end
 		3'b001: begin
 			if (IR[20]) ;		//data processing immediate
