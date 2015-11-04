@@ -750,10 +750,11 @@ module datapath;
 	mux_2x1 mux_reg(mux_reg_output, S8, 2'b00,2'b11);
 	mux_8x1 mux_misc(mux_misc_out, {S11,S10,S9}, 2'b00,2'b00,2'b00,2'b00,2'b00,2'b00,2'b00,2'b00);
 	mux_4x1 mux_mas(mux_mas_out,{S13,S12},2'b00,mux_misc_out,mux_reg,0);
+	
 
 
 	//Vamos a probar 
-	parameter sim_time =40;
+	parameter sim_time =60;
 
 	initial begin
 		//State 0 microprogram
@@ -764,7 +765,9 @@ module datapath;
 		end
 		#4 begin
 			$display("Stating 4");
+
 			E0 = 0;
+			E2 = 0;
 
 			S00 = 0;
 			S0 =1;
@@ -772,6 +775,7 @@ module datapath;
 			RFE = 0;
 			RC  = 15;
 			RB  = 15;
+
 			S3  = 0;
 			S2  = 0;
 			S1  = 0;
@@ -795,12 +799,15 @@ module datapath;
 			shift_type = 1;
 			E0 = 1;
 			E5 = 1;
+
 			RC = ir_out[15:12];
 			RA = ir_out[15:12];
 			RB = ir_out[3:0];
+			
 			S3  = 0;
 			S2  = 0;
 			S1  = 1;
+
 			S00 = 0;
 			S0 =0;
 
@@ -808,6 +815,63 @@ module datapath;
 		#4 begin 
 			$display("Final");
 		end
+
+		// #4 begin
+		// 	$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	               12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
+
+		// 	$display("Stating again 4");
+
+		// 	E0 = 0;
+		// 	E5 = 0;
+
+		// 	S00 = 0;
+		// 	S0 =1;
+				
+		// 	RFE = 0;
+		// 	RC  = 2'bX;
+		// 	RB  = 15;
+
+		// 	S3  = 0;
+		// 	S2  = 0;
+		// 	S1  = 0;
+
+		// 	S7 = 1;
+		// 	S6 = 1;
+		// 	S5 = 0;
+		// 	S4 = 1;
+
+		// 	en = 1;
+		// 	rw = 1;
+		// 	dataSize = 2'b10;
+
+		// 	E3 = 0;
+		// 	E4 = 0;
+		// end
+		// #8 begin
+		// 	$display("Starting again8");
+		// 	shift_type = 0;
+		// 	CIN = 1;
+
+		// 	E0 = 1;
+		// 	E5 = 1;
+
+		// 	RC = ir_out[15:12];
+		// 	RA = ir_out[19:16];
+		// 	RB = ir_out[3:0];
+
+		// 	S7 = 0;
+		// 	S6 = 1;
+		// 	S5 = 0;
+		// 	S4 = 1;
+			
+		// 	S3  = 0;
+		// 	S2  = 0;
+		// 	S1  = 1;
+
+		// 	S00 = 0;
+		// 	S0 =0;
+
+		// end
 	end
 
 	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
