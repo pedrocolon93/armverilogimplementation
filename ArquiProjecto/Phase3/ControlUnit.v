@@ -113,7 +113,7 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 						4:  out = 13;	//add
 						5:  out = 15;	//adc
 						6:  out = 17;	//sbc
-						7:  out = 19;	//rsc
+						7:  out = 19;	//rsc 
 						8:  out = 21;	//tst
 						9:  out = 23;	//teq
 						10: out = 25;	//cmp
