@@ -22,7 +22,7 @@ endmodule
 module NSASel(output reg [1:0] M, input [2:0] ns, input sts);
 	always @ (ns, sts)
 	case(ns)
-		3'b000: M = 2'b00; 	//encoder
+		3'b000: M = 2'b00;	//encoder
 		3'b001: M = 2'b01;	//0
 		3'b010: M = 2'b10;	//pipeline
 		3'b011: M = 2'b11;	//incrementer
@@ -41,7 +41,7 @@ module NSASel(output reg [1:0] M, input [2:0] ns, input sts);
 				0: M = 2'b11;	//incrementer
 				1: M = 2'b00;	//encoder
 			endcase
-		3'b111: M = 2'b01;  //0
+		3'b111: M = 2'b01;	//0
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
@@ -124,8 +124,8 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 						15: out = 35;	//mvn
 					endcase
 				else
-					if (IR[24:23] == 2'b10) ;  		//miscellaneous instructions
-					else 		//data processing immediate shift
+					if (IR[24:23] == 2'b10) ;		//miscellaneous instructions
+					else		//data processing immediate shift
 						case (IR[24:21])
 							0:  out = 5;	//and
 							1:  out = 7;	//eor
@@ -146,7 +146,7 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 						endcase
 		end
 		3'b001: begin
-			if (IR[20]) 		//data processing immediate (32-bit)
+			if (IR[20])		//data processing immediate (32-bit)
 				case (IR[24:21])
 					0:  out = 5;	//and
 					1:  out = 7;	//eor
@@ -168,7 +168,7 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 			else
 				if (IR[24:23] == 2'b10 && IR[21]==0) out = 1;		//undefined instruction
 				else if (IR[24:23] == 2'b10 && IR[21]==1) ;		//move immediate to status register
-				else 		//data processing immediate (32-bit)
+				else		//data processing immediate (32-bit)
 					case (IR[24:21])
 						0:  out = 5;	//and
 						1:  out = 7;	//eor
@@ -194,14 +194,14 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 					if(IR[24])			//offset or pre-indexed (P)
 						if(IR[21]) ;		//pre-indexed (W)
 						else ;				//offset addresing
-					else 				//post-indexed 
+					else				//post-indexed 
 						if(IR[21]) out = 1;	//privilage loads/store 
 						else ;			//normal
-				else 				//sub
+				else				//sub
 					if(IR[24])			//offset or pre-indexed (P)
 						if(IR[21]) ;		//pre-indexed (W)
 						else ;				//offset addresing
-					else 				//post-indexed 
+					else				//post-indexed 
 						if(IR[21]) out = 1;	//privilage loads/store 
 						else ;			//normal
 			else				//store
@@ -209,18 +209,18 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 					if(IR[24])			//offset or pre-indexed (P)
 						if(IR[21]) ;		//pre-indexed (W)
 						else ;				//offset addresing
-					else 				//post-indexed 
+					else				//post-indexed 
 						if(IR[21]) out = 1;	//privilage loads/store 
 						else ;			//normal
-				else 				//sub
+				else				//sub
 					if(IR[24])			//offset or pre-indexed (P)
 						if(IR[21]) ;		//pre-indexed (W)
 						else ;				//offset addresing
-					else 				//post-indexed 
+					else				//post-indexed 
 						if(IR[21]) out = 1;	//privilage loads/store 
 						else ;			//normal
 		end
-		3'b011: begin
+		3'b011: begin //(OK)
 			if(IR[4]) out = 1;		//arquitecturally undefined & media instructions
 			else
 				if(IR[20])			//load
@@ -228,14 +228,14 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 						if(IR[24])			//offset or pre-indexed (P)
 							if(IR[21]) ;		//pre-indexed (W)
 							else ;				//offset addresing
-						else 				//post-indexed 
+						else				//post-indexed 
 							if(IR[21]) out = 1;	//privilage loads/store 
 							else ;			//normal
-					else 				//sub
+					else				//sub
 						if(IR[24])			//offset or pre-indexed (P)
 							if(IR[21]) ;		//pre-indexed (W)
 							else ;				//offset addresing
-						else 				//post-indexed 
+						else				//post-indexed 
 							if(IR[21]) out = 1;	//privilage loads/store 
 							else ;			//normal
 				else				//store
@@ -243,14 +243,14 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 						if(IR[24])			//offset or pre-indexed (P)
 							if(IR[21]) ;		//pre-indexed (W)
 							else ;				//offset addresing
-						else 				//post-indexed 
+						else				//post-indexed 
 							if(IR[21]) out = 1;	//privilage loads/store 
 							else ;			//normal
-					else 				//sub
+					else				//sub
 						if(IR[24])			//offset or pre-indexed (P)
 							if(IR[21]) ;		//pre-indexed (W)
 							else ;				//offset addresing
-						else 				//post-indexed 
+						else				//post-indexed 
 							if(IR[21]) out = 1;	//privilage loads/store 
 							else ;			//normal
 		end
@@ -262,8 +262,8 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 endmodule
 //-------------------------------------------------------------------------------
 // IR condition evaluator
-module condEval(output reg out, input [31:0] IR, input [31:0] tsr);
-	always @ (IR, tsr)
+module condEval(output reg out, input [31:0] IR, input [31:0] str);
+	always @ (IR, str)
 	case(IR[31:28])
 		4'b0000: if (str[30]) out = 1;				// Z=1
 				 else out = 0;
@@ -329,7 +329,7 @@ endmodule
 //-------------------------------------------------------------------------------
 //ROM (output may increce, depending on signals requiered, 1bit per signal)
 module ROM (output reg [44:0] out, input [5:0] state, input clk);
-	reg [31:0]mem[0:44];
+	reg [44:0]mem[31:0];
 	initial begin 
 		//fetch
 		//			   44   42   39 38    33 32 31 30 29   25   21   17   14   10  7  6  5  4  3    1   0
@@ -350,21 +350,22 @@ module ROM (output reg [44:0] out, input [5:0] state, input clk);
 endmodule
 //-------------------------------------------------------------------------------
 //control unit box (output depends on ROM output)
-module ControlUnit (output [44:0] out, input clk, clr, mfc, input [31:0] IR, statusReg);
-	wire [5,0] state, stateSel stateSel1, stateSel2, stateSel3, addToR;
+module ControlUnit (output reg [44:0] out, input clk, clr, mfc, input [31:0] IR, statusReg);
+	
+	wire [5:0] state, stateSel0, stateSel1, stateSel2, stateSel3, addToR;
 	wire [1:0] mux6bsel;
 	wire invIn, invOut, ms0, ms1;
 	wire [44:0] innerOut;
-
-	ROM 		rom 	 (innerOut,   state, 			clk);
-	mux_4x1_6b 	mux6b 	 (state, 	  mux6bsel, 		stateSel, 	stateSel1,  stateSel2, 	stateSSel3);
-	IncReg 		incR 	 (stateSel,   addToR, 			1, 			clr, 		clk);
-	adder 		adderAlu (addToR, 	  state, 			1);
-	condEval 	condEval (invIn, 	  IR, 				statusReg);
-	encoder 	iREnc 	 (stateSSel3, IR);
-	NSASel 		stateSel (mux6bsel,   innerOut[42:38], 	invOut);
-	inverter 	inv 	 (invOut, 	  invIn, 			innerOut[39]);
-	mux_4x1_1b 	mux1b 	 (invIn, 	  innerOut[44:43],	mfc, 		0, 			0, 			0);
+	
+	ROM			rom		 (innerOut,   state, 			clk);
+	mux_4x1_6b	mux6b	 (state, 	  mux6bsel, 		stateSel0, 	stateSel1,  stateSel2, 	stateSSel3);
+	IncReg		incR	 (stateSel0,   addToR, 			1, 			clr, 		clk);
+	adder		adderAlu (addToR, 	  state, 			1);
+	condEval	condEv	 (invIn, 	  IR, 				statusReg);
+	encoder		iREnc	 (stateSSel3, IR);
+	NSASel		stateSel (mux6bsel,   innerOut[42:38], 	invOut);
+	inverter	inv		 (invOut, 	  invIn, 			innerOut[39]);
+	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[44:43],	mfc, 		0, 			0, 			0);
 	
 	always @(posedge clk)
 		out = innerOut;
