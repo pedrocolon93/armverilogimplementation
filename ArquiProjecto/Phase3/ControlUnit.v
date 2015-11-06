@@ -46,24 +46,123 @@ module NSASel(output reg [1:0] M, input [2:0] ns, input sts);
 endmodule
 //-------------------------------------------------------------------------------
 // IR encoder for next state
-module encoder(output reg [5:0] out, input [32:0] IR);
+module encoder(output reg [5:0] out, input [31:0] IR);
 	always @(IR)
 	case(IR[37:35])
 		3'b000: begin
-			if (IR[4])
-				if (IR[7])		//multiplies & extra load/stores
-					if(IR[20])
-						case(IR[23])
-							0: ;
-							1: ;
-						endcase
-					else
-						case(IR[23])
-							0: ;
-							1: ;
-						endcase
-				else
-					if (IR[20])		//data processing register shift
+			if (IR[4]) begin
+				if (IR[7]) begin		//multiplies & extra load/stores
+					if(IR[20]) begin			//load
+						if(IR[23]) begin			//add
+							if(IR[24]) begin			//offset or pre-indexed (P)
+								if(IR[21]) out = 74;		//pre-indexed (W)
+								else out = 72;				//offset addresing
+							end
+							else begin				//post-indexed 
+								if(IR[21]) out = 1;	//unpredictable
+								else out = 76;			//normal
+							end
+						end
+						else begin				//sub
+							if(IR[24]) begin			//offset or pre-indexed (P)
+								if(IR[21]) out = 75;		//pre-indexed (W)
+								else out = 73;				//offset addresing
+							end
+							else begin				//post-indexed 
+								if(IR[21]) out = 1;	//unpredictable 
+								else out = 78;			//normal
+							end
+						end
+					end
+					else begin				//store
+						if(IR[23]) begin			//add
+							if(IR[24]) begin			//offset or pre-indexed (P)
+								if(IR[21]) out = 84;		//pre-indexed (W)
+								else out = 82;				//offset addresing
+							end
+							else begin				//post-indexed 
+								if(IR[21]) out = 1;	//unpredictable
+								else out = 86;			//normal
+							end
+						end
+						else begin				//sub
+							if(IR[24]) begin			//offset or pre-indexed (P)
+								if(IR[21]) out = 85;		//pre-indexed (W)
+								else out = 83;				//offset addresing
+							end
+							else begin				//post-indexed 
+								if(IR[21]) out = 1;	//unpredictable
+								else out = 88;			//normal
+							end
+						end
+					end
+				end
+				else out = 1;
+					/*if (IR[20])	out = 1;	//data processing register shift
+						/*case (IR[24:21])
+							0:  out = 6;	//and
+							1:  out = 8;	//eor
+							2:  out = 10;	//sub
+							3:  out = 12;	//rsb
+							4:  out = 14;	//add
+							5:  out = 16;	//adc
+							6:  out = 18;	//sbc
+							7:  out = 20;	//rsc
+							8:  out = 22;	//tst
+							9:  out = 24;	//teq
+							10: out = 26;	//cmp
+							11: out = 28;	//cmn
+							12: out = 30;	//orr
+							13: out = 32;	//mov
+							14: out = 34;	//bic
+							15: out = 36;	//mvn
+						endcase */
+					/*else
+						if (IR[24:23] == 2'b10) out = 1;		//miscellaneous instructions
+						else out = 1;		//data processing register shift
+							/*case (IR[24:21])
+								0: ; 	//and
+								1: ; 	//eor
+								2: ; 	//sub
+								3: ; 	//rsb
+								4: ; 	//add
+								5: ;  	//adc
+								6: ;  	//sbc
+								7: ;  	//rsc
+								8: ;  	//tst
+								9: ; 	//teq
+								10: ;	//cmp
+								11: ;	//cmn
+								12: ;	//orr
+								13: ;	//mov
+								14: ;	//bic
+								15: ;	//mvn
+							endcase */
+			end
+			else begin
+				if (IR[20])	begin	//data processing immediate shift
+					case (IR[24:21])
+						0:  out = 6;	//and
+						1:  out = 8;	//eor
+						2:  out = 10;	//sub
+						3:  out = 12;	//rsb
+						4:  out = 14;	//add
+						5:  out = 16;	//adc
+						6:  out = 18;	//sbc
+						7:  out = 20;	//rsc
+						8:  out = 22;	//tst
+						9:  out = 24;	//teq
+						10: out = 26;	//cmp
+						11: out = 28;	//cmn
+						12: out = 30;	//orr
+						13: out = 32;	//mov
+						14: out = 34;	//bic
+						15: out = 36;	//mvn
+					endcase
+				end
+				else begin
+					if (IR[24:23] == 2'b10) out = 1 ;//;		//miscellaneous instructions
+					else begin		//data processing immediate shift
 						case (IR[24:21])
 							0:  out = 6;	//and
 							1:  out = 8;	//eor
@@ -82,71 +181,12 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 							14: out = 34;	//bic
 							15: out = 36;	//mvn
 						endcase
-					else
-						if (IR[24:23] == 2'b10) ;		//miscellaneous instructions
-						else		//data processing register shift
-							case (IR[24:21])
-								0: ; 	//and
-								1: ; 	//eor
-								2: ; 	//sub
-								3: ; 	//rsb
-								4: ; 	//add
-								5: ;  	//adc
-								6: ;  	//sbc
-								7: ;  	//rsc
-								8: ;  	//tst
-								9: ; 	//teq
-								10: ;	//cmp
-								11: ;	//cmn
-								12: ;	//orr
-								13: ;	//mov
-								14: ;	//bic
-								15: ;	//mvn
-							endcase
-			else
-				if (IR[20])		//data processing immediate shift
-					case (IR[24:21])
-						0:  ;	//and
-						1:  ;	//eor
-						2:  ;	//sub
-						3:  ;	//rsb
-						4:  ;	//add
-						5:  ;	//adc
-						6:  ;	//sbc
-						7:  ;	//rsc 
-						8:  ;	//tst
-						9:  ;	//teq
-						10: ;	//cmp
-						11: ;	//cmn
-						12: ;	//orr
-						13: ;	//mov
-						14: ;	//bic
-						15: ;	//mvn
-					endcase
-				else
-					if (IR[24:23] == 2'b10) ;		//miscellaneous instructions
-					else		//data processing immediate shift
-						case (IR[24:21])
-							0:  ;	//and
-							1:  ;	//eor
-							2:  ;	//sub
-							3:  ;	//rsb
-							4:  ;	//add
-							5:  ;	//adc
-							6:  ;	//sbc
-							7:  ;	//rsc
-							8:  ;	//tst
-							9:  ;	//teq
-							10: ;	//cmp
-							11: ;	//cmn
-							12: ;	//orr
-							13: ;	//mov
-							14: ;	//bic
-							15: ;	//mvn
-						endcase
-		end
+					end
+				end
+			end
+		end  //done
 		3'b001: begin
-			if (IR[20])		//data processing immediate (32-bit)
+			if (IR[20])	begin	//data processing immediate (32-bit)
 				case (IR[24:21])
 					0:  out = 5;	//and
 					1:  out = 7;	//eor
@@ -165,10 +205,11 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 					14: out = 33;	//bic
 					15: out = 35;	//mvn
 				endcase
-			else
+			end
+			else begin
 				if (IR[24:23] == 2'b10 && IR[21]==0) out = 1;		//undefined instruction
-				else if (IR[24:23] == 2'b10 && IR[21]==1) ;		//move immediate to status register
-				else		//data processing immediate (32-bit)
+				else if (IR[24:23] == 2'b10 && IR[21]==1) out = 1;		//move immediate to status register
+				else begin		//data processing immediate (32-bit)
 					case (IR[24:21])
 						0:  out = 5;	//and
 						1:  out = 7;	//eor
@@ -187,75 +228,109 @@ module encoder(output reg [5:0] out, input [32:0] IR);
 						14: out = 33;	//bic
 						15: out = 35;	//mvn
 					endcase
-		end
+				end
+			end
+		end  //done
 		3'b010: begin		//load/store immediate offset
-			if(IR[20])			//load
-				if(IR[23])			//add
-					if(IR[24])			//offset or pre-indexed (P)
-						if(IR[21]) ;		//pre-indexed (W)
-						else ;				//offset addresing
-					else				//post-indexed 
+			if(IR[20]) begin			//load
+				if(IR[23]) begin			//add
+					if(IR[24]) begin			//offset or pre-indexed (P)
+						if(IR[21]) out = 40;		//pre-indexed (W)
+						else out = 36;				//offset addresing
+					end
+					else begin				//post-indexed 
 						if(IR[21]) out = 1;	//privilage loads/store 
-						else ;			//normal
-				else				//sub
-					if(IR[24])			//offset or pre-indexed (P)
-						if(IR[21]) ;		//pre-indexed (W)
-						else ;				//offset addresing
-					else				//post-indexed 
+						else out = 44;			//normal
+					end
+				end
+				else begin				//sub
+					if(IR[24]) begin			//offset or pre-indexed (P)
+						if(IR[21]) out = 41;		//pre-indexed (W)
+						else out = 37;				//offset addresing
+					end
+					else begin				//post-indexed 
 						if(IR[21]) out = 1;	//privilage loads/store 
-						else ;			//normal
-			else				//store
-				if(IR[23])			//add
-					if(IR[24])			//offset or pre-indexed (P)
-						if(IR[21]) ;		//pre-indexed (W)
-						else ;				//offset addresing
-					else				//post-indexed 
+						else out = 46;			//normal
+					end 
+				end
+			end
+			else begin				//store
+				if(IR[23]) begin			//add
+					if(IR[24]) begin			//offset or pre-indexed (P)
+						if(IR[21]) out = 58;		//pre-indexed (W)
+						else out = 54;				//offset addresing
+					end
+					else begin				//post-indexed 
 						if(IR[21]) out = 1;	//privilage loads/store 
-						else ;			//normal
-				else				//sub
-					if(IR[24])			//offset or pre-indexed (P)
-						if(IR[21]) ;		//pre-indexed (W)
-						else ;				//offset addresing
-					else				//post-indexed 
+						else out = 62;			//normal
+					end
+				end
+				else begin				//sub
+					if(IR[24]) begin			//offset or pre-indexed (P)
+						if(IR[21]) out = 59;		//pre-indexed (W)
+						else out = 55;				//offset addresing
+					end
+					else begin				//post-indexed 
 						if(IR[21]) out = 1;	//privilage loads/store 
-						else ;			//normal
-		end
-		3'b011: begin //(OK)
+						else out = 64;			//normal
+					end
+				end
+			end
+		end //done
+		3'b011: begin 
 			if(IR[4]) out = 1;		//arquitecturally undefined & media instructions
-			else
-				if(IR[20])			//load
-					if(IR[23])			//add
-						if(IR[24])			//offset or pre-indexed (P)
-							if(IR[21]) ;		//pre-indexed (W)
-							else ;				//offset addresing
-						else				//post-indexed 
+			else begin					//load/store register offset
+				if(IR[20]) begin			//load
+					if(IR[23]) begin			//add
+						if(IR[24]) begin			//offset or pre-indexed (P)
+							if(IR[21]) out = 42;		//pre-indexed (W)
+							else out = 38;				//offset addresing
+						end
+						else begin				//post-indexed 
 							if(IR[21]) out = 1;	//privilage loads/store 
-							else ;			//normal
-					else				//sub
-						if(IR[24])			//offset or pre-indexed (P)
-							if(IR[21]) ;		//pre-indexed (W)
-							else ;				//offset addresing
-						else				//post-indexed 
+							else out = 48;			//normal
+						end
+					end
+					else begin				//sub
+						if(IR[24]) begin			//offset or pre-indexed (P)
+							if(IR[21]) out = 43;		//pre-indexed (W)
+							else out = 39;				//offset addresing
+						end
+						else begin				//post-indexed 
 							if(IR[21]) out = 1;	//privilage loads/store 
-							else ;			//normal
-				else				//store
-					if(IR[23])			//add
-						if(IR[24])			//offset or pre-indexed (P)
-							if(IR[21]) ;		//pre-indexed (W)
-							else ;				//offset addresing
-						else				//post-indexed 
+							else out = 50;			//normal
+						end
+					end
+				end
+				else begin				//store
+					if(IR[23]) begin			//add
+						if(IR[24]) begin			//offset or pre-indexed (P)
+							if(IR[21]) out = 60;		//pre-indexed (W)
+							else out = 56;				//offset addresing
+						end
+						else begin				//post-indexed 
 							if(IR[21]) out = 1;	//privilage loads/store 
-							else ;			//normal
-					else				//sub
-						if(IR[24])			//offset or pre-indexed (P)
-							if(IR[21]) ;		//pre-indexed (W)
-							else ;				//offset addresing
-						else				//post-indexed 
+							else out = 66;			//normal
+						end
+					end
+					else begin				//sub
+						if(IR[24]) begin			//offset or pre-indexed (P)
+							if(IR[21]) out = 61;		//pre-indexed (W)
+							else out = 57;				//offset addresing
+						end
+						else begin				//post-indexed 
 							if(IR[21]) out = 1;	//privilage loads/store 
-							else ;			//normal
-		end
-		3'b100: ;		//load/store multiples
-		3'b101: ;		//branch and branch with link
+							else out = 68;			//normal
+						end
+					end
+				end
+			end
+		end //done
+		3'b100: out = 1;		//load/store multiples
+		3'b101: begin
+			if (IR[24])	out = 92;		//branch with link
+			else out = 93;			//branch
+		end //done
 		3'b110: out = 1;		//does not apply
 		3'b111: out = 1;		//does not apply
 	endcase
@@ -358,14 +433,14 @@ module ControlUnit (output reg [44:0] out, input clk, clr, mfc, input [31:0] IR,
 	wire [44:0] innerOut;
 	
 	ROM			rom		 (innerOut,   state, 			clk);
-	mux_4x1_6b	mux6b	 (state, 	  mux6bsel, 		stateSel0, 	stateSel1,  stateSel2, 	stateSSel3);
-	IncReg		incR	 (stateSel0,   addToR, 			1, 			clr, 		clk);
-	adder		adderAlu (addToR, 	  state, 			1);
+	mux_4x1_6b	mux6b	 (state, 	  mux6bsel, 		stateSel0, 	stateSel1,  stateSel2, 	stateSel3);
+	IncReg		incR	 (stateSel0,   addToR, 			1'b1,		clr, 		clk);
+	adder		adderAlu (addToR, 	  state, 			4'b0001);
 	condEval	condEv	 (invIn, 	  IR, 				statusReg);
-	encoder		iREnc	 (stateSSel3, IR);
-	NSASel		stateSel (mux6bsel,   innerOut[42:38], 	invOut);
+	encoder		iREnc	 (stateSel3, IR);
+	NSASel		stateSel (mux6bsel,   innerOut[42:40], 	invOut);
 	inverter	inv		 (invOut, 	  invIn, 			innerOut[39]);
-	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[44:43],	mfc, 		0, 			0, 			0);
+	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[44:43],	mfc, 		1'b0, 		1'b0, 		1'b0);
 	
 	always @(posedge clk)
 		out = innerOut;
