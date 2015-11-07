@@ -1,11 +1,9 @@
 // mux to inverter with inputs if 1 bit
-module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1, I2, I3);
-	always @ (S, I0, I1, I2, I3)
+module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1);
+	always @ (S, I0, I1)
 	case (S)
-		2'b00: assign Y=I0;
-		2'b01: assign Y=I1;
-		2'b10: assign Y=I2;
-		2'b11: assign Y=I3;
+		1'b0: assign Y=I0;
+		1'b1: assign Y=I1;
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
@@ -403,11 +401,11 @@ module mux_4x1_6b(output reg [6:0] Y, input [1:0] S, input [6:0] I0, I1, I2, I3)
 endmodule
 //-------------------------------------------------------------------------------
 //ROM (output may increce, depending on signals requiered, 1bit per signal)
-module ROM (output reg [53:0] out, input [6:0] state, input clk);
-	reg [53:0]mem[127:0];
+module ROM (output reg [52:0] out, input [6:0] state, input clk);
+	reg [52:0]mem[127:0];
 	initial begin 
-		//fetch
-		//			    53   51  48  47     |39  38  37   33 32   28     26   22     20    17    13  12  11 10 9  8  7  6   5      3   1   0
+		//fetch and decode
+		//			    52   50  47  46     |39  38  37   33 32   28     26   22     20    17    13  12  11 10 9  8  7  6   5      3   1   0
 		// 			  | s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
 		mem[0][44:0]  = 00___011_0___0000000_0___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
 		mem[1][44:0]  = 00___011_0___0000000_1___1___0000_0__1111_00_____0000_00_____000___1101__0___0___1__1__0__1__0__1___00_____00__1___0;
@@ -562,27 +560,27 @@ module ROM (output reg [53:0] out, input [6:0] state, input clk);
 
 	end
 	always @ (posedge clk)
-		out = mem[state][53:0];
+		out = mem[state][52:0];
 
 endmodule
 //-------------------------------------------------------------------------------
 //control unit box (output depends on ROM output)
 module ControlUnit (output reg [39:0] out, input clk, clr, mfc, input [31:0] IR, statusReg);
 	
-	wire [6:0] state, stateSel0, stateSel1, stateSel2, stateSel3, addToR;
-	wire [1:0] mux6bsel;
-	wire invIn, invOut, ms0, ms1;
-	wire [53:0] innerOut;
-	
+	wire [6:0] state, stateSel0, stateSel3, addToR;
+	wire [1:0] ms;
+	wire invIn, invOut, condOut;
+	wire [52:0] innerOut;  
+
 	ROM			rom		 (innerOut,   state, 			clk);
-	mux_4x1_6b	mux6b	 (state, 	  mux6bsel, 		stateSel0, 	stateSel1,  stateSel2, 	stateSel3);
-	IncReg		incR	 (stateSel0,   addToR, 			1'b1,		clr, 		clk);
+	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
+	IncReg		incR	 (stateSel3,  addToR, 			1'b1,		clr, 		clk);
 	adder		adderAlu (addToR, 	  state, 			4'b0001);
-	condEval	condEv	 (invIn, 	  IR, 				statusReg);
-	encoder		iREnc	 (stateSel3, IR);
-	NSASel		stateSel (mux6bsel,   innerOut[42:40], 	invOut);
-	inverter	inv		 (invOut, 	  invIn, 			innerOut[39]);
-	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[44:43],	mfc, 		1'b0, 		1'b0, 		1'b0);
+	condEval	condEv	 (condOut, 	  IR, 				statusReg);
+	encoder		iREnc	 (stateSel0,  IR);
+	NSASel		stateSel (ms, 		  innerOut[50:48], 	mfc);
+	inverter	inv		 (invOut, 	  invIn, 			innerOut[4]);
+	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[52:51],	mfc, 		condOut);
 	
 	always @(posedge clk)
 		out = innerOut[39:0];
