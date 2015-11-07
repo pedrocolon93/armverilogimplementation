@@ -589,18 +589,116 @@ endmodule
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 //tester
-module CU_tester;
+/*module CU_tester;
 
-endmodule
-//------------------------------------------
-module condEval_tester;
+	reg clk, clr, mfc;
+	reg [31:0]IR, SR;
+	wire [39:0]out;
 
-endmodule
-//------------------------------------------
+	ControlUnit cu(out, clk, clr, mfc, IR, SR);
+
+	parameter sim_time = 15;
+	initial #sim_time $finish;
+
+	initial begin
+		clk = 0;
+		#1 IR = 11100010_00000001_00000000_00000000;
+		#1 SR = 11110000_00000000_00000000_00000000;
+		#1 clk = 1;
+		#1 clr = 0;
+		#1 mfc = 0;
+
+		#3 repeat (3) #2 begin  //write B
+			IR = 11100011_10000000_00010000_00101000;
+			SR = 11100000_00000000_00000000_00000000;
+		end
+	end
+
+	initial forever #1 clk = ~clk; // Change Clock Every Time Unit
+
+	initial begin
+		$display("clk out                                        IR       SR       mfc");
+		$monitor("%b   %b   %h %h %b", clk, out, IR, SR, mfc);
+	end
+
+	initial begin
+		$display("inside cu");
+		$monitor("%b", cu.innerOut);
+	end
+endmodule*/
+//-------------------------------------------------------------------------------
+/*module inv_tester;
+	wire out;
+	reg in, inv;
+
+	inverter tp(out, in, inv);
+
+	parameter sim_time = 30;
+	initial #sim_time $finish;
+
+	initial begin
+		in = 1;
+		inv = 0;
+
+		#2 repeat (2) #2 inv = ~inv;
+		
+		#8 in = 0;
+
+		#2 repeat (2) #2 inv = ~inv;
+	end
+	initial begin	
+		$display("out in inv");
+		$monitor("%b   %b  %b", out, in, inv);
+	end
+endmodule*/
+//-------------------------------------------------------------------------------
+/*module nsa_tester;
+	wire[1:0] M;
+	reg [2:0] ns;
+	reg sts;
+
+	NSASel sel(M, ns, sts);
+
+	parameter sim_time = 70;
+	initial #sim_time $finish;
+
+	initial begin
+		ns = 3'b000;
+		sts = 1;
+		#2 repeat (7) #1 ns= ns+1'b1;
+		#18 sts = 0;
+		#18 repeat (7) #1 ns= ns-1'b1;
+
+	end
+	initial begin	
+		$display("M  ns  sts");
+		$monitor("%b %b %b", M, ns, sts);
+	end
+endmodule */
+//-------------------------------------------------------------------------------
+/*module cond_tester;
+	wire out;
+	reg [31:0] IR, str;
+	
+	condEval cond(out, IR, str);
+
+	parameter sim_time = 70;
+	initial #sim_time $finish;
+
+	initial begin
+		IR = 1110_0010_00000001_00000000_00000000;
+
+	end
+	initial begin	
+		$display("out IR                               str");
+		$monitor("%b   %b %b", out, IR, str);
+	end
+endmodule*/
+//-------------------------------------------------------------------------------
+/*module rom_tester;
+
+endmodule*/
+//-------------------------------------------------------------------------------
 module encoder_tester;
-
-endmodule
-//------------------------------------------
-module ROM_tester;
 
 endmodule
