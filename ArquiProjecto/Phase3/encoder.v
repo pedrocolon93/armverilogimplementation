@@ -581,20 +581,20 @@ module encoderOLD(output reg [6:0] out, input [31:0] IR);
 endmodule
 
 //-------------------------------------------------------------------------------
-// module enc_tester;
-// 	wire [6:0] out;
-// 	reg [31:0] IR;
+module enc_tester;
+	wire [6:0] out;
+	reg [31:0] IR;
 	
-// 	encoder encode(out, IR);
+	encoder encode(out, IR);
 
-// 	parameter sim_time = 70;
-// 	initial #sim_time $finish;
+	parameter sim_time = 70;
+	initial #sim_time $finish;
 
-// 	initial begin
-// 		IR = 32'b11100110100110000000000000000010; // 32 bit immediate shifter
-// 	end
-// 	initial begin	
-// 		$display("out 	  IR                               ");
-// 		$monitor("%b   %b", out, IR);
-// 	end
-// endmodule
+	initial begin
+		IR = 32'b11100000100000100101000000000101; // 32 bit immediate shifter
+	end
+	initial begin	
+		$display("out 	  IR                               ");
+		$monitor("%b   %b", out, IR);
+	end
+endmodule

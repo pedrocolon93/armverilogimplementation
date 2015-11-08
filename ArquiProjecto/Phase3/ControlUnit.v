@@ -577,7 +577,7 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 endmodule
 //-------------------------------------------------------------------------------
 //control unit box (output depends on ROM output)
-module ControlUnit (output reg [39:0] out, input clk, clr, mfc, input [31:0] IR, statusReg);
+module ControlUnit (output reg [39:0] out, input clk, mfc, input [31:0] IR, statusReg);
 	
 	wire [6:0] state, stateSel0, stateSel3, addToR;
 	wire [1:0] ms;
@@ -591,7 +591,7 @@ module ControlUnit (output reg [39:0] out, input clk, clr, mfc, input [31:0] IR,
 	encoder		iREnc	 (stateSel0,  IR);//Sirve
 	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
 	adder		adderAlu (addToR, 	  state, 			4'b0001);
-	IncReg		incR	 (stateSel3,  addToR, 			1'b0,		clr, 		clk);
+	IncReg		incR	 (stateSel3,  addToR, 			1'b0,		innerOut[39], 		clk);
 	ROM			rom		 (innerOut,   state, 			clk);
 	
 	always @(posedge clk)
@@ -603,41 +603,40 @@ endmodule
 //tester
 module CU_tester;
 
-	reg clk, clr, mfc;
+	reg clk, mfc;
 	reg [31:0]IR, SR;
 	wire [39:0]out;
 
-	ControlUnit cu(out, clk, clr, mfc, IR, SR);
+	ControlUnit cu(out, clk, mfc, IR, SR);
 
-	parameter sim_time = 27;
+	parameter sim_time = 130;
 	initial #sim_time $finish;
 
 	initial begin
 		SR = 0;
 		clk = 1;
-		clr = 0;
 		mfc = 0;
-		IR = 32'b11100010_00000001_00000000_00000000;
 		SR = 32'b11110000_00000000_00000000_00000000;
-		#2 IR = 32'b11100011_10000000_00010000_00101000;
-		#2 mfc = 1;
-		#2 IR = 32'b11100111_11010001_00100000_00000000;
-		#2 IR = 32'b11100101_11010001_00110000_00000010;
-		#2 IR = 32'b11100000_10000000_01010000_00000000;
-		#2 IR = 32'b11100000_10000010_01010000_00000101;
-		#2 IR = 32'b11100010_01010011_00110000_00000001;
-		#2 IR = 32'b00011010_11111111_11111111_11111101;
-		#2 IR = 32'b11100101_11000001_01010000_00000011;		 
-		#2 IR = 32'b11101010_00000000_00000000_00000001;
-		#2 IR = 32'b00001011_00000101_00000111_00000100;
-		#2 IR = 32'b11101010_11111111_11111111_11111111;
+		#7 mfc = 1; // RAM read finished
+		   IR = 32'b11100010_00000001_00000000_00000000; // pass the IR instruction to control unit
+		#8 IR = 32'b11100011_10000000_00010000_00101000;
+		#8 IR = 32'b11100111_11010001_00100000_00000000;
+		#16 IR = 32'b11100101_11010001_00110000_00000010;
+		#16 IR = 32'b11100000_10000000_01010000_00000000;
+		#8 IR = 32'b11100000_10000010_01010000_00000101;
+		#8 IR = 32'b11100010_01010011_00110000_00000001;
+		#8 IR = 32'b00011010_11111111_11111111_11111101;
+		#6 IR = 32'b11100101_11000001_01010000_00000011;		 
+		#12 IR = 32'b11101010_00000000_00000000_00000001;
+		#8 IR = 32'b00001011_00000101_00000111_00000100;
+		#18 IR = 32'b11101010_11111111_11111111_11111111;
 	end
 
 	initial forever #1 clk = ~clk; // Change Clock Every Time Unit
 
 	initial begin
-		$display("clk out                                        IR                           		innerOut    						ms");
-		$monitor("%b   %b   %b 	%b 	%b 	%b 	%b 	%b 	%b 	%b 	%b", clk, out, IR, cu.state, cu.ms, cu.invIn, cu.invOut, cu.condOut, cu.addToR, cu.stateSel0, cu.stateSel3);
+		$display("clk out                                        IR                           		State   	MuxSel InvIn   InvOut  CondOut  AdderOut	EncOut	    IncRegOut	    Time");
+		$monitor("%b   %b   %b 	%b 	%b 	   %b 	   %b 	   %b 	    %b 	%b 	%b 	    %0d", clk, out, IR, cu.state, cu.ms, cu.invIn, cu.invOut, cu.condOut, cu.addToR, cu.stateSel0, cu.stateSel3, $time);
 	end
 endmodule
 //-------------------------------------------------------------------------------
