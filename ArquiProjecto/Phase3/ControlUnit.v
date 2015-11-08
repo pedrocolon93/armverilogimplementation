@@ -81,6 +81,7 @@ module NSASel(output reg [1:0] M, input [2:0] ns, input sts);
 				1: M = 2'b00;	//encoder
 			endcase
 		3'b111: M = 2'b01;	//0
+		default: M=2'b01;
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
@@ -580,13 +581,17 @@ module ControlUnit (output reg [39:0] out, input clk, clr, mfc, input [31:0] IR,
 	wire invIn, invOut, condOut;
 	wire [52:0] innerOut;  
 
-	condEval	condEv	 (condOut, 	  IR, 				statusReg);
+	condEval	condEv	 (condOut, 	  IR, 				statusReg);//Sirve
 	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[52:51],	mfc, 		condOut);
 	inverter	inv		 (invOut, 	  invIn, 			innerOut[47]);
 	//NSASel		stateSel (ms, 		  innerOut[50:48], 	mfc);
 	NSASel		stateSel (ms, 		  innerOut[50:48], invOut);
-	encoder		iREnc	 (stateSel0,  IR);
+	encoder		iREnc	 (stateSel0,  IR);//Sirve
+
+
 	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
+
+
 	adder		adderAlu (addToR, 	  state, 			4'b0001);
 	IncReg		incR	 (stateSel3,  addToR, 			1'b1,		clr, 		clk);
 	ROM			rom		 (innerOut,   state, 			clk);
@@ -610,6 +615,7 @@ module CU_tester;
 	initial #sim_time $finish;
 
 	initial begin
+		SR = 0;
 		clk = 0;
 		clr = 0;
 		mfc = 0;
@@ -638,8 +644,8 @@ module CU_tester;
 	initial forever #1 clk = ~clk; // Change Clock Every Time Unit
 
 	initial begin
-		$display("clk out                                        IR");
-		$monitor("%b   %b   %b", clk, out, IR);
+		$display("clk out                                        IR                           Condout          innerOut    ms invin");
+		$monitor("%b   %b   %b %b %b ", clk, out, IR, cu.innerOut, cu.ms );
 	end
 endmodule
 //-------------------------------------------------------------------------------
