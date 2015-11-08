@@ -145,7 +145,7 @@
 	9) immed_8 -> 00000001
 		shifter_operand = 00000001 rotated right (2*0000) times =  0x00000001
 		The ARM assembly instruction is:
-			ORRS R3, R3, 0x00000001
+			SUBS R3, R3, 0x00000001
 
 	EXAMPLE RUN
 

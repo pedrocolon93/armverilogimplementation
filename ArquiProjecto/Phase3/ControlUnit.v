@@ -1,13 +1,53 @@
+//-------------------------------------------------------------------------------
+// IR condition evaluator
+// condEval	condEv	 (condOut, 	IR, 		     statusReg);
+module condEval(output reg out, input [31:0] IR, input [31:0] str);
+	always @ (IR, str)
+	case(IR[31:28])
+		4'b0000: if (str[30]) out = 1;				// Z=1
+				 else out = 0;
+		4'b0001: if (~str[30]) out = 1;				// Z=0
+				 else out = 0;
+		4'b0010: if (str[29]) out = 1;				// C=1
+				 else out = 0;
+		4'b0011: if (~str[29]) out = 1;				// C=0
+				 else out = 0;
+		4'b0100: if (str[31]) out = 1;				// N=1
+				 else out = 0;
+		4'b0101: if (~str[31]) out = 1;				// N=0
+				 else out = 0;
+		4'b0110: if (str[28]) out = 1;				// V=1
+				 else out = 0;
+		4'b0111: if (~str[28]) out = 1;				// V=0
+				 else out = 0;
+		4'b1000: if (str[29] == 1 && str[30] == 0) out = 1;		// C=1 & Z=0
+				 else out = 0;
+		4'b1001: if (str[29] == 0 || str[30] == 1) out = 1;		// C=0 or Z=1
+				 else out = 0;
+		4'b1010: if (str[31] == str[28]) out = 1;		// N=Z
+				 else out = 0;
+		4'b1011: if (str[31] != str[28]) out = 1;		// N!=V
+				 else out = 0;
+		4'b1100: if (str[30] == 0 && str[31] == str[28]) out = 1;	// Z=0 & N=V
+				 else out = 0;
+		4'b1101: if (str[30] == 1 || str[31] != str[28]) out = 1;	//Z=1 or N=!Z
+				 else out = 0;
+		4'b1110: out = 1;
+		4'b1111: out = 0;
+	endcase
+endmodule
 // mux to inverter with inputs if 1 bit
+//mux_4x1_1b	mux1b	 (invIn, 	  innerOut[52:51],	mfc, 		condOut);
 module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1);
 	always @ (S, I0, I1)
 	case (S)
-		1'b0: assign Y=I0;
-		1'b1: assign Y=I1;
+		2'b00: assign Y=I0;
+		2'b01: assign Y=I1;
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
 //inverter
+//inverter	inv		 (invOut, 	  invIn, 			innerOut[47]);
 module inverter(output reg out, input in, inv);
 	always @ (in, inv)
 	if(inv)	
@@ -17,6 +57,7 @@ module inverter(output reg out, input in, inv);
 endmodule
 //-------------------------------------------------------------------------------
 // 4bit mux selector upon conditions
+//NSASel		stateSel (ms, 		  innerOut[50:48], invOut);
 module NSASel(output reg [1:0] M, input [2:0] ns, input sts);
 	always @ (ns, sts)
 	case(ns)
@@ -44,6 +85,7 @@ module NSASel(output reg [1:0] M, input [2:0] ns, input sts);
 endmodule
 //-------------------------------------------------------------------------------
 // IR encoder for next state
+// encoder		iREnc	 (stateSel0,  IR);
 module encoder(output reg [6:0] out, input [31:0] IR);
 	always @(IR)
 	case(IR[27:25])
@@ -334,50 +376,27 @@ module encoder(output reg [6:0] out, input [31:0] IR);
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
-// IR condition evaluator
-module condEval(output reg out, input [31:0] IR, input [31:0] str);
-	always @ (IR, str)
-	case(IR[31:28])
-		4'b0000: if (str[30]) out = 1;				// Z=1
-				 else out = 0;
-		4'b0001: if (~str[30]) out = 1;				// Z=0
-				 else out = 0;
-		4'b0010: if (str[29]) out = 1;				// C=1
-				 else out = 0;
-		4'b0011: if (~str[29]) out = 1;				// C=0
-				 else out = 0;
-		4'b0100: if (str[31]) out = 1;				// N=1
-				 else out = 0;
-		4'b0101: if (~str[31]) out = 1;				// N=0
-				 else out = 0;
-		4'b0110: if (str[28]) out = 1;				// V=1
-				 else out = 0;
-		4'b0111: if (~str[28]) out = 1;				// V=0
-				 else out = 0;
-		4'b1000: if (str[29] == 1 && str[30] == 0) out = 1;		// C=1 & Z=0
-				 else out = 0;
-		4'b1001: if (str[29] == 0 || str[30] == 1) out = 1;		// C=0 or Z=1
-				 else out = 0;
-		4'b1010: if (str[31] == str[28]) out = 1;		// N=Z
-				 else out = 0;
-		4'b1011: if (str[31] != str[28]) out = 1;		// N!=V
-				 else out = 0;
-		4'b1100: if (str[30] == 0 && str[31] == str[28]) out = 1;	// Z=0 & N=V
-				 else out = 0;
-		4'b1101: if (str[30] == 1 || str[31] != str[28]) out = 1;	//Z=1 or N=!Z
-				 else out = 0;
-		4'b1110: out = 1;
-		4'b1111: out = 0;
+//6bit mux selector for state choosing (may increase depending on final states quantity)
+// 	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
+module mux_4x1_6b(output reg [6:0] Y, input [1:0] S, input [6:0] I0, I1, I2, I3);
+	always @ (S, I0, I1, I2, I3)
+	case (S)
+		2'b00: assign Y=I0[6:0];
+		2'b01: assign Y=I1[6:0];
+		2'b10: assign Y=I2[6:0];
+		2'b11: assign Y=I3[6:0];
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
 //state adder 
+// adder		adderAlu (addToR, 	  state, 			4'b0001);
 module adder(output reg [6:0] out, input [6:0] cs, input [3:0] add);
 	always @ (cs)
 	out = cs + add;
 endmodule
 //-------------------------------------------------------------------------------
 //state adder register
+// IncReg		incR	 (stateSel3,  addToR, 			1'b1,		clr, 		clk);
 module IncReg(output reg [6:0] Q, input [6:0] D, input EN, CLR, CLK);
 	initial Q = 6'b000000;	//Start registers with 0
 	always @ (negedge CLK, negedge CLR)
@@ -389,18 +408,8 @@ module IncReg(output reg [6:0] Q, input [6:0] D, input EN, CLR, CLK);
 			Q <= Q;	//enable off. output what came out before
 endmodule
 //-------------------------------------------------------------------------------
-//6bit mux selector for state choosing (may increase depending on final states quantity)
-module mux_4x1_6b(output reg [6:0] Y, input [1:0] S, input [6:0] I0, I1, I2, I3);
-	always @ (S, I0, I1, I2, I3)
-	case (S)
-		2'b00: assign Y=I0[6:0];
-		2'b01: assign Y=I1[6:0];
-		2'b10: assign Y=I2[6:0];
-		2'b11: assign Y=I3[6:0];
-	endcase
-endmodule
-//-------------------------------------------------------------------------------
 //ROM (output may increce, depending on signals requiered, 1bit per signal)
+// ROM			rom		 (innerOut,   state, 			clk);
 module ROM (output reg [52:0] out, input [6:0] state, input clk);
 	reg [52:0]mem[96:0];
 	initial begin 
@@ -561,7 +570,6 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 	end
 	always @ (posedge clk)
 		out = mem[state][52:0];
-
 endmodule
 //-------------------------------------------------------------------------------
 //control unit box (output depends on ROM output)
@@ -572,15 +580,16 @@ module ControlUnit (output reg [39:0] out, input clk, clr, mfc, input [31:0] IR,
 	wire invIn, invOut, condOut;
 	wire [52:0] innerOut;  
 
-	ROM			rom		 (innerOut,   state, 			clk);
-	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
-	IncReg		incR	 (stateSel3,  addToR, 			1'b1,		clr, 		clk);
-	adder		adderAlu (addToR, 	  state, 			4'b0001);
 	condEval	condEv	 (condOut, 	  IR, 				statusReg);
-	encoder		iREnc	 (stateSel0,  IR);
-	NSASel		stateSel (ms, 		  innerOut[50:48], 	mfc);
-	inverter	inv		 (invOut, 	  invIn, 			innerOut[4]);
 	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[52:51],	mfc, 		condOut);
+	inverter	inv		 (invOut, 	  invIn, 			innerOut[47]);
+	//NSASel		stateSel (ms, 		  innerOut[50:48], 	mfc);
+	NSASel		stateSel (ms, 		  innerOut[50:48], invOut);
+	encoder		iREnc	 (stateSel0,  IR);
+	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
+	adder		adderAlu (addToR, 	  state, 			4'b0001);
+	IncReg		incR	 (stateSel3,  addToR, 			1'b1,		clr, 		clk);
+	ROM			rom		 (innerOut,   state, 			clk);
 	
 	always @(posedge clk)
 		out = innerOut[39:0];
@@ -607,23 +616,23 @@ module CU_tester;
 		#1 IR = 32'b11100010_00000001_00000000_00000000;
 		   SR = 32'b11110000_00000000_00000000_00000000;
 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 		 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 		 
-		#2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
 	end
 
 	initial forever #1 clk = ~clk; // Change Clock Every Time Unit
