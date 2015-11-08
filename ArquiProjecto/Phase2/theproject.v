@@ -606,9 +606,8 @@ module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, 
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, input [3:0] REGCLR, input [3:0] M0SEL, input [3:0] M1SEL, input REGCLK, RFE);
+module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, input REGCLR, input [3:0] M0SEL, input [3:0] M1SEL, input REGCLK, RFE);
 	wire [15:0] decoder2RegEnable; // 16 lines of one bit for Register Enables
-	wire [15:0]	decoder2RegClear; // 16 lines of one bit for Register Clears
 	
 	wire [31:0] reg0ToMux; // 1 line of 32 bits
 	wire [31:0] reg1ToMux; // 1 line of 32 bits
@@ -628,24 +627,23 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 	wire [31:0] reg15ToMux; // 1 line of 32 bits
 
 	dec4x16_32b	D0 (decoder2RegEnable, REGEN, RFE); // Enable selector
-	dec4x16_32b	D1 (decoder2RegClear, REGCLR, RFE); // Clear Selector
 
-	reg_32b R0  (reg0ToMux,  PC, decoder2RegEnable[0],  decoder2RegClear[0], REGCLK);
-	reg_32b R1  (reg1ToMux,  PC, decoder2RegEnable[1],  decoder2RegClear[1], REGCLK);
-	reg_32b R2  (reg2ToMux,  PC, decoder2RegEnable[2],  decoder2RegClear[2], REGCLK);
-	reg_32b R3  (reg3ToMux,  PC, decoder2RegEnable[3],  decoder2RegClear[3], REGCLK);
-	reg_32b R4  (reg4ToMux,  PC, decoder2RegEnable[4],  decoder2RegClear[4], REGCLK);
-	reg_32b R5  (reg5ToMux,  PC, decoder2RegEnable[5],  decoder2RegClear[5], REGCLK);
-	reg_32b R6  (reg6ToMux,  PC, decoder2RegEnable[6],  decoder2RegClear[6], REGCLK);
-	reg_32b R7  (reg7ToMux,  PC, decoder2RegEnable[7],  decoder2RegClear[7], REGCLK);
-	reg_32b R8  (reg8ToMux,  PC, decoder2RegEnable[8],  decoder2RegClear[8], REGCLK);
-	reg_32b R9  (reg9ToMux,  PC, decoder2RegEnable[9],  decoder2RegClear[9], REGCLK);
-	reg_32b R10 (reg10ToMux, PC, decoder2RegEnable[10], decoder2RegClear[10],REGCLK);
-	reg_32b R11 (reg11ToMux, PC, decoder2RegEnable[11], decoder2RegClear[11],REGCLK);
-	reg_32b_MAGIC R12 (reg12ToMux, PC, decoder2RegEnable[12], decoder2RegClear[12],REGCLK);
-	reg_32b R13 (reg13ToMux, PC, decoder2RegEnable[13], decoder2RegClear[13],REGCLK);
-	reg_32b R14 (reg14ToMux, PC, decoder2RegEnable[14], decoder2RegClear[14],REGCLK);
-	reg_32b R15 (reg15ToMux, PC, decoder2RegEnable[15], decoder2RegClear[15],REGCLK);
+	reg_32b R0  (reg0ToMux,  PC, decoder2RegEnable[0],  REGCLR, REGCLK);
+	reg_32b R1  (reg1ToMux,  PC, decoder2RegEnable[1],  REGCLR, REGCLK);
+	reg_32b R2  (reg2ToMux,  PC, decoder2RegEnable[2],  REGCLR, REGCLK);
+	reg_32b R3  (reg3ToMux,  PC, decoder2RegEnable[3],  REGCLR, REGCLK);
+	reg_32b R4  (reg4ToMux,  PC, decoder2RegEnable[4],  REGCLR, REGCLK);
+	reg_32b R5  (reg5ToMux,  PC, decoder2RegEnable[5],  REGCLR, REGCLK);
+	reg_32b R6  (reg6ToMux,  PC, decoder2RegEnable[6],  REGCLR, REGCLK);
+	reg_32b R7  (reg7ToMux,  PC, decoder2RegEnable[7],  REGCLR, REGCLK);
+	reg_32b R8  (reg8ToMux,  PC, decoder2RegEnable[8],  REGCLR, REGCLK);
+	reg_32b R9  (reg9ToMux,  PC, decoder2RegEnable[9],  REGCLR, REGCLK);
+	reg_32b R10 (reg10ToMux, PC, decoder2RegEnable[10], REGCLR, REGCLK);
+	reg_32b R11 (reg11ToMux, PC, decoder2RegEnable[11], REGCLR, REGCLK);
+	reg_32b_MAGIC R12 (reg12ToMux, PC, decoder2RegEnable[12], REGCLR, REGCLK);
+	reg_32b R13 (reg13ToMux, PC, decoder2RegEnable[13], REGCLR, REGCLK);
+	reg_32b R14 (reg14ToMux, PC, decoder2RegEnable[14], REGCLR, REGCLK);
+	reg_32b R15 (reg15ToMux, PC, decoder2RegEnable[15], REGCLR, REGCLK);
 
 	mux8x1_32b M0 (A, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
 		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M0SEL);
@@ -717,7 +715,7 @@ module datapath;
 	wire [3:0] RA; // Selector of A Mux is 3 bits
 	wire [3:0] RB; // Selector of B Mux is 3 bits
 	wire [3:0] RC; // Register Enable Selectors (Input to Decoders 0 and 1)
-	wire [3:0] RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
+	wire RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
 
 
 	reg MFA;//Signals for memory
@@ -772,7 +770,6 @@ module datapath;
 	mux_4x1_4b rc_mux(RC, cuSignals[22:21], cuSignals[26:23], ir_out[15:12], ir_out[19:16],4'b0000);
 
 	//Register file
-	//registerFile registerFile (LEFT_OP, B, PC, RC, RD, RA, RB, CLK, E0); // Instance of Entire Register File
 	registerFile registerFile (LEFT_OP, B, PC, RC, cuSignals[39], RA, RB, CLK, cuSignals[38]);
 	
 	//Input mux
