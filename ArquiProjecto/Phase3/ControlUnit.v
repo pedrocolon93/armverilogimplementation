@@ -644,8 +644,8 @@ module CU_tester;
 	initial forever #1 clk = ~clk; // Change Clock Every Time Unit
 
 	initial begin
-		$display("clk out                                        IR                           Condout          innerOut    ms invin");
-		$monitor("%b   %b   %b %b %b ", clk, out, IR, cu.innerOut, cu.ms );
+		$display("clk out                                        IR                           		innerOut    											ms");
+		$monitor("%b   %b   %b 	%b 	%b ", clk, out, IR, cu.innerOut, cu.ms );
 	end
 endmodule
 //-------------------------------------------------------------------------------
