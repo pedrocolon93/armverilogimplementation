@@ -732,6 +732,7 @@ module datapath;
 	
 	//Clock
 	reg CLK; // Register Clock Enable (All Clocks of Registers are Shared)
+	reg clr;
 
 	//General wires
 	wire CIN;		
@@ -745,7 +746,7 @@ module datapath;
 
 	reg [31:0]data;
 	
-	wire [31:0]mem_data;
+	wire [31:0] mem_data;
 	wire [31:0] ir_out, mdr_out, mdr_in;
 	wire [11:0] twelve_bit_shift_reg_out;
 	reg [31:0]input_register;
@@ -754,43 +755,66 @@ module datapath;
 	wire [31:0] ser_out;
 
 	wire [31:0] status_register_out;
-	reg [3:0] RA_CU,RB_CU,RC_CU;
+	reg [3:0] RA_CU, RB_CU, RC_CU;
 	wire SC;
+
+	wire [39:0] cuSignals;
 	 
+	//ControlUnit (output reg [39:0] out, input clk, clr, mfc, input [31:0] IR, statusReg);
+	ControlUnit cu (cuSignals, CLK, MFC, ir_out, shifter_output);
+
 	//Register file muxes
-	mux_2x1_4b ra_mux(RA,S8,RA_CU,ir_out[19:16]);
-	mux_4x1_4b rb_mux(RB,{S10,S9},RB_CU,ir_out[3:0],ir_out[15:12],ir_out[19:16]);
-	mux_4x1_4b rc_mux(RC,{S16,S11},RC_CU,ir_out[15:12],ir_out[19:16],0);
+	//mux_2x1_4b ra_mux(RA,S8,RA_CU,ir_out[19:16]);
+	mux_2x1_4b ra_mux(RA, cuSignals[33], cuSignals[37:32], ir_out[19:16]);
+	//mux_4x1_4b rb_mux(RB,{S10,S9},RB_CU,ir_out[3:0],ir_out[15:12],ir_out[19:16]);
+	mux_4x1_4b rb_mux(RB, cuSignals[28:27], cuSignals[32:27], ir_out[3:0], ir_out[15:12], ir_out[19:16]);
+	//mux_4x1_4b rc_mux(RC,{S16,S11},RC_CU,ir_out[15:12],ir_out[19:16],0);
+	mux_4x1_4b rc_mux(RC, cuSignals[22:21], cuSignals[26:23], ir_out[15:12], ir_out[19:16],0);
+
 	//Register file
-	registerFile registerFile (LEFT_OP, B, PC, RC, RD, RA, RB, CLK, E0); // Instance of Entire Register File
+	//registerFile registerFile (LEFT_OP, B, PC, RC, RD, RA, RB, CLK, E0); // Instance of Entire Register File
+	registerFile registerFile (LEFT_OP, B, PC, RC, cuSignals[39], RA, RB, CLK, cuSignals[38]);
+	
 	//Input mux
-	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S2,S1,S0}, B, shifter_output, ir_out, ser_out,4,{{20{1'b0}},ir_out[11:0]},{{20{1'b0}},ir_out[11:0]},mdr_out);
+	//mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S2,S1,S0}, B, shifter_output, ir_out, ser_out,4,{{20{1'b0}},ir_out[11:0]},{{20{1'b0}},ir_out[11:0]},mdr_out);
+	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, cuSignals[20:18], B, shifter_output, ir_out, ser_out,4,{{20{1'b0}},ir_out[11:0]},{{20{1'b0}},ir_out[11:0]},mdr_out);
+	
 	//Alu
-	mux_2x1_1b alu_cin_mux(CIN,S12,SC,TSROUT[29]);
-	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, {S6,S5,S4,S3}, CIN);
+	//mux_2x1_1b alu_cin_mux(CIN,S12,SC,TSROUT[29]);
+	mux_2x1_1b alu_cin_mux(CIN, cuSignals[13], SC, TSROUT[29]);
+	//ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, {S6,S5,S4,S3}, CIN);
+	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, cuSignals[17:14], CIN);
 	//Status register
-	mux_2x1_1b sr_mux(E5,S15,1,ir_out[20]);
-	reg_32 status_register(TSROUT, {N,Z,C,V,28'b0000_0000_0000_0000_0000_0000_0000},E5,1'b1,CLK);
+	//mux_2x1_1b sr_mux(E5,S15,1,ir_out[20]);
+	mux_2x1_1b sr_mux(E5, cuSignals[6], 1, ir_out[20]);
+	reg_32 status_register(TSROUT, {N,Z,C,V,28'b0000_0000_0000_0000_0000_0000_0000}, E5, cuSignals[39], CLK);
 	//Right side
-	mux_2x1 mdr_mux(mdr_in, S7, PC,ir_out);
-	reg_32 mdr(mdr_out,mdr_in,E7,1'b1,CLK);
+	//mux_2x1 mdr_mux(mdr_in, S7, PC,ir_out);
+	mux_2x1 mdr_mux(mdr_in, cuSignals[7], PC, ir_out);
+	reg_32 mdr(mdr_out, mdr_in, cuSignals[8], cuSignals[39], CLK);
 
-
-	reg_32 mar(mar_to_ram,PC,E3,1'b1,CLK);
+	
+	//reg_32 mar(mar_to_ram,PC,E3,1'b1,CLK);
+	reg_32 mar(mar_to_ram, PC, cuSignals[9], cuSignals[39], CLK);
 
 
 	//ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
-	mux_8x1_2b misc_mux(mux_misc_out,{ir_out[20],ir_out[6],ir_out[5]},0,2'b01,2'b10,2'b10,2'b10,0,2'b00,2'b01);
-	mux_2x1_2b reg_mux(mux_reg_output,ir_out[22],2'b00,2'b01);
-	mux_4x1_2b mas_mux(MAS,{S14,S13},CUMAS,mux_misc_out,mux_reg_output,0);
-	ramdummyreadfile ram(mem_data, finished, en, rw, mar_to_ram[7:0], mdr_out, MAS);
+	mux_8x1_2b misc_mux(mux_misc_out, {ir_out[20],ir_out[6],ir_out[5]}, 0 ,2'b01, 2'b10, 2'b10, 2'b10, 0, 2'b00, 2'b01);
+	mux_2x1_2b reg_mux(mux_reg_output, ir_out[22], 2'b00, 2'b01);
+	//mux_4x1_2b mas_mux(MAS,{S14,S13},CUMAS,mux_misc_out,mux_reg_output,0);
+	mux_4x1_2b mas_mux(MAS, cuSignals[5:4], cuSignals[3:2], mux_misc_out, mux_reg_output, 0);
+	//ramdummyreadfile ram(mem_data, finished, en, rw, mar_to_ram[7:0], mdr_out, MAS);
+	ramdummyreadfile ram(mem_data, finished, cuSignals[0], cuSignals[1], mar_to_ram[7:0], mdr_out, MAS);
 
-	reg_32 ir(ir_out, mem_data,E3,1'b1,CLK);
+	//reg_32 ir(ir_out, mem_data,E3,1'b1,CLK);
+	reg_32 ir(ir_out, mem_data, cuSignals[10], cuSignals[39], CLK);
 
 
-	shifter sh(B,ir_out[11:0],shift_type,shifter_output);
+	//shifter sh(B,ir_out[11:0],shift_type,shifter_output);
+	shifter sh(B, ir_out[11:0], cuSignals[12], shifter_output);
 
-	reg_32 ser(ser_out,{{18{ir_out[11]}},ir_out[11:0],2'b00},E1,1'b1,CLK);
+	//reg_32 ser(ser_out,{{18{ir_out[11]}},ir_out[11:0],2'b00},E1,1'b1,CLK);
+	reg_32 ser(ser_out, {{18{ir_out[11]}},ir_out[11:0],2'b00}, cuSignals[11], cuSignals[39], CLK);
 	
 
 
