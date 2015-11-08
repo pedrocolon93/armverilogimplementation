@@ -765,11 +765,11 @@ module datapath;
 
 	//Register file muxes
 	//mux_2x1_4b ra_mux(RA,S8,RA_CU,ir_out[19:16]);
-	mux_2x1_4b ra_mux(RA, cuSignals[33], cuSignals[37:32], ir_out[19:16]);
+	mux_2x1_4b ra_mux(RA, cuSignals[33], cuSignals[37:34], ir_out[19:16]);
 	//mux_4x1_4b rb_mux(RB,{S10,S9},RB_CU,ir_out[3:0],ir_out[15:12],ir_out[19:16]);
-	mux_4x1_4b rb_mux(RB, cuSignals[28:27], cuSignals[32:27], ir_out[3:0], ir_out[15:12], ir_out[19:16]);
+	mux_4x1_4b rb_mux(RB, cuSignals[28:27], cuSignals[32:29], ir_out[3:0], ir_out[15:12], ir_out[19:16]);
 	//mux_4x1_4b rc_mux(RC,{S16,S11},RC_CU,ir_out[15:12],ir_out[19:16],0);
-	mux_4x1_4b rc_mux(RC, cuSignals[22:21], cuSignals[26:23], ir_out[15:12], ir_out[19:16],0);
+	mux_4x1_4b rc_mux(RC, cuSignals[22:21], cuSignals[26:23], ir_out[15:12], ir_out[19:16],4'b0000);
 
 	//Register file
 	//registerFile registerFile (LEFT_OP, B, PC, RC, RD, RA, RB, CLK, E0); // Instance of Entire Register File
@@ -819,9 +819,10 @@ module datapath;
 
 
 	//Vamos a probar 
-	parameter sim_time =60;
+	parameter sim_time = 150;
+	initial #sim_time $finish;
 
-	initial begin
+	/*initial begin
 		//State 0 microprogram
 		#4 begin
 			$display("start");
@@ -937,15 +938,20 @@ module datapath;
 		// 	S0 =0;
 
 		// end
+	end*/
+
+	initial begin 
+		CLK = 1;
 	end
 
 	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
-			
-	initial #sim_time $finish;
+	
+	initial begin 
 
-	initial begin
+	end
+	/*initial begin
 		// $display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	               12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
 		// // $monitor ("%d",PC);
 		// $monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d      %d %b %0b %0d %0d %0d %0d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,alu_in_sel_mux_to_alu,     CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, sh.amounttointernal, sh.valuetointernal, sh.shifttypetointernal); //imprime las señales
-	end
+	end*/
 endmodule	

@@ -393,7 +393,7 @@ endmodule
 //-------------------------------------------------------------------------------
 //state adder 
 // adder		adderAlu (addToR, 	  state, 			4'b0001);
-module adder(output reg [6:0] out, input [6:0] cs, input [3:0] add);
+module cuAdder(output reg [6:0] out, input [6:0] cs, input [3:0] add);
 	initial out = 7'b0000000;
 	always @ (cs)
 	out = cs + add;
@@ -590,7 +590,7 @@ module ControlUnit (output reg [39:0] out, input clk, mfc, input [31:0] IR, stat
 	NSASel		stateSel (ms, 		  innerOut[50:48], invOut);
 	encoder		iREnc	 (stateSel0,  IR);//Sirve
 	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
-	adder		adderAlu (addToR, 	  state, 			4'b0001);
+	cuAdder		adderAlu (addToR, 	  state, 			4'b0001);
 	IncReg		incR	 (stateSel3,  addToR, 			1'b0,		innerOut[39], 		clk);
 	ROM			rom		 (innerOut,   state, 			clk);
 	
@@ -601,7 +601,7 @@ endmodule
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 //tester
-module CU_tester;
+/*module CU_tester;
 
 	reg clk, mfc;
 	reg [31:0]IR, SR;
@@ -638,7 +638,7 @@ module CU_tester;
 		$display("clk out                                        IR                           		State   	MuxSel InvIn   InvOut  CondOut  AdderOut	EncOut	    IncRegOut	    Time");
 		$monitor("%b   %b   %b 	%b 	%b 	   %b 	   %b 	   %b 	    %b 	%b 	%b 	    %0d", clk, out, IR, cu.state, cu.ms, cu.invIn, cu.invOut, cu.condOut, cu.addToR, cu.stateSel0, cu.stateSel3, $time);
 	end
-endmodule
+endmodule*/
 //-------------------------------------------------------------------------------
 /*module inv_tester;
 	wire out;
