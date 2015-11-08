@@ -1,4 +1,3 @@
-//-------------------------------------------------------------------------------
 // IR condition evaluator
 // condEval	condEv	 (condOut, 	IR, 		     statusReg);
 module condEval(output reg out, input [31:0] IR, input [31:0] str);
@@ -34,8 +33,10 @@ module condEval(output reg out, input [31:0] IR, input [31:0] str);
 				 else out = 0;
 		4'b1110: out = 1;
 		4'b1111: out = 0;
+		default: out = 1;
 	endcase
 endmodule
+//-------------------------------------------------------------------------------
 // mux to inverter with inputs if 1 bit
 //mux_4x1_1b	mux1b	 (invIn, 	  innerOut[52:51],	mfc, 		condOut);
 module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1);
@@ -43,6 +44,7 @@ module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1);
 	case (S)
 		2'b00: assign Y=I0;
 		2'b01: assign Y=I1;
+		default: Y=I1;
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
@@ -81,7 +83,6 @@ module NSASel(output reg [1:0] M, input [2:0] ns, input sts);
 				1: M = 2'b00;	//encoder
 			endcase
 		3'b111: M = 2'b01;	//0
-		default: M=2'b01;
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
@@ -386,12 +387,14 @@ module mux_4x1_6b(output reg [6:0] Y, input [1:0] S, input [6:0] I0, I1, I2, I3)
 		2'b01: assign Y=I1[6:0];
 		2'b10: assign Y=I2[6:0];
 		2'b11: assign Y=I3[6:0];
+		default: Y=I1;
 	endcase
 endmodule
 //-------------------------------------------------------------------------------
 //state adder 
 // adder		adderAlu (addToR, 	  state, 			4'b0001);
 module adder(output reg [6:0] out, input [6:0] cs, input [3:0] add);
+	initial out = 7'b0000000;
 	always @ (cs)
 	out = cs + add;
 endmodule
@@ -417,7 +420,7 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 		//fetch and decode
 		//			        52   50  47  46     |39  38  37   33 32   28     26   22     20    17    13  12  11 10 9  8  7  6   5      3   1   0
 		// 			     | s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
-		mem[0][52:0]  = 53'b00___011_0___0000000_0___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
+		mem[0][52:0]  = 53'b00___011_0___0000001_0___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
 		mem[1][52:0]  = 53'b00___011_0___0000000_1___1___0000_0__1111_00_____0000_00_____000___1101__0___0___1__1__0__1__0__1___00_____00__1___0;
 		mem[2][52:0]  = 53'b00___011_0___0000000_1___0___1111_0__0000_00_____1111_00_____101___0100__0___0___1__1__1__1__0__1___00_____00__1___0;
 		mem[3][52:0]  = 53'b00___101_1___0000011_1___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__0__1__1__0__1___00_____01__0___1;
@@ -584,16 +587,11 @@ module ControlUnit (output reg [39:0] out, input clk, clr, mfc, input [31:0] IR,
 	condEval	condEv	 (condOut, 	  IR, 				statusReg);//Sirve
 	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[52:51],	mfc, 		condOut);
 	inverter	inv		 (invOut, 	  invIn, 			innerOut[47]);
-	//NSASel		stateSel (ms, 		  innerOut[50:48], 	mfc);
 	NSASel		stateSel (ms, 		  innerOut[50:48], invOut);
 	encoder		iREnc	 (stateSel0,  IR);//Sirve
-
-
 	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
-
-
 	adder		adderAlu (addToR, 	  state, 			4'b0001);
-	IncReg		incR	 (stateSel3,  addToR, 			1'b1,		clr, 		clk);
+	IncReg		incR	 (stateSel3,  addToR, 			1'b0,		clr, 		clk);
 	ROM			rom		 (innerOut,   state, 			clk);
 	
 	always @(posedge clk)
@@ -611,41 +609,35 @@ module CU_tester;
 
 	ControlUnit cu(out, clk, clr, mfc, IR, SR);
 
-	parameter sim_time = 20;
+	parameter sim_time = 27;
 	initial #sim_time $finish;
 
 	initial begin
 		SR = 0;
-		clk = 0;
+		clk = 1;
 		clr = 0;
 		mfc = 0;
-		#1 IR = 32'b11100010_00000001_00000000_00000000;
-		   SR = 32'b11110000_00000000_00000000_00000000;
-
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
-
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
-
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
-
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
-
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
-		 
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
-
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
-
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
-		 
-		// #2 IR = IR - 32'b00010000_00000000_00000000_00000000;
+		IR = 32'b11100010_00000001_00000000_00000000;
+		SR = 32'b11110000_00000000_00000000_00000000;
+		#2 IR = 32'b11100011_10000000_00010000_00101000;
+		#2 mfc = 1;
+		#2 IR = 32'b11100111_11010001_00100000_00000000;
+		#2 IR = 32'b11100101_11010001_00110000_00000010;
+		#2 IR = 32'b11100000_10000000_01010000_00000000;
+		#2 IR = 32'b11100000_10000010_01010000_00000101;
+		#2 IR = 32'b11100010_01010011_00110000_00000001;
+		#2 IR = 32'b00011010_11111111_11111111_11111101;
+		#2 IR = 32'b11100101_11000001_01010000_00000011;		 
+		#2 IR = 32'b11101010_00000000_00000000_00000001;
+		#2 IR = 32'b00001011_00000101_00000111_00000100;
+		#2 IR = 32'b11101010_11111111_11111111_11111111;
 	end
 
 	initial forever #1 clk = ~clk; // Change Clock Every Time Unit
 
 	initial begin
-		$display("clk out                                        IR                           		innerOut    											ms");
-		$monitor("%b   %b   %b 	%b 	%b ", clk, out, IR, cu.innerOut, cu.ms );
+		$display("clk out                                        IR                           		innerOut    						ms");
+		$monitor("%b   %b   %b 	%b 	%b 	%b 	%b 	%b 	%b 	%b 	%b", clk, out, IR, cu.state, cu.ms, cu.invIn, cu.invOut, cu.condOut, cu.addToR, cu.stateSel0, cu.stateSel3);
 	end
 endmodule
 //-------------------------------------------------------------------------------
