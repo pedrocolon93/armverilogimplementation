@@ -319,6 +319,25 @@ module mux_4x1(output reg[31:0] Y, input [1:0] S, input [31:0] I0, I1, I2, I3);
 	endcase
 endmodule
 
+module mux_4x1_2b(output reg[1:0] Y, input [1:0] S, input [1:0] I0, I1, I2, I3);
+	always @ (S, I0, I1, I2, I3)
+	case (S)
+		2'b00: assign Y=I0[1:0];
+		2'b01: assign Y=I1[1:0];
+		2'b10: assign Y=I2[1:0];
+		2'b11: assign Y=I3[1:0];
+	endcase
+endmodule
+
+module mux_4x1_4b(output reg[3:0] Y, input [1:0] S, input [3:0] I0, I1, I2, I3);
+	always @ (S, I0, I1, I2, I3)
+	case (S)
+		2'b00: assign Y=I0[3:0];
+		2'b01: assign Y=I1[3:0];
+		2'b10: assign Y=I2[3:0];
+		2'b11: assign Y=I3[3:0];
+	endcase
+endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 module mux_8x1(output reg[31:0] Y, input [2:0] S, input [31:0] I0, I1, I2, I3, I4,I5,I6,I7);
 	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
@@ -334,13 +353,34 @@ module mux_8x1(output reg[31:0] Y, input [2:0] S, input [31:0] I0, I1, I2, I3, I
 	endcase
 endmodule
 
+module mux_8x1_2b(output reg[1:0] Y, input [2:0] S, input [1:0] I0, I1, I2, I3, I4,I5,I6,I7);
+	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
+	case (S)
+		0: assign Y=I0;
+		1: assign Y=I1;
+		2: assign Y=I2;
+		3: assign Y=I3;
+		4: assign Y=I4;
+		5: assign Y=I5;
+		6: assign Y=I6;
+		7: assign Y=I7;
+	endcase
+endmodule
+
 //---------------------------------------------------------------------------------------------------------------------------------------
 module mux_2x1(output [31:0] Y, input S, input [31:0] I0, I1);
 	assign Y=S? I1:I0;
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
+module mux_2x1_1b(output Y, input S, input I0, I1);
+	assign Y=S? I1:I0;
+endmodule
 module mux_2x1_2b(output [1:0] Y, input S, input [1:0] I0, I1);
+	assign Y=S? I1:I0;
+endmodule
+
+module mux_2x1_4b(output [3:0] Y, input S, input [3:0] I0, I1);
 	assign Y=S? I1:I0;
 endmodule
 
@@ -669,24 +709,21 @@ endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 module datapath;
 	//CU Signals
-	reg E0,E2,E3,E4,E5,E6;//Enables the register that holds pc+4
-	reg S0,S00;//Selects whether its pc or pc+4
+	reg E0,E1,E2,E3,E4;//Enables the register that holds pc+4
+	wire E5;
+	reg S0,S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16;//Selects whether its pc or pc+4
 
 
-	reg [3:0] RA; // Selector of A Mux is 3 bits
-	reg [3:0] RB; // Selector of B Mux is 3 bits
-	reg [3:0] RC; // Register Enable Selectors (Input to Decoders 0 and 1)
-	reg [3:0] RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
-	reg RFE; // Decoder and Mux Enabler (All Enables of Decoders are Shared)
+	wire [3:0] RA; // Selector of A Mux is 3 bits
+	wire [3:0] RB; // Selector of B Mux is 3 bits
+	wire [3:0] RC; // Register Enable Selectors (Input to Decoders 0 and 1)
+	wire [3:0] RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
 
-	reg S8, S9,S10, S11;
-	reg S4,S5,S6,S7;//Function select for alu
-	reg S1,S2,S3;
 
-	reg en;//Signals for memory
-	reg rw;
-	reg [1:0]dataSize;
-	wire finished;
+	reg MFA;//Signals for memory
+	reg RW;
+	wire [1:0]MAS;
+	wire MFC;
 
 	reg shift_type;//shifter
 
@@ -697,17 +734,19 @@ module datapath;
 	reg CLK; // Register Clock Enable (All Clocks of Registers are Shared)
 
 	//General wires
-	reg CIN;		
+	wire CIN;		
 	
-	wire [31:0] PC, LEFT_OP, B;
-	wire [31:0] alu_in_sel_mux_to_alu,pc_plus_4_mux_to_rf, register_to_mux, adder_to_register;
+	wire [31:0] PC, LEFT_OP, B,TSROUT;
+
+
+	wire [31:0] alu_in_sel_mux_to_alu, register_to_mux, adder_to_register;
 	wire [31:0] mar_to_ram;
-	wire [1:0] mux_reg_output, mux_mas_out, mux_misc_out;
+	wire [1:0] mux_reg_output, mux_mas_out, mux_misc_out,CUMAS;
 
 	reg [31:0]data;
 	
 	wire [31:0]mem_data;
-	wire [31:0] ir_out;
+	wire [31:0] ir_out, mdr_out, mdr_in;
 	wire [11:0] twelve_bit_shift_reg_out;
 	reg [31:0]input_register;
 
@@ -715,41 +754,43 @@ module datapath;
 	wire [31:0] ser_out;
 
 	wire [31:0] status_register_out;
-
-	reg something;
-	//Components 
-	adder pc_plus_4(PC, 4, adder_to_register);
-
-	reg_32 sum_holder_register (register_to_mux, adder_to_register, E0, 1'b1,CLK);
-
-	mux_4x1 rf_entry_mux(pc_plus_4_mux_to_rf, {S00, S0}, PC, register_to_mux,3,3);
-
-	registerFile registerFile (LEFT_OP, B, pc_plus_4_mux_to_rf, RC, RD, RA, RB, CLK, RFE); // Instance of Entire Register File
-
-	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S3,S2,S1}, B, shifter_output,{{20{1'b0}},twelve_bit_shift_reg_out}, ir_out, ser_out,0,0,0);
-
-	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, {S7,S6,S5,S4}, CIN);
-
+	reg [3:0] RA_CU,RB_CU,RC_CU;
+	wire SC;
+	 
+	//Register file muxes
+	mux_2x1_4b ra_mux(RA,S8,RA_CU,ir_out[19:16]);
+	mux_4x1_4b rb_mux(RB,{S10,S9},RB_CU,ir_out[3:0],ir_out[15:12],ir_out[19:16]);
+	mux_4x1_4b rc_mux(RC,{S16,S11},RC_CU,ir_out[15:12],ir_out[19:16],0);
+	//Register file
+	registerFile registerFile (LEFT_OP, B, PC, RC, RD, RA, RB, CLK, E0); // Instance of Entire Register File
+	//Input mux
+	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, {S2,S1,S0}, B, shifter_output, ir_out, ser_out,4,{{20{1'b0}},ir_out[11:0]},{{20{1'b0}},ir_out[11:0]},mdr_out);
+	//Alu
+	mux_2x1_1b alu_cin_mux(CIN,S12,SC,TSROUT[29]);
+	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, {S6,S5,S4,S3}, CIN);
+	//Status register
+	mux_2x1_1b sr_mux(E5,S15,1,ir_out[20]);
+	reg_32 status_register(TSROUT, {N,Z,C,V,28'b0000_0000_0000_0000_0000_0000_0000},E5,1'b1,CLK);
 	//Right side
-	reg_32 mar(mar_to_ram,PC,E5,1'b1,CLK);
+	mux_2x1 mdr_mux(mdr_in, S7, PC,ir_out);
+	reg_32 mdr(mdr_out,mdr_in,E7,1'b1,CLK);
+
+
+	reg_32 mar(mar_to_ram,PC,E3,1'b1,CLK);
 
 
 	//ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
-	ramdummyreadfile ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
+	mux_8x1_2b misc_mux(mux_misc_out,{ir_out[20],ir_out[6],ir_out[5]},0,2'b01,2'b10,2'b10,2'b10,0,2'b00,2'b01);
+	mux_2x1_2b reg_mux(mux_reg_output,ir_out[22],2'b00,2'b01);
+	mux_4x1_2b mas_mux(MAS,{S14,S13},CUMAS,mux_misc_out,mux_reg_output,0);
+	ramdummyreadfile ram(mem_data, finished, en, rw, mar_to_ram[7:0], mdr_out, MAS);
 
 	reg_32 ir(ir_out, mem_data,E3,1'b1,CLK);
 
-	reg_12b r_12(twelve_bit_shift_reg_out, ir_out[11:0],E4,1'b1,CLK);
 
-	shifter sh(B,twelve_bit_shift_reg_out,shift_type,shifter_output);
+	shifter sh(B,ir_out[11:0],shift_type,shifter_output);
 
-	reg_32 ser(ser_out,{{18{twelve_bit_shift_reg_out[11]}},twelve_bit_shift_reg_out[11:0],2'b00},E2,1'b1,CLK);
-
-	reg_32 status_register(status_register_out, {N,Z,C,V,28'b0000_0000_0000_0000_0000_0000_0000},E6,1'b1,CLK);
-
-	mux_2x1 mux_reg(mux_reg_output, S8, 2'b00,2'b11);
-	mux_8x1 mux_misc(mux_misc_out, {S11,S10,S9}, 2'b00,2'b00,2'b00,2'b00,2'b00,2'b00,2'b00,2'b00);
-	mux_4x1 mux_mas(mux_mas_out,{S13,S12},2'b00,mux_misc_out,mux_reg,0);
+	reg_32 ser(ser_out,{{18{ir_out[11]}},ir_out[11:0],2'b00},E1,1'b1,CLK);
 	
 
 
@@ -763,58 +804,58 @@ module datapath;
 			CLK  = 1;
 			//Do nothing
 		end
-		#4 begin
-			$display("Stating 4");
+		// #4 begin
+		// 	$display("Stating 4");
 
-			E0 = 0;
-			E2 = 0;
+		// 	E0 = 0;
+		// 	E2 = 0;
 
-			S00 = 0;
-			S0 =1;
+		// 	S00 = 0;
+		// 	S0 =1;
 				
-			RFE = 0;
-			RC  = 15;
-			RB  = 15;
+		// 	RFE = 0;
+		// 	RC  = 15;
+		// 	RB  = 15;
 
-			S3  = 0;
-			S2  = 0;
-			S1  = 0;
+		// 	S3  = 0;
+		// 	S2  = 0;
+		// 	S1  = 0;
 
-			S7 = 1;
-			S6 = 1;
-			S5 = 0;
-			S4 = 1;
+		// 	S7 = 1;
+		// 	S6 = 1;
+		// 	S5 = 0;
+		// 	S4 = 1;
 
-			E5 = 0;
+		// 	E5 = 0;
 
-			en = 1;
-			rw = 1;
-			dataSize = 2'b10;
+		// 	en = 1;
+		// 	rw = 1;
+		// 	dataSize = 2'b10;
 
-			E3 = 0;
-			E4 = 0;
-		end
-		#8 begin
-			$display("Starting 8");
-			shift_type = 1;
-			E0 = 1;
-			E5 = 1;
+		// 	E3 = 0;
+		// 	E4 = 0;
+		// end
+		// #8 begin
+		// 	$display("Starting 8");
+		// 	shift_type = 1;
+		// 	E0 = 1;
+		// 	E5 = 1;
 
-			RC = ir_out[15:12];
-			RA = ir_out[15:12];
-			RB = ir_out[3:0];
+		// 	RC = ir_out[15:12];
+		// 	RA = ir_out[15:12];
+		// 	RB = ir_out[3:0];
 			
-			S3  = 0;
-			S2  = 0;
-			S1  = 1;
+		// 	S3  = 0;
+		// 	S2  = 0;
+		// 	S1  = 1;
 
-			S00 = 0;
-			S0 =0;
+		// 	S00 = 0;
+		// 	S0 =0;
 
-		end
-		#4 begin 
-			$display("Final");
-		end
+		// end
+		// #4 begin 
+		// 	$display("Final");
+		// end
 
 		// #4 begin
 		// 	$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	               12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
@@ -879,8 +920,8 @@ module datapath;
 	initial #sim_time $finish;
 
 	initial begin
-		$display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	               12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
-		// $monitor ("%d",PC);
-		$monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d      %d %b %0b %0d %0d %0d %0d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,alu_in_sel_mux_to_alu,     CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, sh.amounttointernal, sh.valuetointernal, sh.shifttypetointernal); //imprime las señales
+		// $display ("CLK RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    CLK pc martoram memdata finished      ir      	               12BIT           SHIFTEROUT INTSHAM INTSHVAL INTSHTYPE"); //imprime header
+		// // $monitor ("%d",PC);
+		// $monitor ("%d   %d %d %d %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d %0d %0d          %0d      %d %b %0b %0d %0d %0d %0d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,alu_in_sel_mux_to_alu,     CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, sh.amounttointernal, sh.valuetointernal, sh.shifttypetointernal); //imprime las señales
 	end
 endmodule	
