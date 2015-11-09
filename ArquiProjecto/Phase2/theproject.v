@@ -387,58 +387,6 @@ endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 /*MAS: 00 B  //  01 H  //  10 w  // 11 undefined
 1 = read  //  0 = write*/
-module ram512x8 (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [7:0]address, input [31:0]dataIn, input [1:0]MAS);
-	reg [7:0]mem[0:511];
-	always @ (enable, readWrite, MAS, dataIn, address)
-	begin
-		if (enable) begin
-			done = 0;
-			if (readWrite) begin
-				//Reading
-				case(MAS)
-					2'b00:	begin
-						dataOut[7:0] = mem[address][7:0];
-						dataOut[31:8] = 24'b0000_0000_0000_0000_0000_0000;
-					end
-					2'b01:	begin	
-						dataOut[15:8] = mem[address][7:0];
-						dataOut[7:0] = mem[address + 8'b0000001][7:0];
-						dataOut[31:16] = 16'b0000_0000_0000_0000;
-					end
-					2'b10:	begin
-						dataOut[31:0] = {mem[address][7:0], 
-										 mem[address + 8'b0000001][7:0], 
-										 mem[address + 8'b0000010][7:0], 
-										 mem[address + 8'b0000011][7:0]};
-					end
-					default: dataOut = dataOut;
-				endcase
-			end
-			else begin
-				//Writing
-				case(MAS)
-					2'b00:	mem[address][7:0] = dataIn[7:0];
-					2'b01:	begin
-						mem[address][7:0] = dataIn[15:8];
-						mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
-					end
-					2'b10:	begin
-						mem[address + 8'b00000011][7:0] = dataIn[7:0];
-						mem[address + 8'b00000010][7:0] = dataIn[15:8];
-						mem[address + 8'b00000001][7:0] = dataIn[23:16];
-						mem[address][7:0] = dataIn[31:24];
-					end
-					default: dataOut = dataOut;
-				endcase
-			end
-			done = 1;
-		end
-		else begin
-			dataOut = 32'bz;
-			done = 0;
-		end
-	end
-endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [7:0]address, input [31:0]dataIn, input [1:0]MAS);
 	reg [7:0]mem[0:511];
@@ -499,37 +447,10 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 	end
 endmodule
 
-
-//---------------------------------------------------------------------------------------------------------------------------------------
-module reg_12b(output reg [11:0] Q, input [11:0] D, input EN, CLR, CLK);
-	initial	Q <= 12'b000000000000; // Start registers with 0
-	always @ (posedge CLK, negedge CLR)
-		if(!EN)
-			Q <= D; // Enable Sync. Only occurs when Clk is high
-		else if(!CLR) // clear
-			Q <= 12'b000000000000; // Clear Async
-		else
-			Q <= Q; // enable off. output what came out before
-endmodule
-
-//---------------------------------------------------------------------------------------------------------------------------------------
-module reg_12to32_SE(output reg [32:0] Q, input [12:0] D, input EN, CLR, CLK);
-	initial	Q <= 12'b000000000000; // Start registers with 0
-	always @ (posedge CLK, negedge CLR)
-		if(!EN)
-			Q <= {D[11], D[11], D[11], D[11], D[11], D[11], D[11], D[11], D[11], 
-				D[11], D[11], D[11], D[11], D[11], D[11], D[11], D[11], D[11], 
-				D[11], D[11], D[11], D}; // Enable Sync. Only occurs when Clk is high
-		else if(!CLR) // clear
-			Q <= 12'b000000000000; // Clear Async
-		else
-			Q <= Q; // enable off. output what came out before
-endmodule
-
 //---------------------------------------------------------------------------------------------------------------------------------------
 module reg_32(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 	initial	Q = 32'b0000000000000000000000000000000; // Start registers with 0
-	always @ (posedge CLK, negedge CLR)
+	always @ (negedge CLK, negedge CLR)
 		if(!EN)
 			Q <= D; // Enable Sync. Only occurs when Clk is high
 		else if(!CLR) // clear
@@ -1314,7 +1235,7 @@ module ControlUnit (output reg [39:0] out, input clk, mfc, input [31:0] IR, stat
 	// always @(posedge clk)
 	// 	out = innerOut[39:0];
 	always @ (state)
-		$display("State %d",state);
+		$display("Next State %d",state);
 	always @(innerOut)
 		out = innerOut[39:0];
 endmodule
@@ -1441,7 +1362,7 @@ module datapath;
 		CLK = 1;
 	end
 
-	initial forever #3 CLK = ~CLK; // Change Clock Every Time Unit
+	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
 	
 	initial begin 
 
@@ -1449,6 +1370,6 @@ module datapath;
 	initial begin
 		// $display ("CLK PC RA RB RC"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \nALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\n",CLK, PC, RA, RB, RC, mar_to_ram, MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R1.Q,registerFile.R1.CLR, cuSignals[38]); //imprime las señales
+		$monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \nALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\n",CLK, PC, RA, RB, RC, mar_to_ram, MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R0.Q,registerFile.R0.CLR, cuSignals[38]); //imprime las señales
 	end
 endmodule	
