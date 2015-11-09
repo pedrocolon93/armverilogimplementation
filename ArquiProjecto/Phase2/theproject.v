@@ -576,16 +576,16 @@ module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 		else
 			Q <= Q; // enable off. output what came out before
 endmodule
-module reg_32b_MAGIC(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
-	initial	Q = 32'b0000000000000011000001001001001; // Start registers with 0
-	always @ (negedge CLK, negedge CLR)
-		if(!EN)
-			Q = D; // Enable Sync. Only occurs when Clk is high
-		else if(!CLR) // clear
-			Q = 32'b0000000000000000000000000000000; // Clear Async
-		else
-			Q <= Q; // enable off. output what came out before
-endmodule
+// module reg_32b_MAGIC(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
+// 	initial	Q = 32'b0000000000000011000001001001001; // Start registers with 0
+// 	always @ (negedge CLK, negedge CLR)
+// 		if(!EN)
+// 			Q = D; // Enable Sync. Only occurs when Clk is high
+// 		else if(!CLR) // clear
+// 			Q = 32'b0000000000000000000000000000000; // Clear Async
+// 		else
+// 			Q <= Q; // enable off. output what came out before
+// endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL);
 	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15) // if I change the input and enable is high then 
@@ -645,7 +645,7 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 	reg_32b R9  (reg9ToMux,  PC, decoder2RegEnable[9],  REGCLR, REGCLK);
 	reg_32b R10 (reg10ToMux, PC, decoder2RegEnable[10], REGCLR, REGCLK);
 	reg_32b R11 (reg11ToMux, PC, decoder2RegEnable[11], REGCLR, REGCLK);
-	reg_32b_MAGIC R12 (reg12ToMux, PC, decoder2RegEnable[12], REGCLR, REGCLK);
+	reg_32b R12 (reg12ToMux, PC, decoder2RegEnable[12], REGCLR, REGCLK);
 	reg_32b R13 (reg13ToMux, PC, decoder2RegEnable[13], REGCLR, REGCLK);
 	reg_32b R14 (reg14ToMux, PC, decoder2RegEnable[14], REGCLR, REGCLK);
 	reg_32b R15 (reg15ToMux, PC, decoder2RegEnable[15], REGCLR, REGCLK);
@@ -655,6 +655,8 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 
 	mux8x1_32b M1 (B, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
 		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M1SEL);
+	always @(REGCLR)
+		$display("cleaaaring" );
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
@@ -1133,7 +1135,7 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 		//			        52   50  47  46     |39  38  37   33 32   28     26   22     20    17    13  12  11 10 9  8  7  6   5      3   1   0
 		// 			     | s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
 		mem[0][52:0]  = 53'b00___011_0___0000001_0___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[1][52:0]  = 53'b00___011_0___0000000_1___1___0000_0__1111_00_____0000_00_____000___1101__0___0___1__1__0__1__0__1___00_____00__1___0;
+		mem[1][52:0]  = 53'b00___011_0___0000000_1___0___0000_0__1111_00_____0000_00_____000___1101__0___0___1__1__0__1__0__1___00_____00__1___0;
 		mem[2][52:0]  = 53'b00___011_0___0000000_1___0___1111_0__0000_00_____1111_00_____100___0100__0___0___1__1__1__1__0__1___00_____00__1___0;
 		mem[3][52:0]  = 53'b00___101_1___0000011_1___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__0__1__1__0__1___00_____10__1___1;
 		mem[4][52:0]  = 53'b01___100_1___0000001_1___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
@@ -1284,8 +1286,7 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 		//MStores	<-----/		   ... maybe
 
 	end
-	always @ (state)
-		$display("State %d",state);
+
 	always @ (posedge clk)
 		out = mem[state][52:0];
 endmodule
@@ -1310,6 +1311,8 @@ module ControlUnit (output reg [39:0] out, input clk, mfc, input [31:0] IR, stat
 	
 	// always @(posedge clk)
 	// 	out = innerOut[39:0];
+	always @ (state)
+		$display("State %d",state);
 	always @(innerOut)
 		out = innerOut[39:0];
 endmodule
@@ -1444,6 +1447,6 @@ module datapath;
 	initial begin
 		// $display ("CLK PC RA RB RC"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \nALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n",CLK, PC, RA, RB, RC, mar_to_ram, MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,alu_in_sel_mux_to_alu,cuSignals[17:14], MAS); //imprime las señales
+		$monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \nALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\n",CLK, PC, RA, RB, RC, mar_to_ram, MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, cuSignals[38]); //imprime las señales
 	end
 endmodule	
