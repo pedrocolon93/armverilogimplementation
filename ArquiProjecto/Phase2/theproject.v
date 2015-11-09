@@ -474,7 +474,9 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 				endcase
 			end
 			else begin
+				$display("Writing");
 				//Writing
+
 				case(MAS)
 					2'b00:	mem[address][7:0] = dataIn[7:0];
 					2'b01:	begin
@@ -1132,8 +1134,8 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 		// 			     | s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
 		mem[0][52:0]  = 53'b00___011_0___0000001_0___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
 		mem[1][52:0]  = 53'b00___011_0___0000000_1___1___0000_0__1111_00_____0000_00_____000___1101__0___0___1__1__0__1__0__1___00_____00__1___0;
-		mem[2][52:0]  = 53'b00___011_0___0000000_1___0___1111_0__0000_00_____1111_00_____101___0100__0___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[3][52:0]  = 53'b00___101_1___0000011_1___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__0__1__1__0__1___00_____01__0___1;
+		mem[2][52:0]  = 53'b00___011_0___0000000_1___0___1111_0__0000_00_____1111_00_____100___0100__0___0___1__1__1__1__0__1___00_____00__1___0;
+		mem[3][52:0]  = 53'b00___101_1___0000011_1___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__0__1__1__0__1___00_____10__1___1;
 		mem[4][52:0]  = 53'b01___100_1___0000001_1___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
 		//Data Proccesign
 			//0000
@@ -1431,7 +1433,7 @@ module datapath;
 	initial #sim_time $finish;
 
 	initial begin 
-		CLK = 1;
+		CLK = 0;
 	end
 
 	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
@@ -1442,6 +1444,6 @@ module datapath;
 	initial begin
 		// $display ("CLK PC RA RB RC"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("CLK %d PC %b RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b CUSIGNALS %b ENABLERAM %b READ/WRITERAM %b",CLK, PC, RA, RB, RC, mar_to_ram, MFC,mem_data,cuSignals,cuSignals[0], cuSignals[1]); //imprime las señales
+		$monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \nALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n",CLK, PC, RA, RB, RC, mar_to_ram, MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,alu_in_sel_mux_to_alu,cuSignals[17:14], MAS); //imprime las señales
 	end
 endmodule	
