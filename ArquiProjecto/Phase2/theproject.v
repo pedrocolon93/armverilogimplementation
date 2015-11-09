@@ -1355,7 +1355,7 @@ module datapath;
 
 
 	//Vamos a probar 
-	parameter sim_time = 80;
+	parameter sim_time = 300;
 	initial #sim_time $finish;
 
 	initial begin 
@@ -1370,6 +1370,6 @@ module datapath;
 	initial begin
 		// $display ("CLK PC RA RB RC"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \nALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\n",CLK, PC, RA, RB, RC, mar_to_ram, MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R0.Q,registerFile.R0.CLR, cuSignals[38]); //imprime las señales
+		$monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d\n",CLK, PC, RA, RB, RC, mar_to_ram, MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R3.Q,registerFile.R4.Q,registerFile.R5.Q,,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q); //imprime las señales
 	end
 endmodule	
