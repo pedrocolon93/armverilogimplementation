@@ -448,8 +448,8 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 	end
 	always @ (enable, readWrite, MAS, dataIn, address)
 	begin
+		done = 0;
 		if (enable) begin
-
 			done = 0;
 			if (readWrite) begin
 				//Reading
@@ -576,6 +576,7 @@ module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 		else
 			Q <= Q; // enable off. output what came out before
 endmodule
+
 module reg_32b_MAGIC(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 	initial	Q = 32'b0000000000000011000001001001001; // Start registers with 0
 	always @ (negedge CLK, negedge CLR)
@@ -698,7 +699,7 @@ module shifter(input[31:0] input_register, input[11:0] shifter_operand, input se
 	mux_2x1 amount_mux(amounttointernal,selector,{27'b0000_0000_0000_0000_0000_0000_000,shifter_operand[11:8],1'b0}, {27'b0000_0000_0000_0000_0000_0000_000,shifter_operand[11:7]});
 	mux_2x1 value_mux(valuetointernal,selector,{24'b0000_0000_0000_0000_0000_0000,shifter_operand[7:0]},input_register[31:0]);
 	
-	mux_2x1_2b shift_type_mux(shifttypetointernal,selector,1,shifter_operand[6:5]);
+	mux_2x1_2b shift_type_mux(shifttypetointernal,selector,2'b01,shifter_operand[6:5]);
 
 	internal_shifter intsh(amounttointernal,valuetointernal,shifttypetointernal,out);
 endmodule
@@ -1133,8 +1134,8 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 		//			        52   50  47  46     |39  38  37   33 32   28     26   22     20    17    13  12  11 10 9  8  7  6   5      3   1   0
 		// 			     | s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
 		mem[0][52:0]  = 53'b00___011_0___0000001_0___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[1][52:0]  = 53'b00___011_0___0000000_1___1___0000_0__1111_00_____0000_00_____000___1101__0___0___1__1__0__1__0__1___00_____00__1___0;
-		mem[2][52:0]  = 53'b00___011_0___0000000_1___0___1111_0__0000_00_____1111_00_____100___0100__0___0___1__1__1__1__0__1___00_____00__1___0;
+		mem[1][52:0]  = 53'b00___011_0___0000001_1___1___0000_0__1111_00_____0000_00_____000___1101__0___0___1__1__0__1__0__1___00_____00__1___0;
+		mem[2][52:0]  = 53'b00___011_0___0000001_1___0___1111_0__0000_00_____1111_00_____100___0100__0___0___1__1__1__1__0__1___00_____00__1___0;
 		mem[3][52:0]  = 53'b00___101_1___0000011_1___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__0__1__1__0__1___00_____10__1___1;
 		mem[4][52:0]  = 53'b01___100_1___0000001_1___1___0000_0__0000_00_____0000_00_____000___0000__0___0___1__1__1__1__0__1___00_____00__1___0;
 		//Data Proccesign
@@ -1395,7 +1396,7 @@ module datapath;
 	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, cuSignals[17:14], CIN);
 	//Status register
 	//mux_2x1_1b sr_mux(E5,S15,1,ir_out[20]);
-	mux_2x1_1b sr_mux(E5, cuSignals[6], 1, ir_out[20]);
+	mux_2x1_1b sr_mux(E5, cuSignals[6], 1'b1, ir_out[20]);
 	reg_32 status_register(TSROUT, {N,Z,C,V,28'b0000_0000_0000_0000_0000_0000_0000}, E5, cuSignals[39], CLK);
 	//Right side
 	//mux_2x1 mdr_mux(mdr_in, S7, PC,ir_out);
@@ -1408,10 +1409,10 @@ module datapath;
 
 
 	//ram512x8 ram(mem_data, finished, en, rw, mar_to_ram[7:0], data, dataSize);
-	mux_8x1_2b misc_mux(mux_misc_out, {ir_out[20],ir_out[6],ir_out[5]}, 0 ,2'b01, 2'b10, 2'b10, 2'b10, 0, 2'b00, 2'b01);
+	mux_8x1_2b misc_mux(mux_misc_out, {ir_out[20],ir_out[6],ir_out[5]}, 2'b00 ,2'b01, 2'b10, 2'b10, 2'b10, 2'b00, 2'b00, 2'b01);
 	mux_2x1_2b reg_mux(mux_reg_output, ir_out[22], 2'b00, 2'b01);
 	//mux_4x1_2b mas_mux(MAS,{S14,S13},CUMAS,mux_misc_out,mux_reg_output,0);
-	mux_4x1_2b mas_mux(MAS, cuSignals[5:4], cuSignals[3:2], mux_misc_out, mux_reg_output, 0);
+	mux_4x1_2b mas_mux(MAS, cuSignals[5:4], cuSignals[3:2], mux_misc_out, mux_reg_output, 2'b00);
 	//ramdummyreadfile ram(mem_data, finished, en, rw, mar_to_ram[7:0], mdr_out, MAS);
 	//									Enable  	  Read/Write    Input Address    Input Data Datasize
 	ramdummyreadfile ram(mem_data, MFC, cuSignals[0], cuSignals[1], mar_to_ram[7:0], mdr_out, MAS);
