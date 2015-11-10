@@ -424,7 +424,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 				endcase
 			end
 			else begin
-				$display("Writing %b",dataIn);
+				// $display("Writing %b",dataIn);
 				//Writing
 
 				case(MAS)
@@ -645,7 +645,7 @@ module condEval(output reg out, input [31:0] IR, input [31:0] str);
 		4'b0000: begin if (str[30]) out = 1;				// Z=1
 				 else out = 0; end
 		4'b0001: begin 
-					$display("Evaluatinnnn Str %b iR %b",str,IR);
+					// $display("Evaluatinnnn Str %b iR %b",str,IR);
 					if (str[30] == 0) out = 1;				// Z=0
 				 else out = 0; end
 		4'b0010: begin if (str[29]) out = 1;				// C=1
@@ -1240,8 +1240,8 @@ module ControlUnit (output reg [39:0] out, input clk, mfc, input [31:0] IR, stat
 	
 	// always @(posedge clk)
 	// 	out = innerOut[39:0];
-	always @ (state)
-		$display("Next State %d",state);
+	// always @ (state)
+	// 	$display("Next State %d",state);
 	always @(innerOut)
 		out = innerOut[39:0];
 endmodule
@@ -1362,7 +1362,6 @@ module datapath;
 
 	//Vamos a probar 
 	parameter sim_time = 800;
-	initial #sim_time $finish;
 
 	initial begin 
 		CLK = 1;
@@ -1376,11 +1375,23 @@ module datapath;
 	initial begin
 		// $display ("CLK PC RA RB RC"); //imprime header
 		// $monitor ("%d",PC);
-		$monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d \n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n",
-			CLK, PC, RA, RB, RC, mar_to_ram, 
-		MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
-		alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
-		cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
-		registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,shifter_output, ser_out, TSROUT, cu.condOut); //imprime las señales
+		// $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d \n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n",
+		// 	CLK, PC, RA, RB, RC, mar_to_ram, 
+		// MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
+		// alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
+		// cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
+		// registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,shifter_output, ser_out, TSROUT, cu.condOut); //imprime las señales
+		$monitor("Memory Access: %b = %d",mar_to_ram,mar_to_ram);
 	end
+	reg [12:0] i;
+
+	initial #sim_time begin 
+		$display("Printing Memory:");
+		for (i = 0; i < 512; i = i +1) begin
+  			$display ("Memory location %d content: %b", i, ram.mem[i]);
+   		end
+	end
+
+	initial #sim_time $finish;
+
 endmodule	

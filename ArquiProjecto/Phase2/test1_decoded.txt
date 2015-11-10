@@ -167,7 +167,7 @@
 		if PC = address of this inst. plus 8 bytes, the PC = PC + 0xFFFFFFF4
 
 // Immediate Offset
-1110 01 0 1 1 1 0 0 0001 0101 000000000011
+1110 010 1 1 1 0 0 0001 0101 0000 0000 0011
 
 	1) Condition Code –> 1110 = ALWAYS
 	2) b27 – b25 -> 010
@@ -187,7 +187,7 @@
 
 	EXAMPLE RUN
 
-		if R1 = 0x00000028, then R5 = LSB in address 0x0000002B
+		if R1 = 0x00000028, then LSB R5 to address 0x0000002B
 
 // Branch
 1110 101 0 000000000000000000000001
