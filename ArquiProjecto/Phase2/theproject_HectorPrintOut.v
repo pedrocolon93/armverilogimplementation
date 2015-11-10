@@ -1,3 +1,0 @@
-		$display ("CLK  RA RB RC PC PC+4 E0 S0 S7 S6 S5 S4 C N V Z A B    	 CLK pc martoram   memdata  finished ir      	                 \n12BIT           	  SHIFTEROUT  INTSHAM 	INTSHVAL     INTSHTYPE"); //imprime header
-		// $monitor ("%d",PC);
-		$monitor ("%d   %d %d %d  %0d  %0d    %d  %d  %d  %d  %d  %d  %d %d %d %0d %0d %0d DIV  %0d   %0d  %0d          %0d       	%d 		 %b %b %d  %d%d 		   %d", CLK,RA,RB,RC,PC,pc_plus_4_mux_to_rf,E0,S0,S7, S6, S5, S4, COUT, N, V, ZERO,LEFT_OP,B,CLK,PC,mar_to_ram, mem_data, finished,ir_out, twelve_bit_shift_reg_out, shifter_output, sh.amounttointernal, sh.valuetointernal, sh.shifttypetointernal); //imprime las señales
