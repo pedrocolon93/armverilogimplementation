@@ -1123,50 +1123,35 @@ endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 module datapath;
-	//CU Signals
-	reg E0,E1,E2,E3,E4;//Enables the register that holds pc+4
 	wire E5;
-	reg S0,S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16;//Selects whether its pc or pc+4
-
 	wire [3:0] RA; // Selector of A Mux is 3 bits
 	wire [3:0] RB; // Selector of B Mux is 3 bits
 	wire [3:0] RC; // Register Enable Selectors (Input to Decoders 0 and 1)
-	wire RD;  // Register Clear Selectors (Input to Decoders 0 and 1)
 
-	reg MFA;//Signals for memory
-	reg RW;
 	wire [1:0]MAS;
 	wire MFC;
-
-	reg shift_type;//shifter
 
 	//Flags
 	wire N, COUT, V, ZERO;//ALU Flags
 	
 	//Clock
 	reg CLK; // Register Clock Enable (All Clocks of Registers are Shared)
-	reg clr;
 
 	//General wires
 	wire CIN;		
 	
 	wire [31:0] PC, LEFT_OP, B,TSROUT;
 
-	wire [31:0] alu_in_sel_mux_to_alu, register_to_mux, adder_to_register;
+	wire [31:0] alu_in_sel_mux_to_alu;
 	wire [31:0] mar_to_ram;
-	wire [1:0] mux_reg_output, mux_mas_out, mux_misc_out,CUMAS;
-
-	reg [31:0]data;
+	wire [1:0] mux_reg_output, mux_misc_out;
 	
 	wire [31:0] mem_data;
 	wire [31:0] ir_out, mdr_out, mdr_in;
-	wire [11:0] twelve_bit_shift_reg_out;
-	reg [31:0]input_register;
 
 	wire [31:0] shifter_output;
 	wire [31:0] ser_out;
 
-	reg [3:0] RA_CU, RB_CU, RC_CU;
 	wire SC;
 
 	wire [39:0] cuSignals;
@@ -1213,15 +1198,9 @@ module datapath;
 	//Vamos a probar 
 	parameter sim_time = 1300;
 
-	initial begin 
-		CLK = 1;
-	end
-
+	initial begin CLK = 1; end
 	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
 	
-	initial begin 
-
-	end
 	initial begin
 		 /*$display ("CLK PC RA RB RC"); //imprime header
 		 $monitor ("%d",PC);
