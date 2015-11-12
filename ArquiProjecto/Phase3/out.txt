@@ -230,7 +230,7 @@ Memory location  179 content: 11111111
 Memory location  180 content: 00000000
 Memory location  181 content: 00000000
 Memory location  182 content: 00000000
-Memory location  183 content: 00000000
+Memory location  183 content: 01010000
 Memory location  184 content: 11111101
 Memory location  185 content: 01111111
 Memory location  186 content: 11111111
