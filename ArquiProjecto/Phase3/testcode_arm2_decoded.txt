@@ -212,21 +212,24 @@
 1110 000 1010 1 0010 0000 00000 00 0 0001
 
 	ALWAYS
-	Shift by Immediate Shifter
+	Register Shifter
 	CMP
 	Modifies Condition Codes
 	Rn = R2
 	Rd = R0
 	shifter_operand = R1
 
-	CMPS R0, R2, R1
+	CMPS R2, R1
+
+	i.e. N, V update (23 - 34)
 
 1101 101 1 000000000000000000000001
 
-	LE, test Z=1 or N=!V
+	LE (test Z=1 or N=!V)
 	Branch with Link
 	Offset = 4
 
+	R14 = next instruction address
 	BLLE PC + 4
 
 1110 001 0000 0 0001 1110 0000 00000000
