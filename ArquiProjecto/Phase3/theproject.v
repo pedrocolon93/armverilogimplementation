@@ -1211,9 +1211,9 @@ module datapath;
 	wire SC;
 
 	wire [44:0] cuSignals;
-	wire LMSDone;
+	wire LSMDone;
 	 
-	ControlUnit cu (cuSignals, CLK, MFC, LMSDone, ir_out, TSROUT);
+	ControlUnit cu (cuSignals, CLK, MFC, LSMDone, ir_out, TSROUT);
 
 	//Register file muxes
 	mux_2x1_4b ra_mux(RA, cuSignals[33], cuSignals[37:34], ir_out[19:16]);
