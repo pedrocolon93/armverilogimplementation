@@ -18,7 +18,7 @@ Shifter operand === RIGHT_OP
 1111 MVN Move Not Rd := NOT shifter_operand (no first operand)
 */
 module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_OP,RIGHT_OP, input  [3:0]FN, input  CIN);
-	reg [31:0] TEMP;
+	reg [31:0] TEMP, TEMP1;
 	reg CTEMP;
 
 	always @(LEFT_OP, RIGHT_OP, FN, CIN) begin
@@ -60,13 +60,21 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				if((LEFT_OP[31]==RIGHT_OP[31]))
-					if(LEFT_OP[31]!=ALU_OUTPUT[31])
+				TEMP1 = - RIGHT_OP;
+				if((LEFT_OP[31]==TEMP1[31]))
+				begin
+					if(LEFT_OP[31]!=TEMP[31])
 						V=1;
 					else
 						V=0;
+					end
 				else 
-					V=0;
+					begin
+						if((LEFT_OP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
+							V=1;
+						else
+							V=0;
+					end	
 			end
 			// //RSB
 			4'b0011: begin
@@ -81,13 +89,21 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				if((LEFT_OP[31]==RIGHT_OP[31]))
-					if(LEFT_OP[31]!=ALU_OUTPUT[31])
+				TEMP1 = - LEFT_OP;
+				if((RIGHT_OP[31]==TEMP1[31]))
+				begin
+					if(RIGHT_OP[31]!=TEMP[31])
 						V=1;
 					else
 						V=0;
+					end
 				else 
-					V=0;
+					begin
+						if((RIGHT_OP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
+							V=1;
+						else
+							V=0;
+					end	
 			end
 			// //ADD
 			4'b0100: begin
@@ -196,13 +212,21 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				if((LEFT_OP[31]==RIGHT_OP[31]))
+				TEMP1 = - RIGHT_OP;
+				if((LEFT_OP[31]==TEMP1[31]))
+				begin
 					if(LEFT_OP[31]!=TEMP[31])
-						V=0;
-					else
 						V=1;
+					else
+						V=0;
+					end
 				else 
-					V=0;
+					begin
+						if((LEFT_OP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
+							V=1;
+						else
+							V=0;
+					end	
 			end
 			// //CMN
 			4'b1011: begin
@@ -217,9 +241,9 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 				//Check for 2's complement overflow
 				if((LEFT_OP[31]==RIGHT_OP[31]))
 					if(LEFT_OP[31]!=TEMP[31])
-						V=0;
-					else
 						V=1;
+					else
+						V=0;
 				else 
 					V=0;
 			end
@@ -1090,7 +1114,8 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 		//			        52   50  47  46     |39  38  37   33 32   28     26   22     20    17    13  12  11 10 9  8  7  6   5      3   1   0
 		// 			      | s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
 		//b&L
-		mem[93][52:0] = 53'b00___011_1___1011110_1___0___ZZZZ_0__1111_00_____1110_00_____000___1101__1___0__0__0__0__0__0__0___00_____00__1___0;
+
+		mem[93][52:0] = 53'b00___011_1___1011110_1___0___0000_0__1111_00_____1110_00_____000___1101__1___0__0__0__0__0__0__0___00_____00__1___0;
 		//b
 		mem[94][52:0] = 53'b00___010_1___1011100_1___0___1111_0__0000_00_____1111_00_____011___0100__1___0__1__0__0__0__0__0___00_____00__1___0;
 
@@ -1123,8 +1148,8 @@ module ControlUnit (output reg [39:0] out, input clk, mfc, input [31:0] IR, stat
 	
 	// always @(posedge clk)
 	// 	out = innerOut[39:0];
-	always @ (state)
-	 	$display("Next State %d",state);
+	// always @ (state)
+	//  	$display("Next State %d",state);
 	always @(innerOut)
 		out = innerOut[39:0];
 endmodule
@@ -1230,24 +1255,25 @@ module datapath;
 	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
 	
 	initial begin
-		 $display ("CLK PC RA RB RC"); //imprime header
-		 $monitor ("%d",PC);
-		 $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d R9 %d R10 %d R11 %d R12 %d R14 %d\n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n",
-		 	CLK, PC, RA, RB, RC, mar_to_ram, 
-		 MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
-		 alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
-		 cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
-		 registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut); //imprime las señales
+
+		 // $display ("CLK PC RA RB RC"); //imprime header
+		 // $monitor ("%d",PC);
+		 // $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d R9 %d R10 %d R11 %d R12 %d R14 %d\n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n",
+		 // 	CLK, PC, RA, RB, RC, mar_to_ram, 
+		 // MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
+		 // alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
+		 // cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
+		 // registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut); //imprime las señales
 		
-		// $monitor("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
+		$monitor("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
 	end
 	reg [12:0] i;
 
 	initial #sim_time begin 
-		// $display("Printing Memory:");
-		// for (i = 0; i < 512; i = i +1) begin
-  // 			$display ("Memory location %d content: %b", i, ram.mem[i]);
-  //  		end
+		$display("Printing Memory:");
+		for (i = 0; i < 512; i = i +1) begin
+  			$display ("Memory location %d content: %b", i, ram.mem[i]);
+   		end
 	end
 
 	initial #sim_time $finish;
