@@ -198,9 +198,9 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 				//Check for 2's complement overflow
 				if((LEFT_OP[31]==RIGHT_OP[31]))
 					if(LEFT_OP[31]!=TEMP[31])
-						V=1;
-					else
 						V=0;
+					else
+						V=1;
 				else 
 					V=0;
 			end
@@ -217,9 +217,9 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 				//Check for 2's complement overflow
 				if((LEFT_OP[31]==RIGHT_OP[31]))
 					if(LEFT_OP[31]!=TEMP[31])
-						V=1;
-					else
 						V=0;
+					else
+						V=1;
 				else 
 					V=0;
 			end
@@ -595,7 +595,7 @@ module condEval(output reg out, input [31:0] IR, input [31:0] str);
 				 else out = 0; end
 		4'b1100: begin if (str[30] == 0 && str[31] == str[28]) out = 1;	// Z=0 & N=V
 				 else out = 0; end
-		4'b1101: begin if (str[30] == 1 || (str[31] != str[28])) out = 1;	//Z=1 or N=!Z
+		4'b1101: begin if (str[30] == 1 || (str[31] != str[28])) out = 1;	//Z=1 or N!=V
 				 else out = 0; end
 		4'b1110: out = 1;
 		4'b1111: out = 0;
@@ -1087,8 +1087,10 @@ module ROM (output reg [52:0] out, input [6:0] state, input clk);
 		mem[91][52:0] = 53'b00___101_1___1011011_1___1___0000_0__0000_00_____0000_00_____000___1101__1___0__1__1__1__1__0__0___01_____00__1___1;
 		mem[92][52:0] = 53'b01___010_1___0000001_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1__1__1__1__1__1__0___00_____00__1___0;
 		
+		//			        52   50  47  46     |39  38  37   33 32   28     26   22     20    17    13  12  11 10 9  8  7  6   5      3   1   0
+		// 			      | s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
 		//b&L
-		mem[93][52:0] = 53'b00___011_1___1011110_1___0___0000_0__1111_00_____1110_00_____001___1101__1___0__0__0__0__0__0__0___00_____00__1___0;
+		mem[93][52:0] = 53'b00___011_1___1011110_1___0___ZZZZ_0__1111_00_____1110_00_____000___1101__1___0__0__0__0__0__0__0___00_____00__1___0;
 		//b
 		mem[94][52:0] = 53'b00___010_1___1011100_1___0___1111_0__0000_00_____1111_00_____011___0100__1___0__1__0__0__0__0__0___00_____00__1___0;
 
@@ -1235,7 +1237,7 @@ module datapath;
 		 MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
 		 alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
 		 cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
-		 registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R14.Q,,shifter_output, ser_out, TSROUT, cu.condOut); //imprime las señales
+		 registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut); //imprime las señales
 		
 		// $monitor("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
 	end
