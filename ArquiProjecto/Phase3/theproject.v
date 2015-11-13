@@ -1172,135 +1172,138 @@ endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 
 module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAddress, output reg [3:0] sourceRegisterA, sourceRegisterB, destinationRegister ,output reg done ,input [31:0] ir, memoryDataIn, a,b, input clk, mfc);
-	reg inc = 0;
-	reg [4:0] j, cnt;
+	reg inc;
+	reg [4:0] j;
+	reg [4:0] cnt;
 	reg [31:0] start_address;
-	sourceRegisterA = ir[19:16];
-	cnt = 0;
-	for(j = 0; j<16;j=j+1)
-		begin
-			if(ir[j]==1)
-				cnt = cnt+1;
-		end	
-	//Calculate effective address
-	//01 increment after
-	// start_address = Rn
-	// end_address = Rn + (Number_Of_Set_Bits_In(register_list) * 4) - 4
-	// if W == 1 then
-	// Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
-	if(ir[24:23]==2'b01)
-		begin
-			#3 begin
-				start_address = a;
-				if(ir[21]==1)
-				begin
-					destinationRegister = ir[19:16];
-					registerDataOut = start_address + (cnt*4);
-					#3
-				end
-			end
-		end	
-
-	//11 increment before
-	// start_address = Rn + 4
-	// end_address = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
-	// if W == 1 then
-	// Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
-	else if(ir[24:23]==2'b11)
-	begin
-			#3 begin
-				start_address = a+4;
-				if(ir[21]==1)
-				begin
-					destinationRegister = ir[19:16];
-					registerDataOut = start_address + (cnt*4);
-					#3
-				end
-			end
-		end	
 	
-	//00 decrement after
-	// start_address = Rn - (Number_Of_Set_Bits_In(register_list) * 4) + 4
-	// end_address = Rn
-	// if W == 1 then
-	// Rn = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
-	else if(ir[24:23]==2'b00)
-	begin
-		#3 begin
-			start_address = a-(cnt*4)+4;
-			if(ir[21]==1)
-			begin
-				destinationRegister = ir[19:16];
-				registerDataOut = start_address - (cnt*4);
-				#3
-			end
-		end
-	end	
-	//10 decrement before
-	// start_address = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
-	// end_address = Rn - 4
-	// if W == 1 then
-	// Rn = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
-	else
-	begin
-		#3 begin
-			start_address = a-(cnt*4);
-			if(ir[21]==1)
-			begin
-				destinationRegister = ir[19:16];
-				registerDataOut = start_address - (cnt*4);
-				#3
-			end
-		end
-	end	
-	reg [31:0] currAddress = 0;
-	for(j=0;j<16;j=j+1)
-		if(ir[j]==1)
-		begin
-			if(ir[20]==1)
-				begin
-					//load
-					effectiveAddress = currAddress;
-					//Set RC
-					destinationRegister = j[4:0];
-					//Get the data to load.
-					while(!mfc)
-					begin
-						$display("Waiting for memory");
-					end
+	cnt = 5'b00000;
+	sourceRegisterA = ir[19:16];
+	
+	// for(j = 0; j<16;j=j+1)
+	// 	begin
+	// 		if(ir[j]==1)
+	// 			cnt = cnt+1;
+	// 	end	
+	// //Calculate effective address
+	// //01 increment after
+	// // start_address = Rn
+	// // end_address = Rn + (Number_Of_Set_Bits_In(register_list) * 4) - 4
+	// // if W == 1 then
+	// // Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+	// if(ir[24:23]==2'b01)
+	// 	begin
+	// 		#3 begin
+	// 			start_address = a;
+	// 			if(ir[21]==1)
+	// 			begin
+	// 				destinationRegister = ir[19:16];
+	// 				registerDataOut = start_address + (cnt*4);
+	// 				#3
+	// 			end
+	// 		end
+	// 	end	
 
-					//Pipe the data out
-					registerDataOut = memoryDataIn;
+	// //11 increment before
+	// // start_address = Rn + 4
+	// // end_address = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+	// // if W == 1 then
+	// // Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+	// else if(ir[24:23]==2'b11)
+	// begin
+	// 		#3 begin
+	// 			start_address = a+4;
+	// 			if(ir[21]==1)
+	// 			begin
+	// 				destinationRegister = ir[19:16];
+	// 				registerDataOut = start_address + (cnt*4);
+	// 				#3
+	// 			end
+	// 		end
+	// 	end	
+	
+	// //00 decrement after
+	// // start_address = Rn - (Number_Of_Set_Bits_In(register_list) * 4) + 4
+	// // end_address = Rn
+	// // if W == 1 then
+	// // Rn = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
+	// else if(ir[24:23]==2'b00)
+	// begin
+	// 	#3 begin
+	// 		start_address = a-(cnt*4)+4;
+	// 		if(ir[21]==1)
+	// 		begin
+	// 			destinationRegister = ir[19:16];
+	// 			registerDataOut = start_address - (cnt*4);
+	// 			#3
+	// 		end
+	// 	end
+	// end	
+	// //10 decrement before
+	// // start_address = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
+	// // end_address = Rn - 4
+	// // if W == 1 then
+	// // Rn = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
+	// else
+	// begin
+	// 	#3 begin
+	// 		start_address = a-(cnt*4);
+	// 		if(ir[21]==1)
+	// 		begin
+	// 			destinationRegister = ir[19:16];
+	// 			registerDataOut = start_address - (cnt*4);
+	// 			#3
+	// 		end
+	// 	end
+	// end	
+	// reg [31:0] currAddress = 0;
+	// for(j=0;j<16;j=j+1)
+	// 	if(ir[j]==1)
+	// 	begin
+	// 		if(ir[20]==1)
+	// 			begin
+	// 				//load
+	// 				effectiveAddress = currAddress;
+	// 				//Set RC
+	// 				destinationRegister = j[4:0];
+	// 				//Get the data to load.
+	// 				while(!mfc)
+	// 				begin
+	// 					$display("Waiting for memory");
+	// 				end
 
-					//Wait a while
-					#4 $display("Wait complete");
+	// 				//Pipe the data out
+	// 				registerDataOut = memoryDataIn;
 
-					//mark done
-					done = 1;
+	// 				//Wait a while
+	// 				#4 $display("Wait complete");
+
+	// 				//mark done
+	// 				done = 1;
 
 
-				end
-			else
-				begin 
-					//store
+	// 			end
+	// 		else
+	// 			begin 
+	// 				//store
 
-					//Set effective Address
-					effectiveAddress = currAddress;
-					//Get data
-					sourceRegisterA = j[4:0];
-					//Wait a bit
-					#3 $display("Done waiting");
-					//Ouput data
-					memoryDataOut = a;
-					//Get the data to load.
-					while(!mfc)
-					begin
-						$display("Waiting for memory");
-					end
-					//mark done
-					done = 1;
-				end
-	end
+	// 				//Set effective Address
+	// 				effectiveAddress = currAddress;
+	// 				//Get data
+	// 				sourceRegisterA = j[4:0];
+	// 				//Wait a bit
+	// 				#3 $display("Done waiting");
+	// 				//Ouput data
+	// 				memoryDataOut = a;
+	// 				//Get the data to load.
+	// 				while(!mfc)
+	// 				begin
+	// 					$display("Waiting for memory");
+	// 				end
+	// 				//mark done
+	// 				done = 1;
+	// 			end
+	// end
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
