@@ -1171,19 +1171,25 @@ module ControlUnit (output reg [44:0] out, input clk, mfc, lsmDone, input [31:0]
 endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 
-module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAddress, output [3:0] sourceRegisterA, sourceRegisterB, destinationRegister ,output reg done ,input [31:0] ir, memoryDataIn, a,b, input clk, mfc);
+module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAddress, output reg [3:0] sourceRegisterA, sourceRegisterB, destinationRegister ,output reg done ,input [31:0] ir, memoryDataIn, a,b, input clk, mfc, enable);
+	
 	reg inc;
 	reg [4:0] j;
-	wire [4:0] cnt;
+	reg [4:0] cnt;
 	reg [31:0] start_address;
+	reg [31:0] currAddress = 0;
+
 	
-	assign cnt = 5'b00000;
-	assign sourceRegisterA = ir[19:16];
+	always @(enable)
+	if(enable)
+	begin
+	cnt = 5'b00000;
+	sourceRegisterA = ir[19:16];
 	
 	for(j = 0; j<16;j=j+1)
 		begin
 			if(ir[j]==1)
-				assign cnt = cnt+1;
+				cnt = cnt+1;
 		end	
 	//Calculate effective address
 	//01 increment after
@@ -1193,14 +1199,14 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 	// Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
 	if(ir[24:23]==2'b01)
 		begin
-			assign inc = 1;
+			 inc = 1;
 			#3 begin
-				assign start_address = a;
+				 start_address = a;
 				if(ir[21]==1)
 				begin
 					destinationRegister = ir[19:16];
 					registerDataOut = start_address + (cnt*4);
-					#3
+					#3 $display("");
 				end
 			end
 		end	
@@ -1219,7 +1225,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 				begin
 					destinationRegister = ir[19:16];
 					registerDataOut = start_address + (cnt*4);
-					#3
+					#3 $display("");
 				end
 			end
 		end	
@@ -1238,7 +1244,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 			begin
 				destinationRegister = ir[19:16];
 				registerDataOut = start_address - (cnt*4);
-				#3
+				#3 $display("tato");
 			end
 		end
 	end	
@@ -1256,11 +1262,10 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 			begin
 				destinationRegister = ir[19:16];
 				registerDataOut = start_address - (cnt*4);
-				#3
+				#3 $display("pot");
 			end
 		end
 	end	
-	reg [31:0] currAddress = 0;
 	for(j=0;j<16;j=j+1)
 		if(ir[j]==1)
 		begin
@@ -1312,6 +1317,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 			else 
 				currAddress = currAddress -4;
 	end
+end
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
