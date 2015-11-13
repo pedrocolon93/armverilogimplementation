@@ -356,6 +356,19 @@ module mux_8x1_2b(output reg[1:0] Y, input [2:0] S, input [1:0] I0, I1, I2, I3, 
 	endcase
 endmodule
 
+module mux_8x1_4b(output reg[3:0] Y, input [2:0] S, input [3:0] I0, I1, I2, I3, I4,I5,I6,I7);
+	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
+	case (S)
+		0: assign Y=I0;
+		1: assign Y=I1;
+		2: assign Y=I2;
+		3: assign Y=I3;
+		4: assign Y=I4;
+		5: assign Y=I5;
+		6: assign Y=I6;
+		7: assign Y=I7;
+	endcase
+endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 module mux_2x1(output [31:0] Y, input S, input [31:0] I0, I1);
 	assign Y=S? I1:I0;
@@ -1155,24 +1168,137 @@ module ControlUnit (output reg [39:0] out, input clk, mfc, input [31:0] IR, stat
 endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
 
-// module LSMBlackBox(output done ,input [31:0] ir);
-// 	reg [4:0] j;
-// 	for(j=0;j<16;j=j+1)
-// 	begin
-// 		if(ir[j]==1)
-// 		begin
-// 			if(ir[21]==1)
-// 				begin
-// 					//laod
-// 				end
-// 			else
-// 				begin 
-// 					//store
-// 				end
+module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAddress, output reg [3:0] sourceRegisterA, sourceRegisterB, destinationRegister ,output reg done ,input [31:0] ir, memoryDataIn, a,b, input clk, mfc);
+	reg inc = 0;
+	reg [4:0] j, cnt;
+	reg [31:0] start_address;
+	sourceRegisterA = ir[19:16];
+	cnt = 0;
+	for(j = 0; j<16;j=j+1)
+		begin
+			if(ir[j]==1)
+				cnt = cnt+1;
+		end	
+	//Calculate effective address
+	//01 increment after
+	// start_address = Rn
+	// end_address = Rn + (Number_Of_Set_Bits_In(register_list) * 4) - 4
+	// if W == 1 then
+	// Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+	if(ir[24:23]==2'b01)
+		begin
+			#3 begin
+				start_address = a;
+				if(ir[21]==1)
+				begin
+					destinationRegister = ir[19:16];
+					registerDataOut = start_address + (cnt*4);
+					#3
+				end
+			end
+		end	
 
-// 		end
-// 	end
-// endmodule
+	//11 increment before
+	// start_address = Rn + 4
+	// end_address = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+	// if W == 1 then
+	// Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+	else if(ir[24:23]==2'b11)
+	begin
+			#3 begin
+				start_address = a+4;
+				if(ir[21]==1)
+				begin
+					destinationRegister = ir[19:16];
+					registerDataOut = start_address + (cnt*4);
+					#3
+				end
+			end
+		end	
+	
+	//00 decrement after
+	// start_address = Rn - (Number_Of_Set_Bits_In(register_list) * 4) + 4
+	// end_address = Rn
+	// if W == 1 then
+	// Rn = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
+	else if(ir[24:23]==2'b00)
+	begin
+		#3 begin
+			start_address = a-(cnt*4)+4;
+			if(ir[21]==1)
+			begin
+				destinationRegister = ir[19:16];
+				registerDataOut = start_address - (cnt*4);
+				#3
+			end
+		end
+	end	
+	//10 decrement before
+	// start_address = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
+	// end_address = Rn - 4
+	// if W == 1 then
+	// Rn = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
+	else
+	begin
+		#3 begin
+			start_address = a-(cnt*4);
+			if(ir[21]==1)
+			begin
+				destinationRegister = ir[19:16];
+				registerDataOut = start_address - (cnt*4);
+				#3
+			end
+		end
+	end	
+	reg [31:0] currAddress = 0;
+	for(j=0;j<16;j=j+1)
+		if(ir[j]==1)
+		begin
+			if(ir[20]==1)
+				begin
+					//load
+					effectiveAddress = currAddress;
+					//Set RC
+					destinationRegister = j[4:0];
+					//Get the data to load.
+					while(!mfc)
+					begin
+						$display("Waiting for memory");
+					end
+
+					//Pipe the data out
+					registerDataOut = memoryDataIn;
+
+					//Wait a while
+					#4 $display("Wait complete");
+
+					//mark done
+					done = 1;
+
+
+				end
+			else
+				begin 
+					//store
+
+					//Set effective Address
+					effectiveAddress = currAddress;
+					//Get data
+					sourceRegisterA = j[4:0];
+					//Wait a bit
+					#3 $display("Done waiting");
+					//Ouput data
+					memoryDataOut = a;
+					//Get the data to load.
+					while(!mfc)
+					begin
+						$display("Waiting for memory");
+					end
+					//mark done
+					done = 1;
+				end
+	end
+endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 module datapath;
@@ -1212,12 +1338,14 @@ module datapath;
 	ControlUnit cu (cuSignals, CLK, MFC, ir_out, TSROUT);
 
 	//Register file muxes
-	mux_2x1_4b ra_mux(RA, cuSignals[33], cuSignals[37:34], ir_out[19:16]);
-	mux_4x1_4b rb_mux(RB, cuSignals[28:27], cuSignals[32:29], ir_out[3:0], ir_out[15:12], ir_out[19:16]);
-	mux_4x1_4b rc_mux(RC, cuSignals[22:21], cuSignals[26:23], ir_out[15:12], ir_out[19:16],4'bXXXX);
+	mux_4x1_4b ra_mux(RA, {S19,cuSignals[33]}, cuSignals[37:34], ir_out[19:16],LSMSourceReg,0);
+	mux_8x1_4b rb_mux(RB, {S20,cuSignals[28:27]}, cuSignals[32:29], ir_out[3:0], ir_out[15:12], ir_out[19:16],LSMSourceReg,0,0,0);
+	mux_4x1_4b rc_mux(RC, cuSignals[22:21], cuSignals[26:23], ir_out[15:12], ir_out[19:16],LSMDestReg);
 
 	//Register file
-	registerFile registerFile (LEFT_OP, B, PC, RC, cuSignals[39], RA, RB, CLK, cuSignals[38]);
+	wire [31:0] rfmuxtorf;
+	mux_2x1 rf_mux(rfmuxtorf,S21,PC,LSMultData);
+	registerFile registerFile (LEFT_OP, B, rfmuxtorf, RC, cuSignals[39], RA, RB, CLK, cuSignals[38]);
 	
 	//Input mux
 	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, cuSignals[20:18], 
@@ -1230,10 +1358,13 @@ module datapath;
 	mux_2x1_1b sr_mux(E5, cuSignals[6], 1'b1, ~ir_out[20]);
 	reg_32 status_register(TSROUT, {N,ZERO,COUT,V,28'b0000_0000_0000_0000_0000_0000_0000}, E5, cuSignals[39], CLK);
 	//Right side
-	mux_2x1 mdr_mux(mdr_in, cuSignals[7], PC, mem_data);
+	mux_4x1 mdr_mux(mdr_in, {S17,cuSignals[7]}, PC, mem_data,LSMultData,0);
 	reg_32 mdr(mdr_out, mdr_in, cuSignals[8], cuSignals[39], CLK);
+	wire[31:0] marmuxtoram, LSMEaddr;
+	wire S18;
 
-	reg_32 mar(mar_to_ram, PC, cuSignals[9], cuSignals[39], CLK);
+	mux_2x1 mar_mux(marmuxtoram, S18, PC, LSMEaddr);
+	reg_32 mar(mar_to_ram, marmuxtoram, cuSignals[9], cuSignals[39], CLK);
 
 	mux_8x1_2b misc_mux(mux_misc_out, {ir_out[20],ir_out[6],ir_out[5]}, 2'b00 ,2'b01, 2'b10, 2'b10, 2'b10, 2'b00, 2'b00, 2'b01);
 	mux_2x1_2b reg_mux(mux_reg_output, ir_out[22], 2'b10, 2'b00);
@@ -1265,15 +1396,15 @@ module datapath;
 		 // cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
 		 // registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut); //imprime las señales
 		
-		$monitor("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
+		// $monitor("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
 	end
 	reg [12:0] i;
 
 	initial #sim_time begin 
-		$display("Printing Memory:");
-		for (i = 0; i < 512; i = i +1) begin
-  			$display ("Memory location %d content: %b", i, ram.mem[i]);
-   		end
+		// $display("Printing Memory:");
+		// for (i = 0; i < 512; i = i +1) begin
+  // 			$display ("Memory location %d content: %b", i, ram.mem[i]);
+  //  		end
 	end
 
 	initial #sim_time $finish;
