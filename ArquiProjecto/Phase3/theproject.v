@@ -433,8 +433,9 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 				endcase
 			end
 			else begin
-				// $display("Writing Ram %d",dataIn);
-				if(dataIn != 32'bx)
+				$display("Writing Ram %d %d %b",dataIn, address, MAS);
+				if(dataIn||!dataIn)
+				begin
 				case(MAS)
 
 					2'b00:	mem[address][7:0] = dataIn[7:0];
@@ -443,6 +444,8 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 						mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
 					end
 					2'b10:	begin //#60;
+						$display("Here %d",dataIn);
+
 						mem[address + 8'b00000011][7:0] = dataIn[7:0];
 						mem[address + 8'b00000010][7:0] = dataIn[15:8];
 						mem[address + 8'b00000001][7:0] = dataIn[23:16];
@@ -450,6 +453,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 					end
 					default: dataOut = dataOut;
 				endcase
+		   	end
 			end
 			#4 done = 1;
 		end
@@ -1107,8 +1111,8 @@ module ROM (output reg [58:0] out, input [6:0] state, input clk);
 		mem[69][58:0] = 59'b0___0___0___0___0___0___01___011_1___1100010_1___0___0000_1__0000_01_____0000_10_____000___0010__1___0___1__1__1__1__0__0___00_____00__1___0;
 		
 		mem[98][58:0] = 59'b0___0___0___0___0___0___01___010_1___1000110_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
-		mem[70][58:0] = 59'b0___0___0___0___0___0___01___011_1___1000111_1___1___0000_0__0000_10_____0000_00_____000___1101__1___0___1__1__1__0__0__0___10_____00__1___1;
-		mem[71][58:0] = 59'b0___0___0___0___0___0___00___101_1___1000111_1___1___0000_0__0000_00_____0000_00_____000___1101__1___0___1__1__1__1__0__0___10_____00__0___1;
+		mem[70][58:0] = 59'b0___0___0___0___0___0___01___011_1___1000111_1___1___0000_0__0000_10_____0000_00_____000___1101__1___0___1__1__1__0__0__0___10_____00__1___0;
+		mem[71][58:0] = 59'b0___0___0___0___0___0___00___101_1___1000111_1___1___0000_0__0000_10_____0000_00_____000___1101__1___0___1__1__1__1__0__0___10_____00__0___1;
 		mem[72][58:0] = 59'b0___0___0___0___0___0___01___010_1___0000001_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
 		
 		//misc load
@@ -1157,7 +1161,7 @@ module ROM (output reg [58:0] out, input [6:0] state, input clk);
 		// 			        ENM S19 S20 S21 S18 S17|s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
 		//Mloads	
 		mem[101][58:0]= 59'b1___1___1___1___1___1___11___101_1___1100101_1___0___ZZZZ_0__ZZZZ_00_____ZZZZ_11_____111___1101__1___0___1__1__0__0__0__0___00_____10__1___1;
-		mem[102][58:0]= 59'b1___1___1___1___1___1___11___010_1___0000001_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____111___1101__1___0___1__1__1__1__1__0___00_____10__1___0;
+		mem[102][58:0]= 59'b1___1___1___1___1___1___11___010_1___0000001_1___1___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____111___1101__1___0___1__1__1__1__1__0___00_____10__1___0;
 		//MStores
 		mem[105][58:0]= 59'b1___1___1___1___1___1___11___010_1___1100111_1___0___ZZZZ_0__ZZZZ_00_____ZZZZ_11_____000___1101__1___0___1__1__0__0__0__0___00_____10__0___0;
 		mem[103][58:0]= 59'b1___1___1___1___1___1___11___101_1___1100111_1___0___ZZZZ_0__ZZZZ_00_____ZZZZ_11_____000___1101__1___0___1__1__0__0__0__0___00_____10__0___1;
@@ -1187,8 +1191,8 @@ module ControlUnit (output reg [45:0] out, input clk, mfc, lsmDone, input [31:0]
 	
 	// always @(posedge clk)
 	// 	out = innerOut[39:0];
-	// always @ (state)
-	//  	$display("Next State %d",state);
+	always @ (state)
+	 	$display("Next State %d",state);
 	always @(innerOut)
 		out = {innerOut[58:53], innerOut[39:0]};
 endmodule
@@ -1200,6 +1204,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 	reg [4:0] cnt;
 	reg [31:0] start_address;
 	reg [31:0] currAddress = 0;
+	reg [12:0] i;
 	// always @(done)
 	// 	if(done)
 	// 		$display("iM FINISHEDDD");
@@ -1229,7 +1234,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 			if(ir[24:23]==2'b01) begin
 				inc = 1;
 				// $display("IA");
-				#3 begin
+				#4 begin
 					start_address = a;
 					if(ir[21]==1) begin
 						destinationRegister = ir[19:16];
@@ -1247,7 +1252,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 				// $display("IB");
 
 				inc = 1;
-				#3 begin
+				#4 begin
 					start_address = a+4;
 					if(ir[21]==1) begin
 						destinationRegister = ir[19:16];
@@ -1265,7 +1270,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 				inc = 0;
 				// $display("DA");
 
-				#3 begin
+				#4 begin
 					start_address = a-(cnt*4)+4;
 					if(ir[21]==1) begin
 						destinationRegister = ir[19:16];
@@ -1283,7 +1288,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 				inc = 0;
 								// $display("DB");
 
-				#3 begin
+				#4 begin
 					start_address = a-(cnt*4);
 					if(ir[21]==1) begin
 						destinationRegister = ir[19:16];
@@ -1314,24 +1319,30 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 
 						//Wait a while
 						#4 ;//$display("Wait complete");
-
+						destinationRegister = 4'bX;
 						
 					end
 					else begin 								//store
-						// $display("Storing");
+						$display("Storing");
 						//Set effective Address
 						effectiveAddress = currAddress;
-						// $display("Eaddr %d",effectiveAddress);
+						$display("Eaddr %d",effectiveAddress);
 						//Get data
 						sourceRegisterA = j[4:0];
 						//Wait a bit
 						#4;// $display("Done waiting");
 						//Ouput data
 						memoryDataOut = a;
+						$display("Memory data out %d",memoryDataOut);
+
 						//Get the data to load.
 						while(!mfc) begin
 							#4;// $display("Waiting for memory");
 						end
+						$display("Printing Memory:");
+						for (i = 0; i < 512; i = i +1) begin
+				  			$display ("Memory location %d content: %b", i, ram.mem[i]);
+				   		end
 						#4;
 						// $display("Done storing");
 					end
@@ -1346,7 +1357,12 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 			registerDataOut = 32'bX;
 			memoryDataOut = 32'bX;
 			effectiveAddress = 32'bX;
+			sourceRegisterA = 4'bX;
+			sourceRegisterB = 4'bX;
+			destinationRegister = 4'bX;
+
 			//mark done
+
 			done = 1;
 			
 			end
@@ -1441,18 +1457,18 @@ module datapath;
 	initial begin CLK = 1; end
 	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
 	
-
-		 // $display ("CLK PC RA RB RC"); //imprime header
-		 // $monitor ("%d",PC);
-		 // $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d R9 %d R10 %d R11 %d R12 %d R13 %d R14 %d\n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n RAMUX %b%b RBMUX %b%b RCMUX %b N %b Z %b C %b V %b \n  multdata %d multdata %d eaddr %d sourcerega %d sourceregb %d destreg %d done %d ir %d memdata %d a %d b %d mfc %d cuenable %d \nMDR %d\n",
-		 // 	CLK, PC, RA, RB, RC, mar_to_ram, 
-		 // MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
-		 // alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
-		 // cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
-		 // registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R13.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut,
-		 // cuSignals[44],cuSignals[33], cuSignals[43],cuSignals[28:27],cuSignals[22:21],N,ZERO,COUT,V,
-		 // LSMultData, LSMultData, LSMEaddr, LSMSourceRegA,LSMSourceRegB, LSMDestReg ,LSMDone ,ir_out, mem_data, LEFT_OP,B,  MFC, cuSignals[45], mdr_out); //imprime las señales
-	
+	initial begin
+		 $display ("CLK PC RA RB RC"); //imprime header
+		 $monitor ("%d",PC);
+		 $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d R9 %d R10 %d R11 %d R12 %d R13 %d R14 %d\n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n RAMUX %b%b RBMUX %b%b RCMUX %b N %b Z %b C %b V %b \n  multdata %d multdata %d eaddr %d sourcerega %d sourceregb %d destreg %d done %d ir %d memdata %b a %d b %d mfc %d cuenable %d \nMDR %b\n",
+		 	CLK, PC, RA, RB, RC, mar_to_ram, 
+		 MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
+		 alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
+		 cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
+		 registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R13.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut,
+		 cuSignals[44],cuSignals[33], cuSignals[43],cuSignals[28:27],cuSignals[22:21],N,ZERO,COUT,V,
+		 LSMultData, LSMultData, LSMEaddr, LSMSourceRegA,LSMSourceRegB, LSMDestReg ,LSMDone ,ir_out, mem_data, LEFT_OP,B,  MFC, cuSignals[45], mdr_out); //imprime las señales
+	end
 	// always @(mar_to_ram)
 	// 	// if(mar_to_ram||!mar_to_ram)
 	// 		$display("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);

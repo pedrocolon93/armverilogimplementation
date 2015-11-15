@@ -73,7 +73,7 @@
 
 	ORR R1, R0, #4
 
-1110 000 10 1 01 0100 1100 0000 1 11 1 0110
+1110 000 1 0 101 0100 1100 0000 1 11 1 0110
 
 	ALWAYS
 	Miscellaneous Load/Store
@@ -90,7 +90,7 @@
 	ImmedL = 0110
 
 	Immediate Offset
-
+	Acceso r4 - 6 lo guardo en r12 y luego
 	LDRSH R12, [R4], #-6
 	Load r12 from r4, decr r4 by 6
 	
