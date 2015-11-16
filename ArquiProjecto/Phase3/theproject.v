@@ -421,8 +421,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 		$readmemb("data3.bin", mem) ;
 		done = 0;
 	end
-	always @ (enable, readWrite, MAS, dataIn, address)
-	begin
+	always @ (enable, readWrite, MAS, dataIn, address, sign) begin
 		done = 0;
 		if (enable) begin
 			done = 0;
@@ -453,7 +452,6 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 				endcase
 			end
 			else begin
-				$display("Writing Ram %d %d %b",dataIn, address, MAS);
 				if(dataIn||!dataIn)
 				begin
 				case(MAS)
@@ -464,8 +462,6 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 						mem[address + 8'b0000001][7:0] = dataIn[7:0] ;
 					end
 					2'b10:	begin //#60;
-						$display("Here %d",dataIn);
-
 						mem[address + 8'b00000011][7:0] = dataIn[7:0];
 						mem[address + 8'b00000010][7:0] = dataIn[15:8];
 						mem[address + 8'b00000001][7:0] = dataIn[23:16];
@@ -1203,12 +1199,12 @@ module ControlUnit (output reg [48:0] out, input clk, mfc, lsmDone, input [31:0]
 	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
 	cuAdder		adderAlu (addToR, 	  state, 			4'b0001);
 	IncReg		incR	 (stateSel3,  addToR, 			1'b0,		innerOut[39], 		clk);
-	ROM			rom		 (innerOut,   state, 			Clk);
+	ROM			rom		 (innerOut,   state, 			clk);
 	
 	// always @(posedge clk)
 	// 	out = innerOut[39:0];
-	always @ (state)
-	 	$display("Next State %d",state);
+	// always @ (state)
+	//  	$display("Next State %d",state);
 	always @(innerOut)
 		out = {innerOut[61:53], innerOut[39:0]};
 endmodule
@@ -1339,26 +1335,26 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 						
 					end
 					else begin 								//store
-						$display("Storing");
+						//$display("Storing");
 						//Set effective Address
 						effectiveAddress = currAddress;
-						$display("Eaddr %d",effectiveAddress);
+						//$display("Eaddr %d",effectiveAddress);
 						//Get data
 						sourceRegisterA = j[4:0];
 						//Wait a bit
 						#4;// $display("Done waiting");
 						//Ouput data
 						memoryDataOut = a;
-						$display("Memory data out %d",memoryDataOut);
+						//$display("Memory data out %d",memoryDataOut);
 
 						//Get the data to load.
 						while(!mfc) begin
 							#4;// $display("Waiting for memory");
 						end
-						$display("Printing Memory:");
-						for (i = 0; i < 512; i = i +1) begin
-				  			$display ("Memory location %d content: %b", i, ram.mem[i]);
-				   		end
+						//$display("Printing Memory:");
+						// for (i = 0; i < 512; i = i +1) begin
+				  // 			$display ("Memory location %d content: %b", i, ram.mem[i]);
+				  //  		end
 						#4;
 						// $display("Done storing");
 					end
@@ -1448,7 +1444,8 @@ module datapath;
 	mux_2x1_1b sr_mux(E5, cuSignals[6], 1'b1, ~ir_out[20]);
 	reg_32 status_register(TSROUT, {N,ZERO,COUT,V,28'b0000_0000_0000_0000_0000_0000_0000}, E5, cuSignals[39], CLK);
 	//Right side
-	mux_4x1 mdr_mux(mdr_in, {cuSignals[40],cuSignals[7]}, PC, mem_data,LSMultData,0);
+	mux_4x1 mdr_mux(mdr_in, {cuSignals[40],cuSignals[7]}, PC, mem_data,LSMultData
+		,0);
 	reg_32 mdr(mdr_out, mdr_in, cuSignals[8], cuSignals[39], CLK);
 	mux_2x1 mar_mux(marmuxtoram, cuSignals[41], PC, LSMEaddr);
 	reg_32 mar(mar_to_ram, marmuxtoram, cuSignals[9], cuSignals[39], CLK);
@@ -1477,25 +1474,22 @@ module datapath;
 	initial begin CLK = 1; end
 	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
 	
-	initial begin
-		 $display ("CLK PC RA RB RC"); //imprime header
-		 $monitor ("%d",PC);
-		 $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d R9 %d R10 %d R11 %d R12 %d R13 %d R14 %d\n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n RAMUX %b%b RBMUX %b%b RCMUX %b N %b Z %b C %b V %b \n  multdata %d multdata %d eaddr %d sourcerega %d sourceregb %d destreg %d done %d ir %d memdata %b a %d b %d mfc %d cuenable %d \nMDR %b\n",
-		 	CLK, PC, RA, RB, RC, mar_to_ram, 
-		 MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
-		 alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
-		 cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
-		 registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R13.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut,
-		 cuSignals[44],cuSignals[33], cuSignals[43],cuSignals[28:27],cuSignals[22:21],N,ZERO,COUT,V,
-		 LSMultData, LSMultData, LSMEaddr, LSMSourceRegA,LSMSourceRegB, LSMDestReg ,LSMDone ,ir_out, mem_data, LEFT_OP,B,  MFC, cuSignals[45], mdr_out); //imprime las señales
-	end
-	// always @(mar_to_ram)
-	// 	// if(mar_to_ram||!mar_to_ram)
-	// 		$display("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
 	// initial begin
-	// 	$monitor("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
+	// 	 $display ("CLK PC RA RB RC"); //imprime header
+	// 	 $monitor ("%d",PC);
+	// 	 $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d R9 %d R10 %d R11 %d R12 %d R13 %d R14 %d\n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n RAMUX %b%b RBMUX %b%b RCMUX %b N %b Z %b C %b V %b \n  multdata %d multdata %d eaddr %d sourcerega %d sourceregb %d destreg %d done %d ir %d memdata %b a %d b %d mfc %d cuenable %d \nMDR %b\n",
+	// 	 	CLK, PC, RA, RB, RC, mar_to_ram, 
+	// 	 MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
+	// 	 alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
+	// 	 cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
+	// 	 registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R13.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut,
+	// 	 cuSignals[44],cuSignals[33], cuSignals[43],cuSignals[28:27],cuSignals[22:21],N,ZERO,COUT,V,
+	// 	 LSMultData, LSMultData, LSMEaddr, LSMSourceRegA,LSMSourceRegB, LSMDestReg ,LSMDone ,ir_out, mem_data, LEFT_OP,B,  MFC, cuSignals[45], mdr_out); //imprime las señales
 	// end
-
+	always @(mar_to_ram)
+		if(mar_to_ram||!mar_to_ram)
+			$display("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
+		
 	reg [12:0] i;
 
 	initial #sim_time begin 
