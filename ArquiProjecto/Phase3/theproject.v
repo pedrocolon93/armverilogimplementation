@@ -1,23 +1,23 @@
 /*
-Shifter operand === RIGHT_OP
-0000 AND Logical AND Rd := Rn AND shifter_operand
-0001 EOR Logical Exclusive OR Rd := Rn EOR shifter_operand
-0010 SUB Subtract Rd := Rn - shifter_operand
-0011 RSB Reverse Subtract Rd := shifter_operand - Rn
-0100 ADD Add Rd := Rn + shifter_operand
-0101 ADC Add with Carry Rd := Rn + shifter_operand + Carry Flag
-0110 SBC Subtract with Carry Rd := Rn - shifter_operand - NOT(Carry Flag)
-0111 RSC Reverse Subtract with Carry Rd := shifter_operand - Rn - NOT(Carry Flag)
-1000 TST Test Update flags after Rn AND shifter_operand
-1001 TEQ Test Equivalence Update flags after Rn EOR shifter_operand
-1010 CMP Compare Update flags after Rn - shifter_operand
-1011 CMN Compare Negated Update flags after Rn + shifter_operand
-1100 ORR Logical (inclusive) OR Rd := Rn OR shifter_operand
-1101 MOV Move Rd := shifter_operand (no first operand)
-1110 BIC Bit Clear Rd := Rn AND NOT(shifter_operand)
-1111 MVN Move Not Rd := NOT shifter_operand (no first operand)
+Shifter operand === RIGHTOP
+0000 AND Logical AND Rd := Rn AND shifteroperand
+0001 EOR Logical Exclusive OR Rd := Rn EOR shifteroperand
+0010 SUB Subtract Rd := Rn - shifteroperand
+0011 RSB Reverse Subtract Rd := shifteroperand - Rn
+0100 ADD Add Rd := Rn + shifteroperand
+0101 ADC Add with Carry Rd := Rn + shifteroperand + Carry Flag
+0110 SBC Subtract with Carry Rd := Rn - shifteroperand - NOT(Carry Flag)
+0111 RSC Reverse Subtract with Carry Rd := shifteroperand - Rn - NOT(Carry Flag)
+1000 TST Test Update flags after Rn AND shifteroperand
+1001 TEQ Test Equivalence Update flags after Rn EOR shifteroperand
+1010 CMP Compare Update flags after Rn - shifteroperand
+1011 CMN Compare Negated Update flags after Rn + shifteroperand
+1100 ORR Logical (inclusive) OR Rd := Rn OR shifteroperand
+1101 MOV Move Rd := shifteroperand (no first operand)
+1110 BIC Bit Clear Rd := Rn AND NOT(shifteroperand)
+1111 MVN Move Not Rd := NOT shifteroperand (no first operand)
 */
-module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_OP,RIGHT_OP, input  [3:0]FN, input  CIN);
+module ALU(output reg [31:0]ALUOUTPUT, output reg Z,N,C, V, input  [31:0] LEFTOP,RIGHTOP, input  [3:0]FN, input  CIN);
 	reg [31:0] TEMP, TEMP1;
 	reg CTEMP;
 	initial begin
@@ -26,57 +26,57 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 		V = 0;
 		Z = 0;
 	end
-	always @(LEFT_OP, RIGHT_OP, FN, CIN) begin
+	always @(LEFTOP, RIGHTOP, FN, CIN) begin
 
 		case(FN)
 			//AND
 			4'b0000: begin
 				//Set the output and C flag
-				{ALU_OUTPUT[31:0]} = LEFT_OP[31:0] & RIGHT_OP[31:0];
+				{ALUOUTPUT[31:0]} = LEFTOP[31:0] & RIGHTOP[31:0];
 				C = CIN;
 				//Set the N flag
-				N = ALU_OUTPUT[31];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 			end
 			// //EOR
 			4'b0001: begin
-				{C,ALU_OUTPUT[31:0]} = LEFT_OP[31:0] ^ RIGHT_OP[31:0];
+				{C,ALUOUTPUT[31:0]} = LEFTOP[31:0] ^ RIGHTOP[31:0];
 				//Set the N flag
-				N = ALU_OUTPUT[31];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 			end
 			// //SUB
 			4'b0010: begin
-				{CTEMP,ALU_OUTPUT[31:0]} = LEFT_OP[31:0] -  RIGHT_OP[31:0];
+				{CTEMP,ALUOUTPUT[31:0]} = LEFTOP[31:0] -  RIGHTOP[31:0];
 				C = ~CTEMP;
 				//Set the N flag
-				N = ALU_OUTPUT[31];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				TEMP1 = - RIGHT_OP;
-				if((LEFT_OP[31]==TEMP1[31]))
+				TEMP1 = - RIGHTOP;
+				if((LEFTOP[31]==TEMP1[31]))
 				begin
-					if(LEFT_OP[31]!=TEMP[31])
+					if(LEFTOP[31]!=TEMP[31])
 						V=1;
 					else
 						V=0;
 					end
 				else 
 					begin
-						if((LEFT_OP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
+						if((LEFTOP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
 							V=1;
 						else
 							V=0;
@@ -84,28 +84,28 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //RSB
 			4'b0011: begin
-				{CTEMP,ALU_OUTPUT[31:0]} = RIGHT_OP[31:0]-  LEFT_OP[31:0];
+				{CTEMP,ALUOUTPUT[31:0]} = RIGHTOP[31:0]-  LEFTOP[31:0];
 				C = ~CTEMP;
 				//Set the N flag
-				N = ALU_OUTPUT[31];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				TEMP1 = - LEFT_OP;
-				if((RIGHT_OP[31]==TEMP1[31]))
+				TEMP1 = - LEFTOP;
+				if((RIGHTOP[31]==TEMP1[31]))
 				begin
-					if(RIGHT_OP[31]!=TEMP[31])
+					if(RIGHTOP[31]!=TEMP[31])
 						V=1;
 					else
 						V=0;
 					end
 				else 
 					begin
-						if((RIGHT_OP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
+						if((RIGHTOP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
 							V=1;
 						else
 							V=0;
@@ -113,17 +113,17 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //ADD
 			4'b0100: begin
-				{C,ALU_OUTPUT[31:0]} = LEFT_OP[31:0] +  RIGHT_OP[31:0];
-				N = ALU_OUTPUT[31];
+				{C,ALUOUTPUT[31:0]} = LEFTOP[31:0] +  RIGHTOP[31:0];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				if((LEFT_OP[31]==RIGHT_OP[31]))
-					if(LEFT_OP[31]!=ALU_OUTPUT[31])
+				if((LEFTOP[31]==RIGHTOP[31]))
+					if(LEFTOP[31]!=ALUOUTPUT[31])
 						V=1;
 					else
 						V=0;
@@ -132,16 +132,16 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //ADC
 			4'b0101: begin
-				{C,ALU_OUTPUT[31:0]} = LEFT_OP[31:0] + RIGHT_OP[31:0] + CIN;
+				{C,ALUOUTPUT[31:0]} = LEFTOP[31:0] + RIGHTOP[31:0] + CIN;
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				if((LEFT_OP[31]==RIGHT_OP[31]))
-					if(LEFT_OP[31]!=ALU_OUTPUT[31])
+				if((LEFTOP[31]==RIGHTOP[31]))
+					if(LEFTOP[31]!=ALUOUTPUT[31])
 						V=1;
 					else
 						V=0;
@@ -150,17 +150,17 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //SBC
 			4'b0110: begin
-				{CTEMP,ALU_OUTPUT[31:0]} = LEFT_OP[31:0] - RIGHT_OP[31:0] - ~CIN;
+				{CTEMP,ALUOUTPUT[31:0]} = LEFTOP[31:0] - RIGHTOP[31:0] - ~CIN;
 				C = ~CTEMP;
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				if((LEFT_OP[31]==RIGHT_OP[31]))
-					if(LEFT_OP[31]!=ALU_OUTPUT[31])
+				if((LEFTOP[31]==RIGHTOP[31]))
+					if(LEFTOP[31]!=ALUOUTPUT[31])
 						V=1;
 					else
 						V=0;
@@ -169,16 +169,16 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //RSC
 			4'b0111: begin
-				{CTEMP,ALU_OUTPUT[31:0]} =  RIGHT_OP[31:0] - LEFT_OP[31:0] - ~CIN;
+				{CTEMP,ALUOUTPUT[31:0]} =  RIGHTOP[31:0] - LEFTOP[31:0] - ~CIN;
 				C = ~CTEMP;
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				if((LEFT_OP[31]==RIGHT_OP[31]))
-					if(LEFT_OP[31]!=ALU_OUTPUT[31])
+				if((LEFTOP[31]==RIGHTOP[31]))
+					if(LEFTOP[31]!=ALUOUTPUT[31])
 						V=1;
 					else
 						V=0;
@@ -187,7 +187,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //TST
 			4'b1000: begin
-				{TEMP[31:0]} = LEFT_OP[31:0] & RIGHT_OP[31:0];
+				{TEMP[31:0]} = LEFTOP[31:0] & RIGHTOP[31:0];
 				N = TEMP[31];
 
 				if(TEMP==0)
@@ -197,7 +197,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //TEQ
 			4'b1001: begin 
-				{TEMP[31:0]} =  LEFT_OP[31:0] ^ RIGHT_OP[31:0];
+				{TEMP[31:0]} =  LEFTOP[31:0] ^ RIGHTOP[31:0];
 				N =  TEMP[31];
 
 				if(TEMP==0)
@@ -207,7 +207,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //CMP
 			4'b1010: begin 
-				{CTEMP,TEMP[31:0]} = LEFT_OP[31:0] -  RIGHT_OP[31:0];
+				{CTEMP,TEMP[31:0]} = LEFTOP[31:0] -  RIGHTOP[31:0];
 				//Set the N flag
 				C = ~CTEMP;
 				N = TEMP[31];
@@ -218,17 +218,17 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				TEMP1 = - RIGHT_OP;
-				if((LEFT_OP[31]==TEMP1[31]))
+				TEMP1 = - RIGHTOP;
+				if((LEFTOP[31]==TEMP1[31]))
 				begin
-					if(LEFT_OP[31]!=TEMP[31])
+					if(LEFTOP[31]!=TEMP[31])
 						V=1;
 					else
 						V=0;
 					end
 				else 
 					begin
-						if((LEFT_OP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
+						if((LEFTOP[31]!=TEMP1[31])&&(TEMP[31]==TEMP1))
 							V=1;
 						else
 							V=0;
@@ -236,7 +236,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //CMN
 			4'b1011: begin
-				{C,TEMP[31:0]} = LEFT_OP[31:0] +  RIGHT_OP[31:0];
+				{C,TEMP[31:0]} = LEFTOP[31:0] +  RIGHTOP[31:0];
 				N = TEMP[31];
 				//Set the Z flag
 				if(TEMP==0)
@@ -245,8 +245,8 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 					Z = 0;
 				//Set the overflow flag
 				//Check for 2's complement overflow
-				if((LEFT_OP[31]==RIGHT_OP[31]))
-					if(LEFT_OP[31]!=TEMP[31])
+				if((LEFTOP[31]==RIGHTOP[31]))
+					if(LEFTOP[31]!=TEMP[31])
 						V=1;
 					else
 						V=0;
@@ -255,13 +255,13 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //ORR
 			4'b1100: begin
-				ALU_OUTPUT[31:0] = LEFT_OP[31:0] | RIGHT_OP[31:0];
+				ALUOUTPUT[31:0] = LEFTOP[31:0] | RIGHTOP[31:0];
 				// $display("Changing");
 				//Set the N flag
 				
-				N = ALU_OUTPUT[31];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
@@ -271,33 +271,33 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 			end
 			// //MOV
 			4'b1101: begin
-			 	ALU_OUTPUT[31:0] = RIGHT_OP[31:0];
+			 	ALUOUTPUT[31:0] = RIGHTOP[31:0];
 			 	//Set the N flag
-				N = ALU_OUTPUT[31];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 			end
 			// //BIC
 			4'b1110: begin
-				ALU_OUTPUT[31:0] = LEFT_OP[31:0] & ~RIGHT_OP[31:0];
+				ALUOUTPUT[31:0] = LEFTOP[31:0] & ~RIGHTOP[31:0];
 				//Set the N flag
-				N = ALU_OUTPUT[31];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
 			end
 			// //MVN
 			4'b1111: begin
-				ALU_OUTPUT[31:0] = ~RIGHT_OP[31:0];
+				ALUOUTPUT[31:0] = ~RIGHTOP[31:0];
 				//Set the N flag
-				N = ALU_OUTPUT[31];
+				N = ALUOUTPUT[31];
 				//Set the Z flag
-				if(ALU_OUTPUT==0)
+				if(ALUOUTPUT==0)
 					Z = 1;
 				else
 					Z = 0;
@@ -307,7 +307,7 @@ module ALU(output reg [31:0]ALU_OUTPUT, output reg Z,N,C, V, input  [31:0] LEFT_
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module mux_4x1(output reg[31:0] Y, input [1:0] S, input [31:0] I0, I1, I2, I3);
+module mux4x1(output reg[31:0] Y, input [1:0] S, input [31:0] I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
 		2'b00: assign Y=I0[31:0];
@@ -317,7 +317,7 @@ module mux_4x1(output reg[31:0] Y, input [1:0] S, input [31:0] I0, I1, I2, I3);
 	endcase
 endmodule
 
-module mux_4x1_2b(output reg[1:0] Y, input [1:0] S, input [1:0] I0, I1, I2, I3);
+module mux4x12b(output reg[1:0] Y, input [1:0] S, input [1:0] I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
 		2'b00: assign Y=I0[1:0];
@@ -328,7 +328,7 @@ module mux_4x1_2b(output reg[1:0] Y, input [1:0] S, input [1:0] I0, I1, I2, I3);
 	endcase
 endmodule
 
-module mux_4x1_4b(output reg[3:0] Y, input [1:0] S, input [3:0] I0, I1, I2, I3);
+module mux4x14b(output reg[3:0] Y, input [1:0] S, input [3:0] I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
 		2'b00: assign Y=I0[3:0];
@@ -339,7 +339,7 @@ module mux_4x1_4b(output reg[3:0] Y, input [1:0] S, input [3:0] I0, I1, I2, I3);
 	endcase
 endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
-module mux_8x1(output reg[31:0] Y, input [2:0] S, input [31:0] I0, I1, I2, I3, I4,I5,I6,I7);
+module mux8x1(output reg[31:0] Y, input [2:0] S, input [31:0] I0, I1, I2, I3, I4,I5,I6,I7);
 	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
 	case (S)
 		0: assign Y=I0[31:0];
@@ -353,7 +353,7 @@ module mux_8x1(output reg[31:0] Y, input [2:0] S, input [31:0] I0, I1, I2, I3, I
 	endcase
 endmodule
 
-module mux_8x1_2b(output reg[1:0] Y, input [2:0] S, input [1:0] I0, I1, I2, I3, I4,I5,I6,I7);
+module mux8x12b(output reg[1:0] Y, input [2:0] S, input [1:0] I0, I1, I2, I3, I4,I5,I6,I7);
 	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
 	case (S)
 		0: assign Y=I0;
@@ -367,7 +367,7 @@ module mux_8x1_2b(output reg[1:0] Y, input [2:0] S, input [1:0] I0, I1, I2, I3, 
 	endcase
 endmodule
 
-module mux_8x1_1b(output reg Y, input [2:0] S, input I0, I1, I2, I3, I4,I5,I6,I7);
+module mux8x11b(output reg Y, input [2:0] S, input I0, I1, I2, I3, I4,I5,I6,I7);
 	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
 	case (S)
 		0: assign Y=I0;
@@ -381,7 +381,7 @@ module mux_8x1_1b(output reg Y, input [2:0] S, input I0, I1, I2, I3, I4,I5,I6,I7
 	endcase
 endmodule
 
-module mux_8x1_4b(output reg[3:0] Y, input [2:0] S, input [3:0] I0, I1, I2, I3, I4,I5,I6,I7);
+module mux8x14b(output reg[3:0] Y, input [2:0] S, input [3:0] I0, I1, I2, I3, I4,I5,I6,I7);
 	always @ (S, I0, I1, I2, I3, I4,I5,I6,I7)
 	case (S)
 		0: assign Y=I0;
@@ -395,20 +395,20 @@ module mux_8x1_4b(output reg[3:0] Y, input [2:0] S, input [3:0] I0, I1, I2, I3, 
 	endcase
 endmodule
 //---------------------------------------------------------------------------------------------------------------------------------------
-module mux_2x1(output [31:0] Y, input S, input [31:0] I0, I1);
+module mux2x1(output [31:0] Y, input S, input [31:0] I0, I1);
 	assign Y=S? I1:I0;
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module mux_2x1_1b(output Y, input S, input I0, I1);
+module mux2x11b(output Y, input S, input I0, I1);
 	assign Y=S? I1:I0;
 endmodule
 
-module mux_2x1_2b(output [1:0] Y, input S, input [1:0] I0, I1);
+module mux2x12b(output [1:0] Y, input S, input [1:0] I0, I1);
 	assign Y=S? I1:I0;
 endmodule
 
-module mux_2x1_4b(output [3:0] Y, input S, input [3:0] I0, I1);
+module mux2x14b(output [3:0] Y, input S, input [3:0] I0, I1);
 	assign Y=S? I1:I0;
 endmodule
 
@@ -418,7 +418,7 @@ endmodule
 module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [7:0]address, input [31:0]dataIn, input [1:0]MAS, input sign);
 	reg [7:0]mem[0:511];
 	initial begin
-		$readmemb("data3.bin", mem) ;
+		$readmemb("data.bin", mem) ;
 		done = 0;
 	end
 	always @ (enable, readWrite, MAS, dataIn, address, sign) begin
@@ -432,7 +432,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 						if(sign)
 							dataOut[31:8] = {24{mem[address][7]}};
 						else
-							dataOut[31:8] = 24'b0000_0000_0000_0000_0000_0000;
+							dataOut[31:8] = 24'b000000000000000000000000;
 					end
 					2'b01:	begin	
 						dataOut[15:8] = mem[address][7:0];
@@ -440,7 +440,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 						if(sign) 
 							dataOut[31:16] = {16{mem[address][7]}};
 						else 
-							dataOut[31:16] = 16'b0000_0000_0000_0000;
+							dataOut[31:16] = 16'b0000000000000000;
 					end
 					2'b10:	begin // #30;
 						dataOut[31:0] = {mem[address][7:0], 
@@ -479,7 +479,7 @@ module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module reg_32(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
+module reg32(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 	initial	Q = 32'b0000000000000000000000000000000; // Start registers with 0
 	always @ (negedge CLK, negedge CLR)
 		if(!EN)
@@ -491,7 +491,7 @@ module reg_32(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module dec4x16_32b(output reg [15:0] D, input[3:0] A, input EN);
+module dec4x1632b(output reg [15:0] D, input[3:0] A, input EN);
 	always @(A, EN)
 	begin
 		if (!EN)
@@ -518,7 +518,7 @@ module dec4x16_32b(output reg [15:0] D, input[3:0] A, input EN);
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
+module reg32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 	initial	Q = 32'b0000000000000000000000000000000; // Start registers with 0
 	always @ (negedge CLK, negedge CLR)
 		if(!EN)
@@ -530,7 +530,7 @@ module reg_32b(output reg [31:0] Q, input [31:0] D, input EN, CLR, CLK);
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module mux8x1_32b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL);
+module mux8x132b(output reg [31:0] O, input [31:0] I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, input [3:0] SEL);
 	always @ (SEL, I0, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15) // if I change the input and enable is high then 
 		case(SEL)
 			4'b0000: O = I0;
@@ -574,59 +574,59 @@ module registerFile (output [31:0] A, B, input[31:0] PC, input [3:0] REGEN, inpu
 	wire [31:0] reg14ToMux; // 1 line of 32 bits
 	wire [31:0] reg15ToMux; // 1 line of 32 bits
 
-	dec4x16_32b	D0 (decoder2RegEnable, REGEN, RFE); // Enable selector
+	dec4x1632b	D0 (decoder2RegEnable, REGEN, RFE); // Enable selector
 
-	reg_32b R0  (reg0ToMux,  PC, decoder2RegEnable[0],  REGCLR, REGCLK);
-	reg_32b R1  (reg1ToMux,  PC, decoder2RegEnable[1],  REGCLR, REGCLK);
-	reg_32b R2  (reg2ToMux,  PC, decoder2RegEnable[2],  REGCLR, REGCLK);
-	reg_32b R3  (reg3ToMux,  PC, decoder2RegEnable[3],  REGCLR, REGCLK);
-	reg_32b R4  (reg4ToMux,  PC, decoder2RegEnable[4],  REGCLR, REGCLK);
-	reg_32b R5  (reg5ToMux,  PC, decoder2RegEnable[5],  REGCLR, REGCLK);
-	reg_32b R6  (reg6ToMux,  PC, decoder2RegEnable[6],  REGCLR, REGCLK);
-	reg_32b R7  (reg7ToMux,  PC, decoder2RegEnable[7],  REGCLR, REGCLK);
-	reg_32b R8  (reg8ToMux,  PC, decoder2RegEnable[8],  REGCLR, REGCLK);
-	reg_32b R9  (reg9ToMux,  PC, decoder2RegEnable[9],  REGCLR, REGCLK);
-	reg_32b R10 (reg10ToMux, PC, decoder2RegEnable[10], REGCLR, REGCLK);
-	reg_32b R11 (reg11ToMux, PC, decoder2RegEnable[11], REGCLR, REGCLK);
-	reg_32b R12 (reg12ToMux, PC, decoder2RegEnable[12], REGCLR, REGCLK);
-	reg_32b R13 (reg13ToMux, PC, decoder2RegEnable[13], REGCLR, REGCLK);
-	reg_32b R14 (reg14ToMux, PC, decoder2RegEnable[14], REGCLR, REGCLK);
-	reg_32b R15 (reg15ToMux, PC, decoder2RegEnable[15], REGCLR, REGCLK);
+	reg32b R0  (reg0ToMux,  PC, decoder2RegEnable[0],  REGCLR, REGCLK);
+	reg32b R1  (reg1ToMux,  PC, decoder2RegEnable[1],  REGCLR, REGCLK);
+	reg32b R2  (reg2ToMux,  PC, decoder2RegEnable[2],  REGCLR, REGCLK);
+	reg32b R3  (reg3ToMux,  PC, decoder2RegEnable[3],  REGCLR, REGCLK);
+	reg32b R4  (reg4ToMux,  PC, decoder2RegEnable[4],  REGCLR, REGCLK);
+	reg32b R5  (reg5ToMux,  PC, decoder2RegEnable[5],  REGCLR, REGCLK);
+	reg32b R6  (reg6ToMux,  PC, decoder2RegEnable[6],  REGCLR, REGCLK);
+	reg32b R7  (reg7ToMux,  PC, decoder2RegEnable[7],  REGCLR, REGCLK);
+	reg32b R8  (reg8ToMux,  PC, decoder2RegEnable[8],  REGCLR, REGCLK);
+	reg32b R9  (reg9ToMux,  PC, decoder2RegEnable[9],  REGCLR, REGCLK);
+	reg32b R10 (reg10ToMux, PC, decoder2RegEnable[10], REGCLR, REGCLK);
+	reg32b R11 (reg11ToMux, PC, decoder2RegEnable[11], REGCLR, REGCLK);
+	reg32b R12 (reg12ToMux, PC, decoder2RegEnable[12], REGCLR, REGCLK);
+	reg32b R13 (reg13ToMux, PC, decoder2RegEnable[13], REGCLR, REGCLK);
+	reg32b R14 (reg14ToMux, PC, decoder2RegEnable[14], REGCLR, REGCLK);
+	reg32b R15 (reg15ToMux, PC, decoder2RegEnable[15], REGCLR, REGCLK);
 
-	mux8x1_32b M0 (A, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
+	mux8x132b M0 (A, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
 		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M0SEL);
 
-	mux8x1_32b M1 (B, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
+	mux8x132b M1 (B, reg0ToMux, reg1ToMux, reg2ToMux, reg3ToMux, reg4ToMux, reg5ToMux, reg6ToMux, reg7ToMux, 
 		reg8ToMux, reg9ToMux, reg10ToMux, reg11ToMux, reg12ToMux, reg13ToMux, reg14ToMux, reg15ToMux, M1SEL);
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module internal_shifter (input [31:0] amount, value, input [1:0] shift_type, output reg [31:0] shift_out);
+module internalshifter (input [31:0] amount, value, input [1:0] shifttype, output reg [31:0] shiftout);
 	reg [63:0] temp;
-	always @(amount, value, shift_type) begin
-		case(shift_type)
-			0: shift_out[31:0] = value[31:0]<<amount;	//Logical Shift Left
-			1: shift_out[31:0] = value[31:0]>>amount;	//Logical Shift Right
-			2: shift_out[31:0] = $signed(value[31:0])>>>amount;	//right arithmetic
+	always @(amount, value, shifttype) begin
+		case(shifttype)
+			0: shiftout[31:0] = value[31:0]<<amount;	//Logical Shift Left
+			1: shiftout[31:0] = value[31:0]>>amount;	//Logical Shift Right
+			2: shiftout[31:0] = $signed(value[31:0])>>>amount;	//right arithmetic
 			3: begin
 				temp = {value, value} >> amount;	//rotate right
-				shift_out[31:0] = temp[31:0];
+				shiftout[31:0] = temp[31:0];
 			end
-		endcase //shift_type
+		endcase //shifttype
 	end
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-module shifter(input[31:0] input_register, input[11:0] shifter_operand, input selector, output [31:0] out);
+module shifter(input[31:0] inputregister, input[11:0] shifteroperand, input selector, output [31:0] out);
 	wire[31:0] amounttointernal,valuetointernal;
 	wire[1:0] shifttypetointernal;
 
-	mux_2x1 amount_mux(amounttointernal,selector,{27'b0000_0000_0000_0000_0000_0000_000,shifter_operand[11:8],1'b0}, {27'b0000_0000_0000_0000_0000_0000_000,shifter_operand[11:7]});
-	mux_2x1 value_mux(valuetointernal,selector,{24'b0000_0000_0000_0000_0000_0000,shifter_operand[7:0]},input_register[31:0]);
+	mux2x1 amountmux(amounttointernal,selector,{27'b000000000000000000000000000,shifteroperand[11:8],1'b0}, {27'b000000000000000000000000000,shifteroperand[11:7]});
+	mux2x1 valuemux(valuetointernal,selector,{24'b000000000000000000000000,shifteroperand[7:0]},inputregister[31:0]);
 	
-	mux_2x1_2b shift_type_mux(shifttypetointernal,selector,2'b01,shifter_operand[6:5]);
+	mux2x12b shifttypemux(shifttypetointernal,selector,2'b01,shifteroperand[6:5]);
 
-	internal_shifter intsh(amounttointernal,valuetointernal,shifttypetointernal,out);
+	internalshifter intsh(amounttointernal,valuetointernal,shifttypetointernal,out);
 endmodule
 
 //---------------------------------------------------------------------------------------------------------------------------------------
@@ -675,7 +675,7 @@ module condEval(output reg out, input [31:0] IR, input [31:0] str);
 endmodule
 //-------------------------------------------------------------------------------
 // mux to inverter with inputs if 1 bit
-module mux_4x1_1b(output reg Y, input [1:0] S, input I0, I1, I2, I3);
+module mux4x11b(output reg Y, input [1:0] S, input I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
 		2'b00: assign Y=I0;
@@ -980,7 +980,7 @@ module encoder(output reg [6:0] out, input [31:0] IR);
 endmodule
 //-------------------------------------------------------------------------------
 //6bit mux selector for state choosing (may increase depending on final states quantity)
-module mux_4x1_6b(output reg [6:0] Y, input [1:0] S, input [6:0] I0, I1, I2, I3);
+module mux4x16b(output reg [6:0] Y, input [1:0] S, input [6:0] I0, I1, I2, I3);
 	always @ (S, I0, I1, I2, I3)
 	case (S)
 		2'b00: assign Y=I0[6:0];
@@ -1017,167 +1017,167 @@ module ROM (output reg [61:0] out, input [6:0] state, input clk);
 		//fetch and decode
 		//			        61   59   58  57  56  55  54  53 |52   50  47  46     |39  38  37   33 32   28     26   22     20    17    13  12  11 10 9  8  7  6   5      3   1   0
 		// 			        S22  sign ENM S19 S20 S21 S18 S17|s0s1 NS  Inv pl     |clr E0  RA   S8 RB   S9S10  RC   S11S16 S2-S0 S6-S3 S12 Sel E1 E2 E3 E4 S7 S15 S13S14 MAS R/W MFA
-		mem[0][61:0]  = 62'b00___0____0___0___0___0___0___0___00___011_0___0000001_0___1___ZZZZ_0__ZZZZ_00_____ZZZZ_00_____000___0000__0___0___1__1__1__1__0__0___00_____00__1___0;
+		mem[0][61:0]  = 62'b000000000000110000000101ZZZZ0ZZZZ00ZZZZ00000000000111100000010;
 
-		mem[1][61:0]  = 62'b00___0____0___0___0___0___0___0___00___011_0___0000001_1___1___ZZZZ_0__1111_00_____ZZZZ_00_____000___1101__0___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[2][61:0]  = 62'b00___0____0___0___0___0___0___0___00___011_0___0000001_1___0___1111_0__ZZZZ_00_____1111_00_____100___0100__0___0___1__1__1__1__0__0___00_____00__1___0;
+		mem[1][61:0]  = 62'b000000000000110000000111ZZZZ0111100ZZZZ00000110100110100000010;
+		mem[2][61:0]  = 62'b00000000000011000000011011110ZZZZ00111100100010000111100000010;
 
-		mem[3][61:0]  = 62'b00___0____0___0___0___0___0___0___00___101_1___0000011_1___0___ZZZZ_0__ZZZZ_00_____ZZZZ_00_____000___0000__0___0___1__0__1__1__0__0___00_____10__1___1;
-		mem[4][61:0]  = 62'b00___0____0___0___0___0___0___0___01___100_1___0000001_1___1___0000_0__0000_00_____ZZZZ_00_____000___0000__0___0___0__1__1__1__0__0___00_____00__1___0;
+		mem[3][61:0]  = 62'b000000000001011000001110ZZZZ0ZZZZ00ZZZZ00000000000101100001011;
+		mem[4][61:0]  = 62'b00000000001100100000011100000000000ZZZZ00000000000011100000010;
 		//Data Proccesing
 			//0000
-		mem[6][61:0]  = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____ZZZZ_01_____001___0000__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[5][61:0]  = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____ZZZZ_01_____001___0000__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[6][61:0]  = 62'b00000000001010110111001000001000000ZZZZ01001000010111101000010;
+		mem[5][61:0]  = 62'b00000000001010110111001000001000001ZZZZ01001000011111101000010;
 			//0001
-		mem[8][61:0]  = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___0001__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[7][61:0]  = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___0001__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[8][61:0]  = 62'b00000000001010110111001000001000000000001001000110111101000010;
+		mem[7][61:0]  = 62'b00000000001010110111001000001000001000001001000111111101000010;
 			//0010
-		mem[10][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___0010__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[9][61:0]  = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___0010__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[10][61:0] = 62'b00000000001010110111001000001000000000001001001010111101000010;
+		mem[9][61:0]  = 62'b00000000001010110111001000001000001000001001001011111101000010;
 			//0011
-		mem[12][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___0011__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[11][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___0011__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[12][61:0] = 62'b00000000001010110111001000001000000000001001001110111101000010;
+		mem[11][61:0] = 62'b00000000001010110111001000001000001000001001001111111101000010;
 			//0100
-		mem[14][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___0100__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[13][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___0100__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[14][61:0] = 62'b00000000001010110111001000001000000000001001010010111101000010;
+		mem[13][61:0] = 62'b00000000001010110111001000001000001000001001010011111101000010;
 			//010
-		mem[16][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___0101__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[15][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___0101__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[16][61:0] = 62'b00000000001010110111001000001000000000001001010110111101000010;
+		mem[15][61:0] = 62'b00000000001010110111001000001000001000001001010111111101000010;
 			//0110
-		mem[18][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___0110__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[17][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___0110__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[18][61:0] = 62'b00000000001010110111001000001000000000001001011010111101000010;
+		mem[17][61:0] = 62'b00000000001010110111001000001000001000001001011011111101000010;
 			//0111
-		mem[20][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___0111__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[19][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___0111__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[20][61:0] = 62'b00000000001010110111001000001000000000001001011110111101000010;
+		mem[19][61:0] = 62'b00000000001010110111001000001000001000001001011111111101000010;
 			//1000
-		mem[22][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___1___0000_1__0000_00_____0000_00_____001___1000__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[21][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___1___0000_1__0000_01_____0000_00_____001___1000__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[22][61:0] = 62'b00000000001010110111001100001000000000000001100010111101000010;
+		mem[21][61:0] = 62'b00000000001010110111001100001000001000000001100011111101000010;
 			//1001
-		mem[24][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___1___0000_1__0000_00_____0000_00_____001___1001__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[23][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___1___0000_1__0000_01_____0000_00_____001___1001__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[24][61:0] = 62'b00000000001010110111001100001000000000000001100110111101000010;
+		mem[23][61:0] = 62'b00000000001010110111001100001000001000000001100111111101000010;
 			//1010
-		mem[26][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___1___0000_1__0000_00_____0000_00_____001___1010__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[25][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___1___0000_1__0000_01_____0000_00_____001___1010__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[26][61:0] = 62'b00000000001010110111001100001000000000000001101010111101000010;
+		mem[25][61:0] = 62'b00000000001010110111001100001000001000000001101011111101000010;
 			//1011
-		mem[28][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___1___0000_1__0000_00_____0000_00_____001___1011__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[27][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___1___0000_1__0000_01_____0000_00_____001___1011__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[28][61:0] = 62'b00000000001010110111001100001000000000000001101110111101000010;
+		mem[27][61:0] = 62'b00000000001010110111001100001000001000000001101111111101000010;
 			//1100
-		mem[30][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___1100__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[29][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___1100__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[30][61:0] = 62'b00000000001010110111001000001000000000001001110010111101000010;
+		mem[29][61:0] = 62'b00000000001010110111001000001000001000001001110011111101000010;
 			//1101
-		mem[32][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___1101__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[31][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___1101__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[32][61:0] = 62'b00000000001010110111001000001000000000001001110110111101000010;
+		mem[31][61:0] = 62'b00000000001010110111001000001000001000001001110111111101000010;
 			//1110
-		mem[34][61:0] = 62'b00___0____0___0___0___0___0___0___01___100_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___1110__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[33][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___1110__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[34][61:0] = 62'b00000000001100110111001000001000000000001001111010111101000010;
+		mem[33][61:0] = 62'b00000000001010110111001000001000001000001001111011111101000010;
 			//1111
-		mem[36][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_00_____0000_01_____001___1111__1___0___1__1__1__1__0__1___00_____00__1___0;
-		mem[35][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_1__0000_01_____0000_01_____001___1111__1___1___1__1__1__1__0__1___00_____00__1___0;
+		mem[36][61:0] = 62'b00000000001010110111001000001000000000001001111110111101000010;
+		mem[35][61:0] = 62'b00000000001010110111001000001000001000001001111111111101000010;
 		
 		//load
 			//immediate
-		mem[96][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___0110100_1___1___0000_1__0000_00_____0000_00_____101___0100__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[37][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___0110100_1___1___0000_1__0000_00_____0000_00_____101___0010__1___0___1__1__0__1__0__0___00_____00__1___0;
+		mem[96][61:0] = 62'b00000000001010101101001100001000000000000101010010110100000010;
+		mem[37][61:0] = 62'b00000000001010101101001100001000000000000101001010110100000010;
 			//register
-		mem[38][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___0110100_1___1___0000_1__0000_01_____0000_00_____000___0100__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[39][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___0110100_1___1___0000_1__0000_01_____0000_00_____000___0010__1___0___1__1__0__1__0__0___00_____00__1___0;
+		mem[38][61:0] = 62'b00000000001010101101001100001000001000000000010010110100000010;
+		mem[39][61:0] = 62'b00000000001010101101001100001000001000000000001010110100000010;
 			//immediate pre-indexed
-		mem[40][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100001_1___0___0000_1__0000_00_____0000_10_____101___0100__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[41][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100001_1___0___0000_1__0000_00_____0000_10_____101___0010__1___0___1__1__0__1__0__0___00_____00__1___0;
+		mem[40][61:0] = 62'b00000000001010111000011000001000000000010101010010110100000010;
+		mem[41][61:0] = 62'b00000000001010111000011000001000000000010101001010110100000010;
 			//register pre-indexed
-		mem[42][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100001_1___0___0000_1__0000_01_____0000_10_____000___0100__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[43][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100001_1___0___0000_1__0000_01_____0000_10_____000___0010__1___0___1__1__0__1__0__0___00_____00__1___0;
+		mem[42][61:0] = 62'b00000000001010111000011000001000001000010000010010110100000010;
+		mem[43][61:0] = 62'b00000000001010111000011000001000001000010000001010110100000010;
 			//immediate post-indexed
-		mem[44][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___0101101_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[46][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___0101111_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__0___00_____00__1___0;	
-		mem[45][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100001_1___0___0000_1__0000_00_____0000_10_____101___0100__1___0___1__1__1__1__0__0___00_____00__1___0;
-		mem[47][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100001_1___0___0000_1__0000_00_____0000_10_____101___0010__1___0___1__1__1__1__0__0___00_____00__1___0;
+		mem[44][61:0] = 62'b00000000001011101011011100000000011000000000110110110100000010;
+		mem[46][61:0] = 62'b00000000001011101011111100000000011000000000110110110100000010;	
+		mem[45][61:0] = 62'b00000000001010111000011000001000000000010101010010111100000010;
+		mem[47][61:0] = 62'b00000000001010111000011000001000000000010101001010111100000010;
 			//register post-indexed
-		mem[48][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___0110001_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[50][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___0110011_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[49][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100001_1___0___0000_1__0000_01_____0000_10_____000___0100__1___0___1__1__1__1__0__0___00_____00__1___0;
-		mem[51][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1100001_1___0___0000_1__0000_01_____0000_10_____000___0010__1___0___1__1__1__1__0__0___00_____00__1___0;
+		mem[48][61:0] = 62'b00000000001011101100011100000000011000000000110110110100000010;
+		mem[50][61:0] = 62'b00000000001011101100111100000000011000000000110110110100000010;
+		mem[49][61:0] = 62'b00000000001010111000011000001000001000010000010010111100000010;
+		mem[51][61:0] = 62'b00000000001011111000011000001000001000010000001010111100000010;
 		
-		mem[97][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___0110100_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
-		mem[52][61:0] = 62'b10___0____0___0___0___0___0___0___00___101_1___0110100_1___1___0000_0__0000_00_____0000_00_____111___1101__1___0___1__1__1__0__1__0___10_____00__1___1;
-		mem[53][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1001000_1___0___0000_0__0000_00_____0000_01_____111___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
+		mem[97][61:0] = 62'b000000000010101011010010ZZZZXZZZZXXZZZZXX000110111111110000010;
+		mem[52][61:0] = 62'b10000000000101101101001100000000000000000111110110111010100011;
+		mem[53][61:0] = 62'b00000000001010110010001000000000000000001111110111111110000010;
 		
 		//store
 			//immediate
-		mem[54][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1000110_1___1___0000_1__0000_00_____0000_00_____101___0100__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[55][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1000110_1___1___0000_1__0000_00_____0000_00_____101___0010__1___0___1__1__0__1__0__0___00_____00__1___0;
+		mem[54][61:0] = 62'b00000000001010110001101100001000000000000101010010110100000010;
+		mem[55][61:0] = 62'b00000000001010110001101100001000000000000101001010110100000010;
 			//register
-		mem[56][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1000110_1___1___0000_1__0000_01_____0000_00_____000___0100__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[57][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1000110_1___1___0000_1__0000_01_____0000_00_____000___0010__1___0___1__1__0__1__0__0___00_____00__1___0;
+		mem[56][61:0] = 62'b00000000001010110001101100001000001000000000010010110100000010;
+		mem[57][61:0] = 62'b00000000001010110001101100001000001000000000001010110100000010;
 			//immediate pre-indexed
-		mem[58][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100010_1___0___0000_1__0000_00_____0000_10_____101___0100__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[59][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100010_1___0___0000_1__0000_00_____0000_10_____101___0010__1___0___1__1__0__1__0__0___00_____00__1___0;
+		mem[58][61:0] = 62'b00000000001010111000101000001000000000010101010010110100000010;
+		mem[59][61:0] = 62'b00000000001010111000101000001000000000010101001010110100000010;
 			//register pre-indexed
-		mem[60][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100010_1___0___0000_1__0000_01_____0000_10_____000___0100__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[61][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100010_1___0___0000_1__0000_01_____0000_10_____000___0010__1___0___1__1__0__1__0__0___00_____00__1___0;
+		mem[60][61:0] = 62'b00000000001010111000101000001000001000010000010010110100000010;
+		mem[61][61:0] = 62'b00000000001010111000101000001000001000010000001010110100000010;
 			//immediate post-indexed
-		mem[62][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___0111111_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[64][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1000001_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__0___00_____00__1___0;	
-		mem[63][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100010_1___0___0000_1__0000_00_____0000_10_____101___0100__1___0___1__1__1__1__0__0___00_____00__1___0;
-		mem[65][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100010_1___0___0000_1__0000_00_____0000_10_____101___0010__1___0___1__1__1__1__0__0___00_____00__1___0;
+		mem[62][61:0] = 62'b00000000001011101111111100000000011000000000110110110100000010;
+		mem[64][61:0] = 62'b00000000001011110000011100000000011000000000110110110100000010;	
+		mem[63][61:0] = 62'b00000000001010111000101000001000000000010101010010111100000010;
+		mem[65][61:0] = 62'b00000000001010111000101000001000000000010101001010111100000010;
 			//register post-indexed
-		mem[66][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1000011_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[68][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1000101_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__0___00_____00__1___0;
-		mem[67][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100010_1___0___0000_1__0000_01_____0000_10_____000___0100__1___0___1__1__1__1__0__0___00_____00__1___0;
-		mem[69][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1100010_1___0___0000_1__0000_01_____0000_10_____000___0010__1___0___1__1__1__1__0__0___00_____00__1___0;
+		mem[66][61:0] = 62'b00000000001011110000111100000000011000000000110110110100000010;
+		mem[68][61:0] = 62'b00000000001011110001011100000000011000000000110110110100000010;
+		mem[67][61:0] = 62'b00000000001010111000101000001000001000010000010010111100000010;
+		mem[69][61:0] = 62'b00000000001011111000101000001000001000010000001010111100000010;
 		
-		mem[98][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1000110_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
-		mem[70][61:0] = 62'b10___0____0___0___0___0___0___0___01___011_1___1000111_1___1___0000_0__0000_10_____0000_00_____000___1101__1___0___1__1__1__0__0__0___10_____00__1___0;
-		mem[71][61:0] = 62'b10___0____0___0___0___0___0___0___00___101_1___1000111_1___1___0000_0__0000_10_____0000_00_____000___1101__1___0___1__1__1__1__0__0___10_____00__0___1;
-		mem[72][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___0000001_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
+		mem[98][61:0] = 62'b000000000010101100011010ZZZZXZZZZXXZZZZXX000110111111110000010;
+		mem[70][61:0] = 62'b10000000001011110001111100000000010000000000110110111000100010;
+		mem[71][61:0] = 62'b10000000000101110001111100000000010000000000110110111100100001;
+		mem[72][61:0] = 62'b000000000010101000000110ZZZZXZZZZXXZZZZXX000110111111110000010;
 		
 		//misc load
 			//immediate
-		mem[95][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1010000_1___1___0000_1__0000_00_____0000_00_____110___0100__1___0___1__1__0__1__1__1___00_____00__1___0;
-		mem[73][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100011_1___1___0000_1__0000_00_____0000_00_____110___0010__1___0___1__1__0__1__1__1___00_____00__1___0;
+		mem[95][61:0] = 62'b00000000001010110100001100001000000000000110010010110111000010;
+		mem[73][61:0] = 62'b00000000001010111000111100001000000000000110001010110111000010;
 			//immediate pre-indexed
-		mem[74][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1010000_1___0___0000_1__0000_00_____0000_10_____110___0100__1___0___1__1__0__1__1__1___00_____00__1___0;
-		mem[75][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100011_1___0___0000_1__0000_00_____0000_10_____110___0010__1___0___1__1__0__1__1__1___00_____00__1___0;
+		mem[74][61:0] = 62'b00000000001010110100001000001000000000010110010010110111000010;
+		mem[75][61:0] = 62'b00000000001010111000111000001000000000010110001010110111000010;
 			//immediate post-indexed
-		mem[76][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1001101_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__1___00_____00__1___0;
-		mem[78][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1001111_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__1___00_____00__1___0;	
-		mem[77][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100011_1___0___0000_1__0000_00_____0000_10_____110___0100__0___0___1__1__1__1__1__1___00_____00__1___0;
-		mem[79][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1100011_1___0___0000_1__0000_00_____0000_10_____110___0010__0___0___1__1__1__1__1__1___00_____00__1___0;
+		mem[76][61:0] = 62'b00000000001011110011011100000000011000000000110110110101000010;
+		mem[78][61:0] = 62'b00000000001011110011111100000000011000000000110110110101000010;	
+		mem[77][61:0] = 62'b00000000001010111000111000001000000000010110010000111111000010;
+		mem[79][61:0] = 62'b00000000001011111000111000001000000000010110001000111111000010;
 		
-		mem[99][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1010000_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
-		mem[80][61:0] = 62'b01___0____0___0___0___0___0___0___00___101_1___1010000_1___1___0000_0__0000_00_____0000_00_____000___1101__1___0___1__1__1__0__1__0___01_____00__1___1;
-		mem[81][61:0] = 62'b01___0____0___0___0___0___0___0___01___010_1___1011100_1___0___0000_0__0000_00_____0000_01_____111___1101__1___0___1__1__1__0__1__0___01_____00__1___0;
+		mem[99][61:0] = 62'b000000000010101101000010ZZZZXZZZZXXZZZZXX000110111111110000010;
+		mem[80][61:0] = 62'b01000000000101110100001100000000000000000000110110111010010011;
+		mem[81][61:0] = 62'b01000000001010110111001000000000000000001111110110111010010010;
 		
 		//misc store
 			//immediate
-		mem[82][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011010_1___1___0000_1__0000_00_____0000_00_____110___0100__0___0___1__1__0__1__1__1___00_____00__1___0;
-		mem[83][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1011010_1___1___0000_1__0000_00_____0000_00_____110___0010__0___0___1__1__0__1__1__1___00_____00__1___0;
+		mem[82][61:0] = 62'b00000000001010110110101100001000000000000110010000110111000010;
+		mem[83][61:0] = 62'b00000000001010110110101100001000000000000110001000110111000010;
 			//immediate pre-indexed
-		mem[84][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100100_1___0___0000_1__0000_00_____0000_10_____110___0100__0___0___1__1__0__1__1__1___00_____00__1___0;
-		mem[85][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100100_1___0___0000_1__0000_00_____0000_10_____110___0010__0___0___1__1__0__1__1__1___00_____00__1___0;
+		mem[84][61:0] = 62'b00000000001010111001001000001000000000010110010000110111000010;
+		mem[85][61:0] = 62'b00000000001010111001001000001000000000010110001000110111000010;
 			//immediate post-indexed
-		mem[86][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1010111_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__1___00_____00__1___0;
-		mem[88][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1011001_1___1___0000_0__0000_11_____0000_00_____000___1101__1___0___1__1__0__1__0__1___00_____00__1___0;	
-		mem[87][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___1100100_1___0___0000_1__0000_00_____0000_10_____110___0100__0___0___1__1__1__1__1__1___00_____00__1___0;
-		mem[89][61:0] = 62'b00___0____0___0___0___0___0___0___01___011_1___1100100_1___0___0000_1__0000_00_____0000_10_____110___0010__0___0___1__1__1__1__1__1___00_____00__1___0;
+		mem[86][61:0] = 62'b00000000001011110101111100000000011000000000110110110101000010;
+		mem[88][61:0] = 62'b00000000001011110110011100000000011000000000110110110101000010;	
+		mem[87][61:0] = 62'b00000000001010111001001000001000000000010110010000111111000010;
+		mem[89][61:0] = 62'b00000000001011111001001000001000000000010110001000111111000010;
 		
-		mem[100][61:0]= 62'b00___0____0___0___0___0___0___0___01___010_1___1011010_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
-		mem[90][61:0] = 62'b01___0____0___0___0___0___0___0___01___011_1___1011011_1___1___0000_0__0000_10_____0000_00_____000___1101__0___0___1__1__1__0__0__0___01_____00__0___1;
-		mem[91][61:0] = 62'b01___0____0___0___0___0___0___0___00___101_1___1011011_1___1___0000_0__0000_00_____0000_00_____000___1101__1___0___1__1__1__1__0__0___01_____00__1___1;
-		mem[92][61:0] = 62'b00___0____0___0___0___0___0___0___01___010_1___0000001_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___1___1__1__1__1__1__0___00_____00__1___0;
+		mem[100][61:0]= 62'b000000000010101101101010ZZZZXZZZZXXZZZZXX000110111111110000010;
+		mem[90][61:0] = 62'b01000000001011110110111100000000010000000000110100111000010001;
+		mem[91][61:0] = 62'b01000000000101110110111100000000000000000000110110111100010011;
+		mem[92][61:0] = 62'b000000000010101000000110ZZZZXZZZZXXZZZZXX000110111111110000010;
 		
 		//b&L
-		mem[93][61:0] = 62'b00___0____0___0___0___0___0___0___00___011_1___1011110_1___0___0000_0__1111_00_____1110_00_____000___1101__1___0___0__0__0__0__0__0___00_____00__1___0;
+		mem[93][61:0] = 62'b00000000000011110111101000000111100111000000110110000000000010;
 		//b
-		mem[94][61:0] = 62'b00___0____0___0___0___0___0___0___00___010_1___1011100_1___0___1111_0__0000_00_____1111_00_____011___0100__1___0___1__0__0__0__0__0___00_____00__1___0;
+		mem[94][61:0] = 62'b00000000000010110111001011110000000111100011010010100000000010;
 
 		//Mloads	
-		mem[101][61:0]= 62'b00___0____1___1___1___1___1___1___11___101_1___1100101_1___0___ZZZZ_0__ZZZZ_00_____ZZZZ_11_____111___1101__1___0___1__1__0__0__0__0___00_____10__1___1;
-		mem[102][61:0]= 62'b00___0____1___1___1___1___1___1___11___010_1___0000001_1___1___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____111___1101__1___0___1__1__1__1__1__0___00_____10__1___0;
+		mem[101][61:0]= 62'b000111111111011110010110ZZZZ0ZZZZ00ZZZZ11111110110110000001011;
+		mem[102][61:0]= 62'b000111111110101000000111ZZZZXZZZZXXZZZZXX111110110111110001010;
 		//MStores
-		mem[105][61:0]= 62'b00___0____1___1___1___1___1___1___11___010_1___1100111_1___0___ZZZZ_0__ZZZZ_00_____ZZZZ_11_____000___1101__1___0___1__1__0__0__0__0___00_____10__0___0;
-		mem[103][61:0]= 62'b00___0____1___1___1___1___1___1___11___101_1___1100111_1___0___ZZZZ_0__ZZZZ_00_____ZZZZ_11_____000___1101__1___0___1__1__0__0__0__0___00_____10__0___1;
-		mem[104][61:0]= 62'b00___0____1___1___1___1___1___1___11___010_1___0000001_1___0___ZZZZ_X__ZZZZ_XX_____ZZZZ_XX_____000___1101__1___0___1__1__1__1__1__0___00_____10__0___0;
+		mem[105][61:0]= 62'b000111111110101110011110ZZZZ0ZZZZ00ZZZZ11000110110110000001000;
+		mem[103][61:0]= 62'b000111111111011110011110ZZZZ0ZZZZ00ZZZZ11000110110110000001001;
+		mem[104][61:0]= 62'b000111111110101000000110ZZZZXZZZZXXZZZZXX000110110111110001000;
 	end
 
 	always @ (posedge clk)
@@ -1192,11 +1192,11 @@ module ControlUnit (output reg [48:0] out, input clk, mfc, lsmDone, input [31:0]
 	wire [61:0] innerOut;  
 
 	condEval	condEv	 (condOut, 	  IR, 				statusReg);//Sirve
-	mux_4x1_1b	mux1b	 (invIn, 	  innerOut[52:51],	mfc, 		condOut, 1'b0, lsmDone);
+	mux4x11b	mux1b	 (invIn, 	  innerOut[52:51],	mfc, 		condOut, 1'b0, lsmDone);
 	inverter	inv		 (invOut, 	  invIn, 			innerOut[47]);
 	NSASel		stateSel (ms, 		  innerOut[50:48], invOut);
 	encoder		iREnc	 (stateSel0,  IR);//Sirve
-	mux_4x1_6b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
+	mux4x16b	mux6b	 (state, 	  ms,		 		stateSel0, 	7'b0000000,  innerOut[46:40], stateSel3);
 	cuAdder		adderAlu (addToR, 	  state, 			4'b0001);
 	IncReg		incR	 (stateSel3,  addToR, 			1'b0,		innerOut[39], 		clk);
 	ROM			rom		 (innerOut,   state, 			clk);
@@ -1214,7 +1214,7 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 	reg inc;
 	reg [4:0] j;
 	reg [4:0] cnt;
-	reg [31:0] start_address;
+	reg [31:0] startaddress;
 	reg [31:0] currAddress = 0;
 	reg [12:0] i;
 	// always @(done)
@@ -1239,79 +1239,79 @@ module LSMBlackBox(output reg [31:0] registerDataOut, memoryDataOut, effectiveAd
 			// $display("cnt %d", cnt);
 			//Calculate effective address
 			//01 increment after
-			// start_address = Rn
-			// end_address = Rn + (Number_Of_Set_Bits_In(register_list) * 4) - 4
+			// startaddress = Rn
+			// endaddress = Rn + (NumberOfSetBitsIn(registerlist) * 4) - 4
 			// if W == 1 then
-			// Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+			// Rn = Rn + (NumberOfSetBitsIn(registerlist) * 4)
 			if(ir[24:23]==2'b01) begin
 				inc = 1;
 				// $display("IA");
 				#4 begin
-					start_address = a;
+					startaddress = a;
 					if(ir[21]==1) begin
 						destinationRegister = ir[19:16];
-						registerDataOut = start_address + (cnt*4);
+						registerDataOut = startaddress + (cnt*4);
 						#3; //$display("Waiting to store");
 					end
 				end
 			end	
 			//11 increment before
-			// start_address = Rn + 4
-			// end_address = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+			// startaddress = Rn + 4
+			// endaddress = Rn + (NumberOfSetBitsIn(registerlist) * 4)
 			// if W == 1 then
-			// Rn = Rn + (Number_Of_Set_Bits_In(register_list) * 4)
+			// Rn = Rn + (NumberOfSetBitsIn(registerlist) * 4)
 			else if(ir[24:23]==2'b11) begin
 				// $display("IB");
 
 				inc = 1;
 				#4 begin
-					start_address = a+4;
+					startaddress = a+4;
 					if(ir[21]==1) begin
 						destinationRegister = ir[19:16];
-						registerDataOut = start_address + (cnt*4);
+						registerDataOut = startaddress + (cnt*4);
 						#3;// $display("Waiting to store");
 					end
 				end
 			end	
 			//00 decrement after
-			// start_address = Rn - (Number_Of_Set_Bits_In(register_list) * 4) + 4
-			// end_address = Rn
+			// startaddress = Rn - (NumberOfSetBitsIn(registerlist) * 4) + 4
+			// endaddress = Rn
 			// if W == 1 then
-			// Rn = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
+			// Rn = Rn - (NumberOfSetBitsIn(registerlist) * 4)
 			else if(ir[24:23]==2'b00) begin
 				inc = 0;
 				// $display("DA");
 
 				#4 begin
-					start_address = a-(cnt*4)+4;
+					startaddress = a-(cnt*4)+4;
 					if(ir[21]==1) begin
 						destinationRegister = ir[19:16];
-						registerDataOut = start_address - (cnt*4);
+						registerDataOut = startaddress - (cnt*4);
 						#3; //$display("tato");
 					end
 				end
 			end	
 			//10 decrement before
-			// start_address = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
-			// end_address = Rn - 4
+			// startaddress = Rn - (NumberOfSetBitsIn(registerlist) * 4)
+			// endaddress = Rn - 4
 			// if W == 1 then
-			// Rn = Rn - (Number_Of_Set_Bits_In(register_list) * 4)
+			// Rn = Rn - (NumberOfSetBitsIn(registerlist) * 4)
 			else begin
 				inc = 0;
 								// $display("DB");
 
 				#4 begin
-					start_address = a-(cnt*4);
+					startaddress = a-(cnt*4);
 					if(ir[21]==1) begin
 						destinationRegister = ir[19:16];
-						registerDataOut = start_address - (cnt*4);
+						registerDataOut = startaddress - (cnt*4);
 						#3 ;//$display("pot");
 					end
 				end
 			end	
-			currAddress = start_address;
+			currAddress = startaddress;
 
-			// $display("Start addr %d", start_address);
+			// $display("Start addr %d", startaddress);
 			for(j=0;j<16;j=j+1) begin
 				if(ir[j]==1) begin
 					if(ir[20]==1) begin						//load
@@ -1401,17 +1401,17 @@ module datapath;
 	//General wires
 	wire CIN;		
 	
-	wire [31:0] PC, LEFT_OP, B,TSROUT;
+	wire [31:0] PC, LEFTOP, B,TSROUT;
 
-	wire [31:0] alu_in_sel_mux_to_alu;
-	wire [31:0] mar_to_ram;
-	wire [1:0] mux_reg_output, mux_misc_out;
+	wire [31:0] aluinselmuxtoalu;
+	wire [31:0] martoram;
+	wire [1:0] muxregoutput, muxmiscout;
 	
-	wire [31:0] mem_data;
-	wire [31:0] ir_out, mdr_out, mdr_in;
+	wire [31:0] memdata;
+	wire [31:0] irout, mdrout, mdrin;
 
-	wire [31:0] shifter_output;
-	wire [31:0] ser_out;
+	wire [31:0] shifteroutput;
+	wire [31:0] serout;
 
 	wire SC;
 
@@ -1419,57 +1419,57 @@ module datapath;
 
 	wire [31:0]  LSMultData,LSMEaddr,LSMultRegData;
 	wire [3:0] LSMSourceRegA,LSMSourceRegB, LSMDestReg;
-	wire LSMDone, misc_out, reg_out, SIGN;
+	wire LSMDone, miscout, regout, SIGN;
 	wire [31:0] rfmuxtorf, marmuxtoram;
 
-	ControlUnit cu (cuSignals, CLK, MFC, LSMDone, ir_out, TSROUT);
+	ControlUnit cu (cuSignals, CLK, MFC, LSMDone, irout, TSROUT);
 
 	//Register file muxes
-	mux_4x1_4b ra_mux(RA, {cuSignals[44],cuSignals[33]}, cuSignals[37:34], ir_out[19:16],LSMSourceRegA,4'b0000);
-	mux_8x1_4b rb_mux(RB, {cuSignals[43],cuSignals[28:27]}, cuSignals[32:29], ir_out[3:0], ir_out[15:12], ir_out[19:16],LSMSourceRegB,4'b0000,4'b0000,4'b0000);
-	mux_4x1_4b rc_mux(RC, cuSignals[22:21], cuSignals[26:23], ir_out[15:12], ir_out[19:16],LSMDestReg);
+	mux4x14b ramux(RA, {cuSignals[44],cuSignals[33]}, cuSignals[37:34], irout[19:16],LSMSourceRegA,4'b0000);
+	mux8x14b rbmux(RB, {cuSignals[43],cuSignals[28:27]}, cuSignals[32:29], irout[3:0], irout[15:12], irout[19:16],LSMSourceRegB,4'b0000,4'b0000,4'b0000);
+	mux4x14b rcmux(RC, cuSignals[22:21], cuSignals[26:23], irout[15:12], irout[19:16],LSMDestReg);
 
 	//Register file
-	mux_2x1 rf_mux(rfmuxtorf,cuSignals[42],PC,LSMultRegData);
-	registerFile registerFile (LEFT_OP, B, rfmuxtorf, RC, cuSignals[39], RA, RB, CLK, cuSignals[38]);
+	mux2x1 rfmux(rfmuxtorf,cuSignals[42],PC,LSMultRegData);
+	registerFile registerFile (LEFTOP, B, rfmuxtorf, RC, cuSignals[39], RA, RB, CLK, cuSignals[38]);
 	
 	//Input mux
-	mux_8x1 alu_input_select_mux(alu_in_sel_mux_to_alu, cuSignals[20:18], 
-		B, shifter_output, ir_out, ser_out,4,{{20{1'b0}},ir_out[11:0]},{{24{1'b0}},ir_out[11:8],ir_out[3:0]},mdr_out);
+	mux8x1 aluinputselectmux(aluinselmuxtoalu, cuSignals[20:18], 
+		B, shifteroutput, irout, serout,4,{{20{1'b0}},irout[11:0]},{{24{1'b0}},irout[11:8],irout[3:0]},mdrout);
 	
 	//Alu
-	mux_2x1_1b alu_cin_mux(CIN, cuSignals[13], SC, TSROUT[29]);
-	ALU alu1(PC, ZERO, N, COUT, V, LEFT_OP, alu_in_sel_mux_to_alu, cuSignals[17:14], CIN);
+	mux2x11b alucinmux(CIN, cuSignals[13], SC, TSROUT[29]);
+	ALU alu1(PC, ZERO, N, COUT, V, LEFTOP, aluinselmuxtoalu, cuSignals[17:14], CIN);
 	//Status register
-	mux_2x1_1b sr_mux(E5, cuSignals[6], 1'b1, ~ir_out[20]);
-	reg_32 status_register(TSROUT, {N,ZERO,COUT,V,28'b0000_0000_0000_0000_0000_0000_0000}, E5, cuSignals[39], CLK);
+	mux2x11b srmux(E5, cuSignals[6], 1'b1, ~irout[20]);
+	reg32 statusregister(TSROUT, {N,ZERO,COUT,V,28'b0000000000000000000000000000}, E5, cuSignals[39], CLK);
 	//Right side
-	mux_4x1 mdr_mux(mdr_in, {cuSignals[40],cuSignals[7]}, PC, mem_data,LSMultData
+	mux4x1 mdrmux(mdrin, {cuSignals[40],cuSignals[7]}, PC, memdata,LSMultData
 		,0);
-	reg_32 mdr(mdr_out, mdr_in, cuSignals[8], cuSignals[39], CLK);
-	mux_2x1 mar_mux(marmuxtoram, cuSignals[41], PC, LSMEaddr);
-	reg_32 mar(mar_to_ram, marmuxtoram, cuSignals[9], cuSignals[39], CLK);
+	reg32 mdr(mdrout, mdrin, cuSignals[8], cuSignals[39], CLK);
+	mux2x1 marmux(marmuxtoram, cuSignals[41], PC, LSMEaddr);
+	reg32 mar(martoram, marmuxtoram, cuSignals[9], cuSignals[39], CLK);
 
-	mux_8x1_2b misc_mux(mux_misc_out, {ir_out[20],ir_out[6],ir_out[5]}, 2'b00 ,2'b01, 2'b10, 2'b10, 2'b10, 2'b00, 2'b00, 2'b01);
-	mux_2x1_2b reg_mux(mux_reg_output, ir_out[22], 2'b10, 2'b00);
-	mux_4x1_2b mas_mux(MAS, cuSignals[5:4], cuSignals[3:2], mux_misc_out, mux_reg_output, 2'b00);
+	mux8x12b miscmux(muxmiscout, {irout[20],irout[6],irout[5]}, 2'b00 ,2'b01, 2'b10, 2'b10, 2'b10, 2'b00, 2'b00, 2'b01);
+	mux2x12b regmux(muxregoutput, irout[22], 2'b10, 2'b00);
+	mux4x12b masmux(MAS, cuSignals[5:4], cuSignals[3:2], muxmiscout, muxregoutput, 2'b00);
 
-	mux_8x1_1b misc_sig_mux(misc_out, {ir_out[20],ir_out[6],ir_out[5]}, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1);
-	mux_2x1_1b reg_sig_mux(reg_out, ir_out[22], 1'b0, 1'b0);
-	mux_4x1_1b signed_mux(SIGN, cuSignals[61:60], cuSignals[59], misc_out, reg_out, 1'b0);
+	mux8x11b miscsigmux(miscout, {irout[20],irout[6],irout[5]}, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1);
+	mux2x11b regsigmux(regout, irout[22], 1'b0, 1'b0);
+	mux4x11b signedmux(SIGN, cuSignals[61:60], cuSignals[59], miscout, regout, 1'b0);
 
 	//									Enable  	  Read/Write    Input Address    Input Data Datasize
-	ramdummyreadfile ram(mem_data, MFC, cuSignals[0], cuSignals[1], mar_to_ram[7:0], mdr_out, MAS, SIGN);
+	ramdummyreadfile ram(memdata, MFC, cuSignals[0], cuSignals[1], martoram[7:0], mdrout, MAS, SIGN);
 
-	reg_32 ir(ir_out, mem_data, cuSignals[10], cuSignals[39], CLK);
+	reg32 ir(irout, memdata, cuSignals[10], cuSignals[39], CLK);
 
-	shifter sh(B, ir_out[11:0], cuSignals[12], shifter_output);
+	shifter sh(B, irout[11:0], cuSignals[12], shifteroutput);
 
-	reg_32 ser(ser_out, {{18{ir_out[11]}},ir_out[11:0],2'b00}, cuSignals[11], cuSignals[39], CLK);
+	reg32 ser(serout, {{18{irout[11]}},irout[11:0],2'b00}, cuSignals[11], cuSignals[39], CLK);
 	
-	LSMBlackBox lsm(LSMultRegData, LSMultData, LSMEaddr, LSMSourceRegA, LSMSourceRegB, LSMDestReg ,LSMDone ,ir_out, mem_data, LEFT_OP,B, CLK, MFC, cuSignals[45]);
+	LSMBlackBox lsm(LSMultRegData, LSMultData, LSMEaddr, LSMSourceRegA, LSMSourceRegB, LSMDestReg ,LSMDone ,irout, memdata, LEFTOP,B, CLK, MFC, cuSignals[45]);
 	//Vamos a probar 
-	parameter sim_time = 5000;
+	parameter simtime = 5000;
 
 	initial begin CLK = 1; end
 	initial forever #2 CLK = ~CLK; // Change Clock Every Time Unit
@@ -1477,28 +1477,28 @@ module datapath;
 	// initial begin
 	// 	 $display ("CLK PC RA RB RC"); //imprime header
 	// 	 $monitor ("%d",PC);
-	// 	 $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d R9 %d R10 %d R11 %d R12 %d R13 %d R14 %d\n SHIFTER_OUT %d SEROUT %d TSROUT %0b CONDOUT %b\n RAMUX %b%b RBMUX %b%b RCMUX %b N %b Z %b C %b V %b \n  multdata %d multdata %d eaddr %d sourcerega %d sourceregb %d destreg %d done %d ir %d memdata %b a %d b %d mfc %d cuenable %d \nMDR %b\n",
-	// 	 	CLK, PC, RA, RB, RC, mar_to_ram, 
-	// 	 MFC,mem_data,ir_out,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFT_OP,
-	// 	 alu_in_sel_mux_to_alu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
+	// 	 $monitor ("CLK %d PC %d RA %d RB %d RC %d MARTORAM %0d MFC %d MEMDATA %b IR %b \nCUSIGNALS %b ENABLERAM %b READ/WRITERAM %b MUX8SEL %b \n ALULEFT %d ALURIGHT %dALUSELECT %b MAS %b \n R15CONTENT %d R15CLR %d REGEN %d\nR0 %d R1 %d R2 %d R3 %d R4 %d R5 %d R6 %d R7 %d R8 %d R9 %d R10 %d R11 %d R12 %d R13 %d R14 %d\n SHIFTEROUT %d SEROUT %d TSROUT %0b CONDOUT %b\n RAMUX %b%b RBMUX %b%b RCMUX %b N %b Z %b C %b V %b \n  multdata %d multdata %d eaddr %d sourcerega %d sourceregb %d destreg %d done %d ir %d memdata %b a %d b %d mfc %d cuenable %d \nMDR %b\n",
+	// 	 	CLK, PC, RA, RB, RC, martoram, 
+	// 	 MFC,memdata,irout,cuSignals,cuSignals[0], cuSignals[1], cuSignals[20:18],LEFTOP,
+	// 	 aluinselmuxtoalu,cuSignals[17:14], MAS,registerFile.R15.Q,registerFile.R15.CLR, 
 	// 	 cuSignals[38],registerFile.R0.Q,registerFile.R1.Q,registerFile.R2.Q,registerFile.R3.Q,registerFile.R4.Q,
-	// 	 registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R13.Q,registerFile.R14.Q,shifter_output, ser_out, TSROUT, cu.condOut,
+	// 	 registerFile.R5.Q,registerFile.R6.Q,registerFile.R7.Q,registerFile.R8.Q,registerFile.R9.Q,registerFile.R10.Q,registerFile.R11.Q,registerFile.R12.Q,registerFile.R13.Q,registerFile.R14.Q,shifteroutput, serout, TSROUT, cu.condOut,
 	// 	 cuSignals[44],cuSignals[33], cuSignals[43],cuSignals[28:27],cuSignals[22:21],N,ZERO,COUT,V,
-	// 	 LSMultData, LSMultData, LSMEaddr, LSMSourceRegA,LSMSourceRegB, LSMDestReg ,LSMDone ,ir_out, mem_data, LEFT_OP,B,  MFC, cuSignals[45], mdr_out); //imprime las señales
+	// 	 LSMultData, LSMultData, LSMEaddr, LSMSourceRegA,LSMSourceRegB, LSMDestReg ,LSMDone ,irout, memdata, LEFTOP,B,  MFC, cuSignals[45], mdrout); //imprime las señales
 	// end
-	always @(mar_to_ram)
-		if(mar_to_ram||!mar_to_ram)
-			$display("Memory Access: %b (%0d)",mar_to_ram,mar_to_ram);
+	always @(martoram)
+		if(martoram||!martoram)
+			$display("Memory Access: %b (%0d)",martoram,martoram);
 		
 	reg [12:0] i;
 
-	initial #sim_time begin 
+	initial #simtime begin 
 		$display("Printing Memory:");
 		for (i = 0; i < 512; i = i +1) begin
   			$display ("Memory location %d content: %b", i, ram.mem[i]);
    		end
 	end
 
-	initial #sim_time $finish;
+	initial #simtime $finish;
 
 endmodule	
