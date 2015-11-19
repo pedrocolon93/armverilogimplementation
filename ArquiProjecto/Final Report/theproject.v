@@ -418,7 +418,7 @@ endmodule
 module ramdummyreadfile (output reg [31:0]dataOut, output reg done, input enable, readWrite, input [7:0]address, input [31:0]dataIn, input [1:0]MAS, input sign);
 	reg [7:0]mem[0:511];
 	initial begin
-		$readmemb("data3.bin", mem) ;
+		$readmemb("data.bin", mem) ;
 		done = 0;
 	end
 	always @ (enable, readWrite, MAS, dataIn, address, sign) begin
